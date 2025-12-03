@@ -29,12 +29,12 @@ export default function TemplatesPage() {
 
     useEffect(() => {
         Promise.all([
-            fetch('/api/admin/products').then(res => res.json()),
-            fetch('/api/admin/categories').then(res => res.json())
+            fetch('/api/products').then(res => res.json()),
+            fetch('/api/categories').then(res => res.json())
         ])
             .then(([productsData, categoriesData]) => {
                 if (productsData.products) {
-                    setTemplates(productsData.products.filter((p: { isActive: boolean }) => p.isActive).map((t: { id: number; title: string; slug: string; price: number; discountPrice?: number; image?: string; category: string; isFeatured?: boolean; isFree?: boolean }) => ({
+                    setTemplates(productsData.products.map((t: { id: number; title: string; slug: string; price: number; discountPrice?: number; image?: string; category: string; isFeatured?: boolean; isFree?: boolean }) => ({
                         _id: t.id.toString(),
                         title: t.title,
                         slug: t.slug,
