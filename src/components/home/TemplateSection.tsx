@@ -2,8 +2,6 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, FileSpreadsheet, Sparkles } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { CardStack } from '@/components/home/CardStack'
 
 interface Template {
@@ -106,14 +104,25 @@ export function TemplateSection({
                             }}
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                         >
-                            <FileSpreadsheet className="w-10 h-10 text-orange-500" />
+                            <lord-icon
+                                src="https://cdn.lordicon.com/ghhwiltn.json"
+                                trigger="loop"
+                                delay="1000"
+                                colors="primary:#f97316,secondary:#fbbf24"
+                                style={{ width: '48px', height: '48px' }}
+                            />
                         </motion.div>
                         <h3 className="text-xl font-bold text-gray-900 mb-2">{emptyTitle}</h3>
                         <p className="text-gray-600 max-w-md mx-auto mb-6">
                             {emptyDescription}
                         </p>
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full text-orange-600 text-sm font-medium">
-                            <Sparkles className="w-4 h-4" />
+                            <lord-icon
+                                src="https://cdn.lordicon.com/hvueufdo.json"
+                                trigger="loop"
+                                colors="primary:#ea580c"
+                                style={{ width: '18px', height: '18px' }}
+                            />
                             Coming Soon
                         </div>
                     </motion.div>
@@ -124,12 +133,20 @@ export function TemplateSection({
 
                         {/* View All Button */}
                         <div className="text-center mt-6">
-                            <Button asChild variant="outline" size="lg" className="px-8">
-                                <Link href={viewAllLink}>
-                                    Lihat Semua Template
-                                    <ArrowRight className="ml-2 h-4 w-4" />
-                                </Link>
-                            </Button>
+                            <Link 
+                                href={viewAllLink}
+                                className="group relative inline-flex items-center gap-2 h-11 px-8 border-2 border-gray-200 rounded-xl text-gray-700 font-medium overflow-hidden transition-all duration-300 hover:border-orange-400 hover:text-orange-600 hover:bg-orange-50 hover:-translate-y-0.5 active:translate-y-0"
+                            >
+                                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-orange-100/50 to-transparent" />
+                                <span className="relative z-10">Lihat Semua Template</span>
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/whtfgdfm.json"
+                                    trigger="loop-on-hover"
+                                    colors="primary:#ea580c"
+                                    style={{ width: '20px', height: '20px' }}
+                                    className="relative z-10 transition-transform duration-300 group-hover:translate-x-1"
+                                />
+                            </Link>
                         </div>
                     </>
                 )}

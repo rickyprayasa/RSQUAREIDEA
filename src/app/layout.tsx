@@ -77,6 +77,8 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Lordicon script for animated icons */}
+        <script src="https://cdn.lordicon.com/lordicon.js" async />
       </head>
       <body className={`${poppins.variable} font-sans antialiased bg-gray-50 text-gray-900`}>
         <CartProvider>

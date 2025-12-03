@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
-import { Plus, Minus, HelpCircle, MessageCircle, Sparkles } from 'lucide-react'
 
 const faqs = [
     {
@@ -84,7 +83,13 @@ export function FAQ() {
                         animate={isInView ? { opacity: 1, scale: 1 } : {}}
                         transition={{ duration: 0.5, delay: 0.1 }}
                     >
-                        <HelpCircle className="w-4 h-4 text-orange-600" />
+                        <lord-icon
+                            src="https://cdn.lordicon.com/ujxzdfjx.json"
+                            trigger="loop"
+                            delay="3000"
+                            colors="primary:#ea580c"
+                            style={{ width: '20px', height: '20px' }}
+                        />
                         <span className="text-sm font-medium text-orange-700">FAQ</span>
                     </motion.div>
                     
@@ -117,7 +122,7 @@ export function FAQ() {
                             >
                                 <button
                                     onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                    className="w-full px-6 py-5 flex items-center gap-4 text-left"
+                                    className="w-full px-6 py-5 flex items-center gap-4 text-left group"
                                 >
                                     {/* Question */}
                                     <span className={`flex-1 font-semibold text-lg transition-colors ${
@@ -128,19 +133,23 @@ export function FAQ() {
                                     
                                     {/* Toggle Icon */}
                                     <motion.div
-                                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
                                             openIndex === index 
-                                                ? 'bg-orange-500 text-white' 
-                                                : 'bg-gray-100 text-gray-500'
+                                                ? 'bg-orange-500' 
+                                                : 'bg-gray-100 group-hover:bg-orange-100'
                                         }`}
                                         animate={{ rotate: openIndex === index ? 180 : 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
-                                        {openIndex === index ? (
-                                            <Minus className="w-4 h-4" />
-                                        ) : (
-                                            <Plus className="w-4 h-4" />
-                                        )}
+                                        <lord-icon
+                                            src={openIndex === index 
+                                                ? "https://cdn.lordicon.com/hwuyodym.json" 
+                                                : "https://cdn.lordicon.com/zrkkrrpl.json"
+                                            }
+                                            trigger="hover"
+                                            colors={openIndex === index ? "primary:#ffffff" : "primary:#6b7280"}
+                                            style={{ width: '18px', height: '18px' }}
+                                        />
                                     </motion.div>
                                 </button>
                                 
@@ -176,15 +185,27 @@ export function FAQ() {
                     transition={{ duration: 0.5, delay: 0.6 }}
                 >
                     <p className="text-gray-600 mb-4 flex items-center justify-center gap-2">
-                        <MessageCircle className="w-5 h-5 text-orange-500" />
+                        <lord-icon
+                            src="https://cdn.lordicon.com/fdxqrdfe.json"
+                            trigger="loop"
+                            delay="2000"
+                            colors="primary:#f97316"
+                            style={{ width: '24px', height: '24px' }}
+                        />
                         Masih punya pertanyaan lain?
                     </p>
                     <a
                         href="/kontak"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-orange-200 transition-all duration-300 hover:-translate-y-0.5"
+                        className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-orange-300/50 hover:-translate-y-0.5 active:translate-y-0"
                     >
-                        <Sparkles className="w-4 h-4" />
-                        Hubungi Kami
+                        <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                        <lord-icon
+                            src="https://cdn.lordicon.com/hvueufdo.json"
+                            trigger="loop-on-hover"
+                            colors="primary:#ffffff"
+                            style={{ width: '20px', height: '20px' }}
+                        />
+                        <span className="relative z-10">Hubungi Kami</span>
                     </a>
                 </motion.div>
             </div>

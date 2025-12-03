@@ -1,36 +1,39 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Palette, Rocket, Bot, MonitorPlay } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const features = [
   {
     title: 'Desain Intuitif & Estetis',
     description: 'Tampilan visual yang bersih memanjakan mata, membuat pengelolaan data jadi menyenangkan.',
-    icon: Palette,
-    color: 'bg-orange-100 text-orange-600',
+    iconSrc: 'https://cdn.lordicon.com/puvaffet.json',
+    color: 'bg-orange-100',
+    iconColor: 'primary:#ea580c,secondary:#fbbf24',
     image: '/images/restorer-pana.png'
   },
   {
     title: 'Langsung Siap Pakai',
     description: 'Hemat puluhan jam. Download, buka, dan langsung gunakan tanpa setup rumit.',
-    icon: Rocket,
-    color: 'bg-blue-100 text-blue-600',
+    iconSrc: 'https://cdn.lordicon.com/xkumezul.json',
+    color: 'bg-blue-100',
+    iconColor: 'primary:#2563eb,secondary:#60a5fa',
     image: '/images/rocket-pana.png'
   },
   {
     title: 'Otomatisasi Canggih',
     description: 'Ditenagai Google Apps Script untuk fitur ajaib yang tidak bisa dilakukan spreadsheet biasa.',
-    icon: Bot,
-    color: 'bg-purple-100 text-purple-600',
+    iconSrc: 'https://cdn.lordicon.com/zyzoecaw.json',
+    color: 'bg-purple-100',
+    iconColor: 'primary:#9333ea,secondary:#c084fc',
     image: '/images/ai-pana.png'
   },
   {
     title: 'Panduan Video Lengkap',
     description: 'Setiap template dilengkapi dengan video tutorial langkah demi langkah agar Kamu tidak bingung.',
-    icon: MonitorPlay,
-    color: 'bg-green-100 text-green-600',
+    iconSrc: 'https://cdn.lordicon.com/aklfruoc.json',
+    color: 'bg-green-100',
+    iconColor: 'primary:#16a34a,secondary:#4ade80',
     image: '/images/video-rafiki.png'
   },
 ]
@@ -95,7 +98,7 @@ export function Features() {
               >
                 <div className={cn(
                   "absolute inset-0 rounded-full blur-3xl opacity-20 transform scale-75 transition-transform duration-700 group-hover:scale-100",
-                  feature.color.replace('text-', 'bg-').replace('100', '300')
+                  feature.color.replace('100', '300')
                 )} />
                 <motion.img
                   whileHover={{ scale: 1.05, rotateY: 5 }}
@@ -120,13 +123,14 @@ export function Features() {
                     className="absolute inset-0 bg-white/30 rounded-full blur-md"
                   />
 
-                  {/* Floating Icon */}
-                  <motion.div
-                    animate={{ y: [0, -3, 0], rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <feature.icon className="w-10 h-10 relative z-10" />
-                  </motion.div>
+                  {/* Lordicon */}
+                  <lord-icon
+                    src={feature.iconSrc}
+                    trigger="loop"
+                    delay="2000"
+                    colors={feature.iconColor}
+                    style={{ width: '48px', height: '48px' }}
+                  />
                 </motion.div>
 
                 <motion.div variants={textVariants}>

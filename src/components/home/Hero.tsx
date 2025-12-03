@@ -2,9 +2,6 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, Sparkles, TrendingUp, Shield, Zap } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-
 import { Background3D } from '@/components/ui/background-3d'
 
 export function Hero() {
@@ -21,8 +18,14 @@ export function Hero() {
                     transition={{ duration: 0.5 }}
                     className="flex justify-center mb-8"
                 >
-                    <span className="inline-flex items-center rounded-full bg-orange-50 px-4 py-1.5 text-sm font-medium text-orange-600 ring-1 ring-inset ring-orange-200 shadow-sm">
-                        <Sparkles className="mr-2 h-4 w-4 text-orange-500" />
+                    <span className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-4 py-1.5 text-sm font-medium text-orange-600 ring-1 ring-inset ring-orange-200 shadow-sm">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/hvueufdo.json"
+                            trigger="loop"
+                            delay="2000"
+                            colors="primary:#f97316"
+                            style={{ width: '20px', height: '20px' }}
+                        />
                         Template Google Sheets Premium #1 di Indonesia
                     </span>
                 </motion.div>
@@ -60,20 +63,36 @@ export function Hero() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20"
                 >
-                    <Button asChild size="lg" className="h-14 px-8 text-lg rounded-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 shadow-xl shadow-orange-500/20 transition-all hover:scale-105 hover:shadow-orange-500/30">
-                        <Link href="/templates">
-                            Jelajahi Template
-                            <ArrowRight className="ml-2 h-5 w-5" />
-                        </Link>
-                    </Button>
-                    <Button asChild variant="outline" size="lg" className="h-14 px-8 text-lg rounded-full border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-all">
-                        <Link href="#features">
-                            Pelajari Lebih Lanjut
-                        </Link>
-                    </Button>
+                    <Link 
+                        href="/templates"
+                        className="group relative h-14 px-8 text-lg rounded-full bg-gradient-to-r from-orange-600 to-amber-500 text-white font-medium shadow-xl shadow-orange-500/25 transition-all duration-300 hover:shadow-orange-500/40 hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 active:shadow-lg overflow-hidden inline-flex items-center gap-3"
+                    >
+                        {/* Shimmer effect */}
+                        <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                        <span className="relative z-10">Jelajahi Template</span>
+                        <lord-icon
+                            src="https://cdn.lordicon.com/whtfgdfm.json"
+                            trigger="loop-on-hover"
+                            colors="primary:#ffffff"
+                            style={{ width: '24px', height: '24px' }}
+                            className="relative z-10 transition-transform duration-300 group-hover:translate-x-1"
+                        />
+                    </Link>
+                    <Link 
+                        href="#features"
+                        className="group h-14 px-8 text-lg rounded-full border-2 border-gray-200 text-gray-700 font-medium transition-all duration-300 hover:border-orange-400 hover:text-orange-600 hover:bg-orange-50 hover:-translate-y-1 active:translate-y-0 inline-flex items-center gap-2"
+                    >
+                        <span>Pelajari Lebih Lanjut</span>
+                        <lord-icon
+                            src="https://cdn.lordicon.com/kkvxgpti.json"
+                            trigger="loop-on-hover"
+                            colors="primary:#f97316"
+                            style={{ width: '20px', height: '20px' }}
+                        />
+                    </Link>
                 </motion.div>
 
-                {/* Floating Hero Image - Clean No Frame */}
+                {/* Floating Hero Image */}
                 <motion.div
                     initial={{ opacity: 0, y: 40, rotateX: 10 }}
                     animate={{ opacity: 1, y: 0, rotateX: 0 }}
@@ -88,7 +107,7 @@ export function Hero() {
                         />
                     </div>
 
-                    {/* Glow Effect behind image */}
+                    {/* Glow Effect */}
                     <div className="absolute inset-0 -z-10 bg-orange-500/20 blur-[100px] rounded-full transform scale-75"></div>
 
                     {/* Floating Elements */}
@@ -98,8 +117,14 @@ export function Hero() {
                         className="absolute -right-4 top-10 md:-right-12 md:top-20 bg-white p-4 rounded-xl shadow-xl border border-gray-100 hidden sm:block z-20"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-green-100 rounded-lg text-green-600">
-                                <Zap className="w-6 h-6" />
+                            <div className="p-2 bg-green-100 rounded-lg">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/akqsdstj.json"
+                                    trigger="loop"
+                                    delay="2000"
+                                    colors="primary:#16a34a"
+                                    style={{ width: '28px', height: '28px' }}
+                                />
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 font-medium">Fitur Pintar</p>
@@ -114,8 +139,14 @@ export function Hero() {
                         className="absolute -left-4 bottom-10 md:-left-12 md:bottom-20 bg-white p-4 rounded-xl shadow-xl border border-gray-100 hidden sm:block z-20"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                                <TrendingUp className="w-6 h-6" />
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/yxyampao.json"
+                                    trigger="loop"
+                                    delay="2500"
+                                    colors="primary:#2563eb"
+                                    style={{ width: '28px', height: '28px' }}
+                                />
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 font-medium">Visualisasi</p>

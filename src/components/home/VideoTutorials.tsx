@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { Play, ChevronLeft, ChevronRight, X, Youtube, Sparkles, ExternalLink } from 'lucide-react'
 
 interface VideoTutorial {
     id: number
@@ -57,7 +56,6 @@ export function VideoTutorials() {
         setCurrentIndex((prev) => (prev - 1 + videos.length) % videos.length)
     }
 
-    // Don't render if inactive or no videos
     if (settings.isActive === 'false' || (!loading && videos.length === 0)) {
         return null
     }
@@ -77,15 +75,27 @@ export function VideoTutorials() {
                         transition={{ duration: 0.5 }}
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 rounded-full mb-4">
-                            <Youtube className="w-4 h-4 text-red-500" />
+                            <lord-icon
+                                src="https://cdn.lordicon.com/aklfruoc.json"
+                                trigger="loop"
+                                delay="2000"
+                                colors="primary:#dc2626"
+                                style={{ width: '20px', height: '20px' }}
+                            />
                             <span className="text-sm font-medium text-red-600">Video Tutorial</span>
                         </div>
                         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
                             Pelajari Cara Penggunaan Template
                         </h2>
-                        <p className="text-gray-500 max-w-2xl mx-auto">
-                            <Sparkles className="w-4 h-4 inline mr-1 text-amber-500" />
-                            Tonton video panduan lengkap untuk memaksimalkan penggunaan template dan meningkatkan produktivitas Kamu
+                        <p className="text-gray-500 max-w-2xl mx-auto flex items-center justify-center gap-2">
+                            <lord-icon
+                                src="https://cdn.lordicon.com/hvueufdo.json"
+                                trigger="loop"
+                                delay="3000"
+                                colors="primary:#f59e0b"
+                                style={{ width: '20px', height: '20px' }}
+                            />
+                            Tonton video panduan lengkap untuk memaksimalkan penggunaan template
                         </p>
                     </motion.div>
 
@@ -106,9 +116,14 @@ export function VideoTutorials() {
                                 {videos.length > 1 && (
                                     <button
                                         onClick={prevSlide}
-                                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-14 z-10 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-orange-500 hover:shadow-xl transition-all duration-200"
+                                        className="group absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-14 z-10 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:shadow-xl hover:scale-110"
                                     >
-                                        <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+                                        <lord-icon
+                                            src="https://cdn.lordicon.com/zmkotitn.json"
+                                            trigger="hover"
+                                            colors="primary:#f97316"
+                                            style={{ width: '24px', height: '24px' }}
+                                        />
                                     </button>
                                 )}
 
@@ -154,7 +169,12 @@ export function VideoTutorials() {
                                                         <div className="relative">
                                                             <div className="absolute inset-0 bg-white/30 rounded-full animate-ping" />
                                                             <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-white flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
-                                                                <Play className="w-6 h-6 md:w-8 md:h-8 text-red-500 ml-1" fill="currentColor" />
+                                                                <lord-icon
+                                                                    src="https://cdn.lordicon.com/becebamh.json"
+                                                                    trigger="loop-on-hover"
+                                                                    colors="primary:#dc2626"
+                                                                    style={{ width: '40px', height: '40px' }}
+                                                                />
                                                             </div>
                                                         </div>
                                                     </div>
@@ -187,9 +207,14 @@ export function VideoTutorials() {
                                 {videos.length > 1 && (
                                     <button
                                         onClick={nextSlide}
-                                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-14 z-10 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-orange-500 hover:shadow-xl transition-all duration-200"
+                                        className="group absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-14 z-10 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:shadow-xl hover:scale-110"
                                     >
-                                        <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+                                        <lord-icon
+                                            src="https://cdn.lordicon.com/whtfgdfm.json"
+                                            trigger="hover"
+                                            colors="primary:#f97316"
+                                            style={{ width: '24px', height: '24px' }}
+                                        />
                                     </button>
                                 )}
                             </div>
@@ -234,11 +259,22 @@ export function VideoTutorials() {
                             href={youtubeChannelUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-3 px-6 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 hover:shadow-lg hover:shadow-red-200 transition-all duration-300 hover:-translate-y-0.5"
+                            className="group relative inline-flex items-center gap-3 px-6 py-3 bg-red-600 text-white font-medium rounded-xl overflow-hidden transition-all duration-300 hover:bg-red-700 hover:shadow-lg hover:shadow-red-300/50 hover:-translate-y-0.5 active:translate-y-0"
                         >
-                            <Youtube className="w-5 h-5" />
-                            Kunjungi Channel YouTube
-                            <ExternalLink className="w-4 h-4" />
+                            <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                            <lord-icon
+                                src="https://cdn.lordicon.com/aklfruoc.json"
+                                trigger="loop-on-hover"
+                                colors="primary:#ffffff"
+                                style={{ width: '24px', height: '24px' }}
+                            />
+                            <span className="relative z-10">Kunjungi Channel YouTube</span>
+                            <lord-icon
+                                src="https://cdn.lordicon.com/ercyvufy.json"
+                                trigger="loop-on-hover"
+                                colors="primary:#ffffff"
+                                style={{ width: '20px', height: '20px' }}
+                            />
                         </a>
                     </motion.div>
                 </div>
@@ -266,7 +302,12 @@ export function VideoTutorials() {
                                 onClick={() => setActiveVideo(null)}
                                 className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white transition-colors"
                             >
-                                <X className="h-6 w-6" />
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/nqtddedc.json"
+                                    trigger="hover"
+                                    colors="primary:#ffffff"
+                                    style={{ width: '28px', height: '28px' }}
+                                />
                             </button>
 
                             <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">

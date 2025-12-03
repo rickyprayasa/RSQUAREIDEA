@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 
 interface VoucherSettings {
     voucher_code: string | null
@@ -29,18 +30,54 @@ export function AnnouncementBar() {
             .finally(() => setLoading(false))
     }, [])
 
-    // Don't show if loading, no settings, or voucher is not active
     if (loading || !settings || settings.voucher_active !== 'true' || !settings.voucher_code) {
         return null
     }
 
     return (
-        <div className="bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-3 text-center text-sm font-medium text-white shadow-lg">
-            <p>
-                🔥 Kode Voucher: <span className="font-bold tracking-wider">{settings.voucher_code}</span> untuk mendapatkan
-                Diskon {settings.voucher_discount}% semua Templates{' '}
-                <Link href="/templates" className="underline hover:text-orange-100 transition-colors">
-                    Klaim Sekarang &rarr;
+        <div className="relative bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 px-6 py-3 text-center text-sm font-medium text-white shadow-lg overflow-hidden">
+            {/* Animated background shimmer */}
+            <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{ x: ['-100%', '100%'] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+            />
+            
+            <p className="relative z-10 flex items-center justify-center gap-2 flex-wrap">
+                <motion.span
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                >
+                    🔥
+                </motion.span>
+                <span>Kode Voucher:</span>
+                <span className="font-bold tracking-wider bg-white/20 px-2 py-0.5 rounded">
+                    {settings.voucher_code}
+                </span>
+                <span>untuk mendapatkan Diskon {settings.voucher_discount}% semua Templates</span>
+                <Link 
+                    href="/templates" 
+                    className="inline-flex items-center gap-1 group ml-1"
+                >
+                    {/* Animated gradient text */}
+                    <motion.span 
+                        className="relative font-bold"
+                        whileHover={{ scale: 1.05 }}
+                    >
+                        <span className="absolute inset-0 bg-gradient-to-r from-yellow-200 via-white to-yellow-200 bg-clip-text text-transparent bg-[length:200%_100%] animate-shimmer">
+                            Klaim Sekarang
+                        </span>
+                        <span className="bg-gradient-to-r from-yellow-200 via-white to-yellow-200 bg-clip-text text-transparent bg-[length:200%_100%] animate-shimmer">
+                            Klaim Sekarang
+                        </span>
+                    </motion.span>
+                    <motion.span
+                        className="inline-block"
+                        animate={{ x: [0, 4, 0] }}
+                        transition={{ duration: 0.8, repeat: Infinity }}
+                    >
+                        →
+                    </motion.span>
                 </Link>
             </p>
         </div>
