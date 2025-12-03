@@ -7,7 +7,7 @@ const features = [
   {
     title: 'Desain Intuitif & Estetis',
     description: 'Tampilan visual yang bersih memanjakan mata, membuat pengelolaan data jadi menyenangkan.',
-    iconSrc: 'https://cdn.lordicon.com/puvaffet.json',
+    iconSrc: 'https://cdn.lordicon.com/wloilxuq.json',
     color: 'bg-orange-100',
     iconColor: 'primary:#ea580c,secondary:#fbbf24',
     image: '/images/restorer-pana.png'
@@ -15,7 +15,7 @@ const features = [
   {
     title: 'Langsung Siap Pakai',
     description: 'Hemat puluhan jam. Download, buka, dan langsung gunakan tanpa setup rumit.',
-    iconSrc: 'https://cdn.lordicon.com/xkumezul.json',
+    iconSrc: 'https://cdn.lordicon.com/akqsdstj.json',
     color: 'bg-blue-100',
     iconColor: 'primary:#2563eb,secondary:#60a5fa',
     image: '/images/rocket-pana.png'
@@ -23,7 +23,7 @@ const features = [
   {
     title: 'Otomatisasi Canggih',
     description: 'Ditenagai Google Apps Script untuk fitur ajaib yang tidak bisa dilakukan spreadsheet biasa.',
-    iconSrc: 'https://cdn.lordicon.com/zyzoecaw.json',
+    iconSrc: 'https://cdn.lordicon.com/nocovwne.json',
     color: 'bg-purple-100',
     iconColor: 'primary:#9333ea,secondary:#c084fc',
     image: '/images/ai-pana.png'
