@@ -86,7 +86,8 @@ export default async function Home() {
                 subtitle="Mulai perjalanan produktivitas Kamu tanpa biaya sepeserpun."
                 templates={freeTemplates}
                 viewAllLink="/templates?category=free"
-                bgClass="bg-gray-50"
+                emptyTitle="Template Gratis Segera Hadir"
+                emptyDescription="Kami sedang menyiapkan koleksi template gratis untuk membantu Kamu memulai. Nantikan!"
             />
 
             <TemplateSection
@@ -94,6 +95,8 @@ export default async function Home() {
                 subtitle="Solusi premium untuk kebutuhan bisnis dan personal yang lebih kompleks."
                 templates={featuredTemplates}
                 viewAllLink="/templates?category=premium"
+                emptyTitle="Template Unggulan Segera Hadir"
+                emptyDescription="Koleksi template premium terbaik kami sedang dalam persiapan. Coming soon!"
             />
 
             <VideoTutorials />

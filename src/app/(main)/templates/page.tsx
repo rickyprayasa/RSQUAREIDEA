@@ -1,71 +1,167 @@
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Sparkles, FileSpreadsheet, Search } from 'lucide-react'
 import { TemplatesList } from '@/components/templates/TemplatesList'
 
-export const revalidate = 3600
-
-async function getTemplates() {
-    const supabase = await createClient()
-    
-    const { data } = await supabase
-        .from('products')
-        .select('id, title, slug, price, discount_price, image, category, is_featured, is_free')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-    
-    return data?.map(t => ({
-        _id: t.id.toString(),
-        title: t.title,
-        slug: t.slug,
-        price: t.price,
-        discountPrice: t.discount_price,
-        image: t.image || '',
-        category: t.category,
-        isFeatured: t.is_featured,
-        isFree: t.is_free,
-    })) || []
+interface Template {
+    _id: string
+    title: string
+    slug: string
+    price: number
+    discountPrice?: number
+    image: string
+    category: string
+    isFeatured?: boolean
+    isFree?: boolean
 }
 
-async function getCategories() {
-    const supabase = await createClient()
-    
-    const { data } = await supabase
-        .from('categories')
-        .select('name, slug')
-        .order('name')
-    
-    return data || []
+interface Category {
+    name: string
+    slug: string
 }
 
-export default async function TemplatesPage() {
-    const [templates, categories] = await Promise.all([
-        getTemplates(),
-        getCategories(),
-    ])
+export default function TemplatesPage() {
+    const [templates, setTemplates] = useState<Template[]>([])
+    const [categories, setCategories] = useState<Category[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        Promise.all([
+            fetch('/api/admin/products').then(res => res.json()),
+            fetch('/api/admin/categories').then(res => res.json())
+        ])
+            .then(([productsData, categoriesData]) => {
+                if (productsData.products) {
+                    setTemplates(productsData.products.filter((p: { isActive: boolean }) => p.isActive).map((t: { id: number; title: string; slug: string; price: number; discountPrice?: number; image?: string; category: string; isFeatured?: boolean; isFree?: boolean }) => ({
+                        _id: t.id.toString(),
+                        title: t.title,
+                        slug: t.slug,
+                        price: t.price,
+                        discountPrice: t.discountPrice,
+                        image: t.image || '',
+                        category: t.category,
+                        isFeatured: t.isFeatured,
+                        isFree: t.isFree,
+                    })))
+                }
+                if (categoriesData.categories) {
+                    setCategories(categoriesData.categories)
+                }
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false))
+    }, [])
 
     return (
-        <main className="min-h-screen relative">
-            {/* Global Grid Background */}
+        <main className="min-h-screen relative overflow-hidden">
+            {/* Animated Background */}
             <div className="fixed inset-0 -z-10">
-                <div className="absolute inset-0 bg-white" />
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-white to-amber-50/20" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
+                
+                {/* Floating Shapes */}
+                <motion.div
+                    className="absolute top-20 right-[10%] w-64 h-64 bg-orange-200/40 rounded-full blur-3xl"
+                    animate={{
+                        x: [0, 40, 0],
+                        y: [0, -30, 0],
+                        scale: [1, 1.2, 1],
+                    }}
+                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                    className="absolute top-[40%] left-[5%] w-48 h-48 bg-amber-300/30 rounded-full blur-3xl"
+                    animate={{
+                        x: [0, -20, 0],
+                        y: [0, 40, 0],
+                        scale: [1, 1.15, 1],
+                    }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                />
+                <motion.div
+                    className="absolute bottom-[20%] right-[15%] w-72 h-72 bg-orange-100/50 rounded-full blur-3xl"
+                    animate={{
+                        x: [0, 30, 0],
+                        y: [0, -20, 0],
+                        scale: [1, 1.1, 1],
+                    }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                />
+                
+                {/* Random Floating Squares */}
+                <motion.div
+                    className="absolute top-[15%] left-[20%] w-8 h-8 bg-orange-400/20 rounded-lg"
+                    animate={{
+                        y: [0, -20, 0],
+                        rotate: [0, 45, 0],
+                        opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                    className="absolute top-[60%] right-[25%] w-6 h-6 bg-amber-400/25 rounded-lg"
+                    animate={{
+                        y: [0, 15, 0],
+                        rotate: [0, -30, 0],
+                        opacity: [0.2, 0.5, 0.2],
+                    }}
+                    transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                />
+                <motion.div
+                    className="absolute bottom-[30%] left-[30%] w-5 h-5 bg-orange-300/30 rounded-full"
+                    animate={{
+                        y: [0, -25, 0],
+                        x: [0, 10, 0],
+                        opacity: [0.3, 0.5, 0.3],
+                    }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+                />
+                <motion.div
+                    className="absolute top-[30%] right-[40%] w-4 h-4 bg-amber-500/20 rounded-full"
+                    animate={{
+                        y: [0, 20, 0],
+                        x: [0, -15, 0],
+                        opacity: [0.2, 0.4, 0.2],
+                    }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2.5 }}
+                />
             </div>
 
             {/* Hero Header */}
             <section className="relative py-16 md:py-20 overflow-hidden">
                 <div className="container mx-auto px-6 relative z-10">
                     <div className="max-w-3xl mx-auto text-center">
-                        <span className="inline-flex items-center rounded-full bg-orange-50 px-4 py-1.5 text-sm font-medium text-orange-600 ring-1 ring-inset ring-orange-200 mb-6">
-                            Koleksi Lengkap
-                        </span>
-                        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <span className="inline-flex items-center rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
+                                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                                Koleksi Lengkap
+                            </span>
+                        </motion.div>
+                        <motion.h1 
+                            className="text-4xl md:text-5xl font-bold text-gray-900 mb-5 leading-tight"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                        >
                             Template Premium untuk{' '}
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500">
                                 Segala Kebutuhan
                             </span>
-                        </h1>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                        </motion.h1>
+                        <motion.p 
+                            className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                        >
                             Temukan template yang tepat untuk bisnis dan kehidupan personal Kamu. Semua template dilengkapi panduan lengkap.
-                        </p>
+                        </motion.p>
                     </div>
                 </div>
             </section>
@@ -73,10 +169,39 @@ export default async function TemplatesPage() {
             {/* Templates Section */}
             <section className="py-12">
                 <div className="container mx-auto px-6">
-                    <TemplatesList 
-                        initialTemplates={templates} 
-                        categories={categories}
-                    />
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <motion.div
+                                className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full"
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            />
+                            <p className="text-gray-500 mt-4">Memuat template...</p>
+                        </div>
+                    ) : templates.length === 0 ? (
+                        <motion.div 
+                            className="text-center py-20"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                        >
+                            <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Search className="w-12 h-12 text-orange-400" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-3">Belum Ada Template</h3>
+                            <p className="text-gray-600 max-w-md mx-auto mb-6">
+                                Template sedang dalam proses persiapan. Segera hadir koleksi template premium untuk kebutuhan Kamu!
+                            </p>
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full text-orange-600 text-sm font-medium">
+                                <Sparkles className="w-4 h-4" />
+                                Coming Soon
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <TemplatesList 
+                            initialTemplates={templates} 
+                            categories={categories}
+                        />
+                    )}
                 </div>
             </section>
         </main>

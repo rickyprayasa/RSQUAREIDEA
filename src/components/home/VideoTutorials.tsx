@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { Play, ChevronLeft, ChevronRight, X, Youtube, Sparkles } from 'lucide-react'
+import { Play, ChevronLeft, ChevronRight, X, Youtube, Sparkles, ExternalLink } from 'lucide-react'
 
 interface VideoTutorial {
     id: number
@@ -18,6 +18,7 @@ interface VideoTutorial {
 interface VideoSettings {
     video_tutorial_title?: string
     isActive?: string
+    youtube_channel_url?: string
 }
 
 export function VideoTutorials() {
@@ -30,11 +31,14 @@ export function VideoTutorials() {
     const [currentIndex, setCurrentIndex] = useState(0)
 
     useEffect(() => {
-        fetch('/api/videos')
-            .then(res => res.json())
-            .then(data => {
-                if (data.videos) setVideos(data.videos)
-                if (data.settings) setSettings(data.settings)
+        Promise.all([
+            fetch('/api/videos').then(res => res.json()),
+            fetch('/api/settings').then(res => res.json())
+        ])
+            .then(([videosData, settingsData]) => {
+                if (videosData.videos) setVideos(videosData.videos)
+                if (videosData.settings) setSettings(prev => ({ ...prev, ...videosData.settings }))
+                if (settingsData.settings) setSettings(prev => ({ ...prev, ...settingsData.settings }))
             })
             .catch(console.error)
             .finally(() => setLoading(false))
@@ -59,6 +63,7 @@ export function VideoTutorials() {
     }
 
     const currentVideo = videos[currentIndex]
+    const youtubeChannelUrl = settings.youtube_channel_url || 'https://youtube.com/@rsquareidea'
 
     return (
         <>
@@ -214,6 +219,28 @@ export function VideoTutorials() {
                             )}
                         </motion.div>
                     )}
+
+                    {/* YouTube Channel Button */}
+                    <motion.div 
+                        className="text-center mt-10"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={isInView ? { opacity: 1, y: 0 } : {}}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                    >
+                        <p className="text-gray-600 mb-4">
+                            Ingin tips dan trik seputar Google Sheets lainnya?
+                        </p>
+                        <a
+                            href={youtubeChannelUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-3 px-6 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 hover:shadow-lg hover:shadow-red-200 transition-all duration-300 hover:-translate-y-0.5"
+                        >
+                            <Youtube className="w-5 h-5" />
+                            Kunjungi Channel YouTube
+                            <ExternalLink className="w-4 h-4" />
+                        </a>
+                    </motion.div>
                 </div>
             </section>
 

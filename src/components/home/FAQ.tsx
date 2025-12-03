@@ -8,27 +8,22 @@ const faqs = [
     {
         question: "Apakah saya perlu berlangganan bulanan?",
         answer: "Tidak! Semua template RSQUARE adalah sekali bayar (one-time purchase). Kamu bisa menggunakannya selamanya tanpa biaya tambahan.",
-        icon: "💳"
     },
     {
         question: "Apakah template ini bisa digunakan di Excel?",
         answer: "Template kami dirancang khusus untuk Google Sheets untuk memanfaatkan fitur kolaborasi dan otomatisasi online. Beberapa fitur mungkin tidak berjalan sempurna jika diekspor ke Excel.",
-        icon: "📊"
     },
     {
         question: "Bagaimana jika saya butuh bantuan?",
         answer: "Setiap pembelian dilengkapi dengan panduan video lengkap. Jika masih ada kendala, tim support kami siap membantu melalui WhatsApp atau Email.",
-        icon: "🤝"
     },
     {
         question: "Apakah saya bisa request fitur tambahan?",
         answer: "Tentu! Kami menyediakan layanan kustomisasi template dengan biaya tambahan sesuai tingkat kesulitan request Kamu.",
-        icon: "✨"
     },
     {
         question: "Apakah data saya aman?",
         answer: "Sangat aman. Template ini berjalan di akun Google Drive Kamu sendiri. Kami tidak memiliki akses ke data yang Kamu input.",
-        icon: "🔒"
     },
 ]
 
@@ -124,9 +119,6 @@ export function FAQ() {
                                     onClick={() => setOpenIndex(openIndex === index ? null : index)}
                                     className="w-full px-6 py-5 flex items-center gap-4 text-left"
                                 >
-                                    {/* Icon */}
-                                    <span className="text-2xl flex-shrink-0">{faq.icon}</span>
-                                    
                                     {/* Question */}
                                     <span className={`flex-1 font-semibold text-lg transition-colors ${
                                         openIndex === index ? 'text-orange-600' : 'text-gray-900'
@@ -162,7 +154,7 @@ export function FAQ() {
                                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                                         >
                                             <div className="px-6 pb-5 pt-0">
-                                                <div className="pl-12 pr-12">
+                                                <div className="pr-12">
                                                     <p className="text-gray-600 leading-relaxed">
                                                         {faq.answer}
                                                     </p>
