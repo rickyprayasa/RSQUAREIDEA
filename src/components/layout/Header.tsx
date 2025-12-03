@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CartButton } from '@/components/cart/CartButton'
 
@@ -48,7 +47,6 @@ export function Header() {
                                 <span className={`relative z-10 ${isActive ? 'text-orange-600' : 'text-gray-600 group-hover:text-gray-900'}`}>
                                     {item.name}
                                 </span>
-                                {/* Hover underline effect */}
                                 <span className={`absolute bottom-0 left-1/2 h-0.5 bg-orange-500 transition-all duration-300 ease-out ${
                                     isActive ? 'w-1/2 -translate-x-1/2' : 'w-0 group-hover:w-1/2 group-hover:-translate-x-1/2'
                                 }`} />
@@ -66,7 +64,21 @@ export function Header() {
                         className="md:hidden hover:bg-orange-50"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     >
-                        {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                        {mobileMenuOpen ? (
+                            <lord-icon
+                                src="https://cdn.lordicon.com/nqtddedc.json"
+                                trigger="hover"
+                                colors="primary:#374151"
+                                style={{ width: '24px', height: '24px' }}
+                            />
+                        ) : (
+                            <lord-icon
+                                src="https://cdn.lordicon.com/eouimtlu.json"
+                                trigger="hover"
+                                colors="primary:#374151"
+                                style={{ width: '24px', height: '24px' }}
+                            />
+                        )}
                     </Button>
                 </div>
             </nav>

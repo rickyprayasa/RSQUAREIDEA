@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sparkles, FileSpreadsheet, Search } from 'lucide-react'
 import { TemplatesList } from '@/components/templates/TemplatesList'
 
 interface Template {
@@ -89,44 +88,6 @@ export default function TemplatesPage() {
                     }}
                     transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
                 />
-                
-                {/* Random Floating Squares */}
-                <motion.div
-                    className="absolute top-[15%] left-[20%] w-8 h-8 bg-orange-400/20 rounded-lg"
-                    animate={{
-                        y: [0, -20, 0],
-                        rotate: [0, 45, 0],
-                        opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div
-                    className="absolute top-[60%] right-[25%] w-6 h-6 bg-amber-400/25 rounded-lg"
-                    animate={{
-                        y: [0, 15, 0],
-                        rotate: [0, -30, 0],
-                        opacity: [0.2, 0.5, 0.2],
-                    }}
-                    transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                />
-                <motion.div
-                    className="absolute bottom-[30%] left-[30%] w-5 h-5 bg-orange-300/30 rounded-full"
-                    animate={{
-                        y: [0, -25, 0],
-                        x: [0, 10, 0],
-                        opacity: [0.3, 0.5, 0.3],
-                    }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-                />
-                <motion.div
-                    className="absolute top-[30%] right-[40%] w-4 h-4 bg-amber-500/20 rounded-full"
-                    animate={{
-                        y: [0, 20, 0],
-                        x: [0, -15, 0],
-                        opacity: [0.2, 0.4, 0.2],
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2.5 }}
-                />
             </div>
 
             {/* Hero Header */}
@@ -138,8 +99,14 @@ export default function TemplatesPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
                         >
-                            <span className="inline-flex items-center rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
-                                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                            <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/ghhwiltn.json"
+                                    trigger="loop"
+                                    delay="2000"
+                                    colors="primary:#ea580c"
+                                    style={{ width: '18px', height: '18px' }}
+                                />
                                 Koleksi Lengkap
                             </span>
                         </motion.div>
@@ -171,10 +138,11 @@ export default function TemplatesPage() {
                 <div className="container mx-auto px-6">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20">
-                            <motion.div
-                                className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full"
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            <lord-icon
+                                src="https://cdn.lordicon.com/xjovhxra.json"
+                                trigger="loop"
+                                colors="primary:#f97316"
+                                style={{ width: '48px', height: '48px' }}
                             />
                             <p className="text-gray-500 mt-4">Memuat template...</p>
                         </div>
@@ -185,14 +153,24 @@ export default function TemplatesPage() {
                             animate={{ opacity: 1, y: 0 }}
                         >
                             <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Search className="w-12 h-12 text-orange-400" />
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/kkvxgpti.json"
+                                    trigger="loop"
+                                    colors="primary:#f97316"
+                                    style={{ width: '48px', height: '48px' }}
+                                />
                             </div>
                             <h3 className="text-2xl font-bold text-gray-900 mb-3">Belum Ada Template</h3>
                             <p className="text-gray-600 max-w-md mx-auto mb-6">
                                 Template sedang dalam proses persiapan. Segera hadir koleksi template premium untuk kebutuhan Kamu!
                             </p>
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full text-orange-600 text-sm font-medium">
-                                <Sparkles className="w-4 h-4" />
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/hvueufdo.json"
+                                    trigger="loop"
+                                    colors="primary:#ea580c"
+                                    style={{ width: '18px', height: '18px' }}
+                                />
                                 Coming Soon
                             </div>
                         </motion.div>

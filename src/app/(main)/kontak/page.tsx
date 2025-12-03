@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, MessageSquare, Send, Phone, MapPin, Sparkles } from 'lucide-react'
 
 export default function KontakPage() {
     const [contactEmail, setContactEmail] = useState('hello@rsquareidea.my.id')
@@ -22,7 +21,6 @@ export default function KontakPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         setFormStatus('sending')
-        // Simulate sending
         setTimeout(() => {
             setFormStatus('sent')
             setTimeout(() => setFormStatus('idle'), 3000)
@@ -66,8 +64,14 @@ export default function KontakPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
                         >
-                            <span className="inline-flex items-center rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
-                                <MessageSquare className="w-4 h-4 mr-2" />
+                            <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/fdxqrdfe.json"
+                                    trigger="loop"
+                                    delay="2000"
+                                    colors="primary:#ea580c"
+                                    style={{ width: '18px', height: '18px' }}
+                                />
                                 Hubungi Kami
                             </span>
                             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-5 leading-tight">
@@ -98,7 +102,13 @@ export default function KontakPage() {
                             >
                                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                                     <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
-                                        <Mail className="w-6 h-6 text-orange-600" />
+                                        <lord-icon
+                                            src="https://cdn.lordicon.com/diihvcfp.json"
+                                            trigger="loop"
+                                            delay="2000"
+                                            colors="primary:#ea580c"
+                                            style={{ width: '28px', height: '28px' }}
+                                        />
                                     </div>
                                     <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
                                     <a 
@@ -111,7 +121,13 @@ export default function KontakPage() {
 
                                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                                     <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
-                                        <Phone className="w-6 h-6 text-green-600" />
+                                        <lord-icon
+                                            src="https://cdn.lordicon.com/srsgifqc.json"
+                                            trigger="loop"
+                                            delay="2500"
+                                            colors="primary:#16a34a"
+                                            style={{ width: '28px', height: '28px' }}
+                                        />
                                     </div>
                                     <h3 className="font-semibold text-gray-900 mb-2">WhatsApp</h3>
                                     <p className="text-gray-600 text-sm">Respon cepat via WhatsApp</p>
@@ -119,7 +135,13 @@ export default function KontakPage() {
 
                                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                                        <MapPin className="w-6 h-6 text-blue-600" />
+                                        <lord-icon
+                                            src="https://cdn.lordicon.com/surcxhka.json"
+                                            trigger="loop"
+                                            delay="3000"
+                                            colors="primary:#2563eb"
+                                            style={{ width: '28px', height: '28px' }}
+                                        />
                                     </div>
                                     <h3 className="font-semibold text-gray-900 mb-2">Lokasi</h3>
                                     <p className="text-gray-600 text-sm">Indonesia</p>
@@ -135,7 +157,13 @@ export default function KontakPage() {
                             >
                                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
                                     <div className="flex items-center gap-2 mb-6">
-                                        <Sparkles className="w-5 h-5 text-orange-500" />
+                                        <lord-icon
+                                            src="https://cdn.lordicon.com/hvueufdo.json"
+                                            trigger="loop"
+                                            delay="2000"
+                                            colors="primary:#f97316"
+                                            style={{ width: '24px', height: '24px' }}
+                                        />
                                         <h2 className="text-xl font-bold text-gray-900">Kirim Pesan</h2>
                                     </div>
 
@@ -202,35 +230,42 @@ export default function KontakPage() {
                                             disabled={formStatus === 'sending'}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
-                                            className={`w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all ${
+                                            className={`group relative w-full h-12 rounded-xl font-semibold text-white flex items-center justify-center gap-2 overflow-hidden transition-all ${
                                                 formStatus === 'sent' 
                                                     ? 'bg-green-500' 
                                                     : 'bg-gradient-to-r from-orange-500 to-amber-500 hover:shadow-lg hover:shadow-orange-200'
                                             }`}
                                         >
+                                            <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                                             {formStatus === 'sending' ? (
                                                 <>
-                                                    <motion.div
-                                                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                                                        animate={{ rotate: 360 }}
-                                                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                                    <lord-icon
+                                                        src="https://cdn.lordicon.com/xjovhxra.json"
+                                                        trigger="loop"
+                                                        colors="primary:#ffffff"
+                                                        style={{ width: '24px', height: '24px' }}
                                                     />
-                                                    Mengirim...
+                                                    <span className="relative z-10">Mengirim...</span>
                                                 </>
                                             ) : formStatus === 'sent' ? (
                                                 <>
-                                                    <motion.div
-                                                        initial={{ scale: 0 }}
-                                                        animate={{ scale: 1 }}
-                                                    >
-                                                        ✓
-                                                    </motion.div>
-                                                    Pesan Terkirim!
+                                                    <lord-icon
+                                                        src="https://cdn.lordicon.com/oqdmuxru.json"
+                                                        trigger="loop"
+                                                        colors="primary:#ffffff"
+                                                        style={{ width: '24px', height: '24px' }}
+                                                    />
+                                                    <span className="relative z-10">Pesan Terkirim!</span>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Send className="w-4 h-4" />
-                                                    Kirim Pesan
+                                                    <lord-icon
+                                                        src="https://cdn.lordicon.com/ternnbni.json"
+                                                        trigger="loop-on-hover"
+                                                        colors="primary:#ffffff"
+                                                        style={{ width: '20px', height: '20px' }}
+                                                    />
+                                                    <span className="relative z-10">Kirim Pesan</span>
                                                 </>
                                             )}
                                         </motion.button>

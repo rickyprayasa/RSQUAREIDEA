@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, X, Trash2, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
@@ -12,7 +11,6 @@ export function CartButton() {
     const { items, removeItem, clearCart, totalItems, totalPrice } = useCart()
     const dropdownRef = useRef<HTMLDivElement>(null)
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -30,9 +28,14 @@ export function CartButton() {
             {/* Cart Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors"
+                className="relative p-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors group"
             >
-                <ShoppingCart className="h-5 w-5 text-orange-600" />
+                <lord-icon
+                    src="https://cdn.lordicon.com/pbrgppbb.json"
+                    trigger="hover"
+                    colors="primary:#ea580c"
+                    style={{ width: '22px', height: '22px' }}
+                />
                 {totalItems > 0 && (
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                         {totalItems}
@@ -53,14 +56,25 @@ export function CartButton() {
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
                             <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                                <ShoppingCart className="h-4 w-4 text-orange-500" />
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/pbrgppbb.json"
+                                    trigger="loop"
+                                    delay="3000"
+                                    colors="primary:#f97316"
+                                    style={{ width: '20px', height: '20px' }}
+                                />
                                 Keranjang ({totalItems})
                             </h3>
                             <button
                                 onClick={() => setIsOpen(false)}
                                 className="p-1 hover:bg-gray-200 rounded-lg transition-colors"
                             >
-                                <X className="h-4 w-4 text-gray-500" />
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/nqtddedc.json"
+                                    trigger="hover"
+                                    colors="primary:#6b7280"
+                                    style={{ width: '18px', height: '18px' }}
+                                />
                             </button>
                         </div>
 
@@ -68,8 +82,14 @@ export function CartButton() {
                         <div className="max-h-80 overflow-y-auto">
                             {items.length === 0 ? (
                                 <div className="text-center py-8 px-4">
-                                    <ShoppingCart className="h-12 w-12 mx-auto text-gray-200 mb-3" />
-                                    <p className="text-gray-500 text-sm">Keranjang masih kosong</p>
+                                    <lord-icon
+                                        src="https://cdn.lordicon.com/pbrgppbb.json"
+                                        trigger="loop"
+                                        delay="2000"
+                                        colors="primary:#d1d5db"
+                                        style={{ width: '48px', height: '48px' }}
+                                    />
+                                    <p className="text-gray-500 text-sm mt-2">Keranjang masih kosong</p>
                                     <p className="text-xs text-gray-400 mt-1">Tambahkan template yang ingin dibeli</p>
                                 </div>
                             ) : (
@@ -79,13 +99,11 @@ export function CartButton() {
                                             key={item.id}
                                             className="flex gap-3 p-2 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
                                         >
-                                            {/* Clickable Product Link */}
                                             <Link
                                                 href={`/templates/${item.slug}`}
                                                 onClick={() => setIsOpen(false)}
                                                 className="flex gap-3 flex-1 min-w-0"
                                             >
-                                                {/* Product Image */}
                                                 <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                                                     {item.image ? (
                                                         <Image
@@ -97,12 +115,16 @@ export function CartButton() {
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-                                                            <ShoppingCart className="w-5 h-5 text-orange-400" />
+                                                            <lord-icon
+                                                                src="https://cdn.lordicon.com/ghhwiltn.json"
+                                                                trigger="loop"
+                                                                colors="primary:#f97316"
+                                                                style={{ width: '24px', height: '24px' }}
+                                                            />
                                                         </div>
                                                     )}
                                                 </div>
                                                 
-                                                {/* Product Info */}
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="font-medium text-gray-900 text-sm leading-tight line-clamp-1 hover:text-orange-600 transition-colors">{item.title}</h4>
                                                     <span className="inline-block mt-0.5 px-1.5 py-0.5 bg-orange-100 text-orange-600 text-xs font-medium rounded">
@@ -123,7 +145,6 @@ export function CartButton() {
                                                 </div>
                                             </Link>
                                             
-                                            {/* Remove Button */}
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation()
@@ -131,7 +152,12 @@ export function CartButton() {
                                                 }}
                                                 className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors self-start flex-shrink-0"
                                             >
-                                                <Trash2 className="h-3.5 w-3.5" />
+                                                <lord-icon
+                                                    src="https://cdn.lordicon.com/skkahier.json"
+                                                    trigger="hover"
+                                                    colors="primary:#ef4444"
+                                                    style={{ width: '16px', height: '16px' }}
+                                                />
                                             </button>
                                         </div>
                                     ))}
@@ -152,17 +178,31 @@ export function CartButton() {
                                     <Link
                                         href="/checkout"
                                         onClick={() => setIsOpen(false)}
-                                        className="flex items-center justify-center gap-2 w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors text-sm"
+                                        className="group relative flex items-center justify-center gap-2 w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors text-sm overflow-hidden"
                                     >
-                                        Checkout <ArrowRight className="h-4 w-4" />
+                                        <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-500 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                        <span className="relative z-10">Checkout</span>
+                                        <lord-icon
+                                            src="https://cdn.lordicon.com/whtfgdfm.json"
+                                            trigger="loop-on-hover"
+                                            colors="primary:#ffffff"
+                                            style={{ width: '18px', height: '18px' }}
+                                            className="relative z-10"
+                                        />
                                     </Link>
                                     <button
                                         onClick={() => {
                                             clearCart()
                                             setIsOpen(false)
                                         }}
-                                        className="w-full py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-colors text-xs"
+                                        className="w-full py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-colors text-xs flex items-center justify-center gap-1"
                                     >
+                                        <lord-icon
+                                            src="https://cdn.lordicon.com/skkahier.json"
+                                            trigger="hover"
+                                            colors="primary:#6b7280"
+                                            style={{ width: '14px', height: '14px' }}
+                                        />
                                         Kosongkan Keranjang
                                     </button>
                                 </div>

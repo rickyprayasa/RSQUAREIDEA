@@ -3,14 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Instagram, Youtube, Mail, MapPin, ArrowUpRight, ExternalLink, Globe } from 'lucide-react'
-
-// TikTok icon component
-const TikTokIcon = ({ className }: { className?: string }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-    </svg>
-)
 
 const footerLinks = {
     products: [
@@ -26,9 +18,9 @@ const footerLinks = {
         { name: 'Syarat & Ketentuan', href: '/syarat-ketentuan' },
     ],
     social: [
-        { name: 'YouTube', icon: Youtube, href: 'https://www.youtube.com/@RSQUAREIDEA', color: 'hover:bg-red-500' },
-        { name: 'Instagram', icon: Instagram, href: 'https://www.instagram.com/rsquareidea/', color: 'hover:bg-gradient-to-br hover:from-purple-500 hover:via-pink-500 hover:to-orange-400' },
-        { name: 'TikTok', icon: TikTokIcon, href: 'https://www.tiktok.com/@rsquareidea', color: 'hover:bg-black' },
+        { name: 'YouTube', iconSrc: 'https://cdn.lordicon.com/aklfruoc.json', href: 'https://www.youtube.com/@RSQUAREIDEA', color: 'hover:bg-red-500' },
+        { name: 'Instagram', iconSrc: 'https://cdn.lordicon.com/lplsfbqx.json', href: 'https://www.instagram.com/rsquareidea/', color: 'hover:bg-gradient-to-br hover:from-purple-500 hover:via-pink-500 hover:to-orange-400' },
+        { name: 'TikTok', iconSrc: 'https://cdn.lordicon.com/qfmqzqts.json', href: 'https://www.tiktok.com/@rsquareidea', color: 'hover:bg-black' },
     ],
     portfolio: [
         { name: 'Omzetin', href: 'https://omzetin.web.id/', description: 'Aplikasi Kasir & Inventory' },
@@ -67,7 +59,6 @@ export function Footer() {
                         {/* Brand Section */}
                         <div className="lg:col-span-5">
                             <Link href="/" className="inline-flex items-center gap-3 mb-6 group">
-                                {/* Logo with white background */}
                                 <div className="relative p-2 bg-white rounded-xl shadow-lg group-hover:shadow-orange-500/20 transition-shadow duration-300">
                                     <Image
                                         src="/images/rsquare-logo.png"
@@ -97,7 +88,12 @@ export function Footer() {
                                         className={`w-11 h-11 rounded-xl bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300 ${item.color}`}
                                         aria-label={item.name}
                                     >
-                                        <item.icon className="h-5 w-5" />
+                                        <lord-icon
+                                            src={item.iconSrc}
+                                            trigger="hover"
+                                            colors="primary:#9ca3af"
+                                            style={{ width: '22px', height: '22px' }}
+                                        />
                                     </a>
                                 ))}
                             </div>
@@ -120,7 +116,13 @@ export function Footer() {
                                                     className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-center gap-1 group"
                                                 >
                                                     <span>{item.name}</span>
-                                                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200" />
+                                                    <lord-icon
+                                                        src="https://cdn.lordicon.com/whtfgdfm.json"
+                                                        trigger="hover"
+                                                        colors="primary:#fb923c"
+                                                        style={{ width: '14px', height: '14px' }}
+                                                        className="opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200"
+                                                    />
                                                 </Link>
                                             </li>
                                         ))}
@@ -141,7 +143,13 @@ export function Footer() {
                                                     className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-center gap-1 group"
                                                 >
                                                     <span>{item.name}</span>
-                                                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200" />
+                                                    <lord-icon
+                                                        src="https://cdn.lordicon.com/whtfgdfm.json"
+                                                        trigger="hover"
+                                                        colors="primary:#fb923c"
+                                                        style={{ width: '14px', height: '14px' }}
+                                                        className="opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200"
+                                                    />
                                                 </Link>
                                             </li>
                                         ))}
@@ -160,12 +168,22 @@ export function Footer() {
                                                 href={`mailto:${contactEmail}`}
                                                 className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-start gap-3"
                                             >
-                                                <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                                <lord-icon
+                                                    src="https://cdn.lordicon.com/diihvcfp.json"
+                                                    trigger="hover"
+                                                    colors="primary:#9ca3af"
+                                                    style={{ width: '18px', height: '18px', marginTop: '2px', flexShrink: 0 }}
+                                                />
                                                 <span className="text-sm break-all">{contactEmail}</span>
                                             </a>
                                         </li>
                                         <li className="flex items-start gap-3 text-gray-400">
-                                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                            <lord-icon
+                                                src="https://cdn.lordicon.com/surcxhka.json"
+                                                trigger="hover"
+                                                colors="primary:#9ca3af"
+                                                style={{ width: '18px', height: '18px', marginTop: '2px', flexShrink: 0 }}
+                                            />
                                             <span className="text-sm">Indonesia</span>
                                         </li>
                                     </ul>
@@ -184,9 +202,20 @@ export function Footer() {
                                                     rel="noopener noreferrer"
                                                     className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-center gap-2 group"
                                                 >
-                                                    <Globe className="w-4 h-4" />
+                                                    <lord-icon
+                                                        src="https://cdn.lordicon.com/osuxyevn.json"
+                                                        trigger="hover"
+                                                        colors="primary:#9ca3af"
+                                                        style={{ width: '18px', height: '18px' }}
+                                                    />
                                                     <span>{item.name}</span>
-                                                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    <lord-icon
+                                                        src="https://cdn.lordicon.com/ercyvufy.json"
+                                                        trigger="hover"
+                                                        colors="primary:#fb923c"
+                                                        style={{ width: '14px', height: '14px' }}
+                                                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    />
                                                 </a>
                                                 <p className="text-xs text-gray-500 ml-6">{item.description}</p>
                                             </li>

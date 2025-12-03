@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Wand2, Send, AlertTriangle, Lightbulb } from 'lucide-react'
 
 export default function JasaKustomPage() {
     return (
@@ -22,8 +21,14 @@ export default function JasaKustomPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
                         >
-                            <span className="inline-flex items-center rounded-full bg-orange-50 px-4 py-1.5 text-sm font-medium text-orange-600 ring-1 ring-inset ring-orange-200 mb-6">
-                                <Wand2 className="w-4 h-4 mr-2" />
+                            <span className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-4 py-1.5 text-sm font-medium text-orange-600 ring-1 ring-inset ring-orange-200 mb-6">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/wloilxuq.json"
+                                    trigger="loop"
+                                    delay="2000"
+                                    colors="primary:#ea580c"
+                                    style={{ width: '18px', height: '18px' }}
+                                />
                                 Jasa Kustom
                             </span>
                             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-5 leading-tight">
@@ -52,7 +57,13 @@ export default function JasaKustomPage() {
                         {/* Info Box */}
                         <div className="mb-8 p-6 bg-orange-50 rounded-2xl border border-orange-100">
                             <div className="flex items-start gap-3 mb-4">
-                                <Lightbulb className="w-5 h-5 text-orange-600 mt-0.5" />
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/rjzlnunf.json"
+                                    trigger="loop"
+                                    delay="2000"
+                                    colors="primary:#ea580c"
+                                    style={{ width: '24px', height: '24px', marginTop: '2px' }}
+                                />
                                 <h3 className="font-bold text-lg text-orange-900">Harap Dibaca Sebelum Mengisi</h3>
                             </div>
                             
@@ -160,10 +171,16 @@ export default function JasaKustomPage() {
                                     type="submit"
                                     whileHover={{ scale: 1.02, y: -2 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="w-full h-14 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold text-lg shadow-lg shadow-orange-200/50 flex items-center justify-center gap-2 group relative overflow-hidden"
+                                    className="group relative w-full h-14 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold text-lg shadow-lg shadow-orange-200/50 flex items-center justify-center gap-2 overflow-hidden"
                                 >
+                                    <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                                     <span className="relative z-10 flex items-center gap-2">
-                                        <Send className="w-5 h-5" />
+                                        <lord-icon
+                                            src="https://cdn.lordicon.com/ternnbni.json"
+                                            trigger="loop-on-hover"
+                                            colors="primary:#ffffff"
+                                            style={{ width: '24px', height: '24px' }}
+                                        />
                                         Kirim Permintaan
                                     </span>
                                     <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-amber-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

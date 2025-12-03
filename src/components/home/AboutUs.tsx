@@ -3,7 +3,13 @@
 import Image from 'next/image'
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { CheckCircle2 } from 'lucide-react'
+
+const highlights = [
+    { text: '10,000+ Pengguna Aktif', iconSrc: 'https://cdn.lordicon.com/dxjqoygy.json' },
+    { text: 'Support Bahasa Indonesia', iconSrc: 'https://cdn.lordicon.com/fdxqrdfe.json' },
+    { text: 'Update Gratis Seumur Hidup', iconSrc: 'https://cdn.lordicon.com/qhkvfxpn.json' },
+    { text: 'Komunitas Pengguna Solid', iconSrc: 'https://cdn.lordicon.com/bhfjfgqz.json' },
+]
 
 export function AboutUs() {
     const sectionRef = useRef<HTMLElement>(null)
@@ -46,8 +52,15 @@ export function AboutUs() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={isInView ? { opacity: 1, y: 0 } : {}}
                             transition={{ duration: 0.4, delay: 0.2 }}
-                            className="inline-block text-orange-500 font-semibold text-sm uppercase tracking-wider mb-3"
+                            className="inline-flex items-center gap-2 text-orange-500 font-semibold text-sm uppercase tracking-wider mb-3"
                         >
+                            <lord-icon
+                                src="https://cdn.lordicon.com/yqzmiobz.json"
+                                trigger="loop"
+                                delay="3000"
+                                colors="primary:#f97316"
+                                style={{ width: '20px', height: '20px' }}
+                            />
                             Tentang Kami
                         </motion.span>
                         
@@ -66,12 +79,7 @@ export function AboutUs() {
                         </p>
 
                         <ul className="space-y-3">
-                            {[
-                                '10,000+ Pengguna Aktif',
-                                'Support Bahasa Indonesia',
-                                'Update Gratis Seumur Hidup',
-                                'Komunitas Pengguna Solid'
-                            ].map((item, index) => (
+                            {highlights.map((item, index) => (
                                 <motion.li 
                                     key={index} 
                                     initial={{ opacity: 0, x: 20 }}
@@ -79,10 +87,16 @@ export function AboutUs() {
                                     transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
                                     className="flex items-center gap-3"
                                 >
-                                    <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <CheckCircle2 className="w-4 h-4 text-orange-500" />
+                                    <div className="w-7 h-7 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <lord-icon
+                                            src={item.iconSrc}
+                                            trigger="loop"
+                                            delay="3000"
+                                            colors="primary:#f97316"
+                                            style={{ width: '18px', height: '18px' }}
+                                        />
                                     </div>
-                                    <span className="text-gray-700 font-medium">{item}</span>
+                                    <span className="text-gray-700 font-medium">{item.text}</span>
                                 </motion.li>
                             ))}
                         </ul>
