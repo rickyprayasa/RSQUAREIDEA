@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
@@ -35,6 +35,18 @@ export function CardStack({ templates }: CardStackProps) {
     const router = useRouter()
     
     const selectedTemplate = templates.find(t => t._id === selectedId)
+
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (selectedId) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => {
+            document.body.style.overflow = ''
+        }
+    }, [selectedId])
 
     const handleAddToCart = (template: Template, e?: React.MouseEvent) => {
         e?.stopPropagation()
@@ -201,12 +213,12 @@ export function CardStack({ templates }: CardStackProps) {
 
                         {/* Enlarged Card */}
                         <div 
-                            className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto" 
+                            className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 pb-8 overflow-y-auto" 
                             onClick={() => setSelectedId(null)}
                         >
                             <motion.div
                                 layoutId={`card-${selectedId}`}
-                                className="relative w-full max-w-md my-8"
+                                className="relative w-full max-w-md"
                                 initial={false}
                                 onClick={(e) => e.stopPropagation()}
                             >
