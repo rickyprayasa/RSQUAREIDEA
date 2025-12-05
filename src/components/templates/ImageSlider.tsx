@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Maximize2, ImageIcon, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Maximize2, ImageIcon, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
 
 interface ImageSliderProps {
     images: string[]
@@ -13,6 +13,23 @@ interface ImageSliderProps {
 export function ImageSlider({ images, title }: ImageSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [isZoomed, setIsZoomed] = useState(false)
+    
+    // Zoom and pan state
+    const [scale, setScale] = useState(1)
+    const [position, setPosition] = useState({ x: 0, y: 0 })
+    const [isDragging, setIsDragging] = useState(false)
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    const MIN_SCALE = 0.5
+    const MAX_SCALE = 5
+    const ZOOM_STEP = 0.3
+
+    // Reset zoom when changing image or closing modal
+    const resetZoom = useCallback(() => {
+        setScale(1)
+        setPosition({ x: 0, y: 0 })
+    }, [])
 
     // Lock body scroll when modal is open
     useEffect(() => {
@@ -20,11 +37,59 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
             document.body.style.overflow = 'hidden'
         } else {
             document.body.style.overflow = ''
+            resetZoom()
         }
         return () => {
             document.body.style.overflow = ''
         }
-    }, [isZoomed])
+    }, [isZoomed, resetZoom])
+
+    // Reset zoom when changing slides
+    useEffect(() => {
+        resetZoom()
+    }, [currentIndex, resetZoom])
+
+    // Handle mouse wheel zoom
+    const handleWheel = useCallback((e: React.WheelEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        
+        const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP
+        setScale(prev => Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev + delta)))
+    }, [])
+
+    // Handle mouse down for drag
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        if (scale > 1) {
+            e.preventDefault()
+            setIsDragging(true)
+            setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+        }
+    }, [scale, position])
+
+    // Handle mouse move for drag
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        if (isDragging && scale > 1) {
+            setPosition({
+                x: e.clientX - dragStart.x,
+                y: e.clientY - dragStart.y
+            })
+        }
+    }, [isDragging, dragStart, scale])
+
+    // Handle mouse up
+    const handleMouseUp = useCallback(() => {
+        setIsDragging(false)
+    }, [])
+
+    // Zoom controls
+    const zoomIn = useCallback(() => {
+        setScale(prev => Math.min(MAX_SCALE, prev + ZOOM_STEP))
+    }, [])
+
+    const zoomOut = useCallback(() => {
+        setScale(prev => Math.max(MIN_SCALE, prev - ZOOM_STEP))
+    }, [])
 
     const slideVariants = {
         enter: (direction: number) => ({
@@ -179,10 +244,39 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                         className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
                         style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
                     >
+                        {/* Top controls */}
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
+                            <button
+                                onClick={zoomOut}
+                                className="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
+                                title="Zoom Out"
+                            >
+                                <ZoomOut className="w-5 h-5 text-white" />
+                            </button>
+                            <span className="text-white text-sm min-w-[60px] text-center font-medium">
+                                {Math.round(scale * 100)}%
+                            </span>
+                            <button
+                                onClick={zoomIn}
+                                className="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
+                                title="Zoom In"
+                            >
+                                <ZoomIn className="w-5 h-5 text-white" />
+                            </button>
+                            <div className="w-px h-6 bg-white/30 mx-1" />
+                            <button
+                                onClick={resetZoom}
+                                className="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
+                                title="Reset Zoom"
+                            >
+                                <RotateCcw className="w-5 h-5 text-white" />
+                            </button>
+                        </div>
+
                         {/* Close button */}
                         <button
                             onClick={() => setIsZoomed(false)}
-                            className="absolute top-4 right-4 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                            className="absolute top-4 right-4 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
                         >
                             <X className="w-6 h-6 text-white" />
                         </button>
@@ -193,7 +287,7 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                                 <button
                                     onClick={(e) => { e.stopPropagation(); paginate(-1); }}
                                     disabled={currentIndex === 0}
-                                    className={`absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors ${
+                                    className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors ${
                                         currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''
                                     }`}
                                 >
@@ -202,7 +296,7 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                                 <button
                                     onClick={(e) => { e.stopPropagation(); paginate(1); }}
                                     disabled={currentIndex === images.length - 1}
-                                    className={`absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors ${
+                                    className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors ${
                                         currentIndex === images.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
                                     }`}
                                 >
@@ -211,35 +305,61 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                             </>
                         )}
 
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            onClick={() => setIsZoomed(false)}
-                            className="w-full h-full flex items-center justify-center p-4 cursor-zoom-out"
+                        {/* Zoomable image container */}
+                        <div
+                            ref={containerRef}
+                            onWheel={handleWheel}
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                            className={`w-full h-full flex items-center justify-center overflow-hidden ${
+                                scale > 1 ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-zoom-in'
+                            }`}
+                            onClick={(e) => {
+                                if (!isDragging && scale === 1) {
+                                    setIsZoomed(false)
+                                }
+                            }}
                         >
-                            {images[currentIndex] ? (
-                                <Image
-                                    src={images[currentIndex]}
-                                    alt={`${title} - Full Preview`}
-                                    width={1920}
-                                    height={1440}
-                                    className="max-w-full max-h-full w-auto h-auto object-contain"
-                                    style={{ maxWidth: '95vw', maxHeight: '95vh' }}
-                                    unoptimized
-                                    priority
-                                />
-                            ) : (
-                                <div className="flex items-center justify-center text-white text-2xl">
-                                    Preview {currentIndex + 1}
-                                </div>
-                            )}
-                        </motion.div>
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                className="flex items-center justify-center"
+                                style={{
+                                    transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+                                    transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+                                }}
+                            >
+                                {images[currentIndex] ? (
+                                    <Image
+                                        src={images[currentIndex]}
+                                        alt={`${title} - Full Preview`}
+                                        width={1920}
+                                        height={1440}
+                                        className="max-w-[95vw] max-h-[95vh] w-auto h-auto object-contain select-none"
+                                        draggable={false}
+                                        unoptimized
+                                        priority
+                                    />
+                                ) : (
+                                    <div className="flex items-center justify-center text-white text-2xl">
+                                        Preview {currentIndex + 1}
+                                    </div>
+                                )}
+                            </motion.div>
+                        </div>
                         
-                        {/* Slide counter */}
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-sm text-white text-sm px-4 py-2 rounded-full">
-                            {currentIndex + 1} / {images.length}
+                        {/* Bottom info */}
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
+                            <div className="bg-black/50 backdrop-blur-sm text-white/70 text-xs px-3 py-1 rounded-full">
+                                Scroll untuk zoom • Drag untuk geser
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-sm text-white text-sm px-4 py-2 rounded-full">
+                                {currentIndex + 1} / {images.length}
+                            </div>
                         </div>
                     </motion.div>
                 )}
