@@ -5,7 +5,8 @@ export async function POST(request: NextRequest) {
     try {
         const data = await request.json()
         const supabase = await createClient()
-        
+
+        // Create order
         const { data: order, error } = await supabase
             .from('orders')
             .insert({
@@ -26,6 +27,25 @@ export async function POST(request: NextRequest) {
         if (error) {
             console.error('Error creating order:', error)
             return NextResponse.json({ error: error.message }, { status: 500 })
+        }
+
+        // Insert order items
+        if (order && data.items && data.items.length > 0) {
+            const orderItems = data.items.map((item: { productId: string; productTitle: string; price: number }) => ({
+                order_id: order.id,
+                product_id: parseInt(item.productId),
+                product_title: item.productTitle,
+                price: item.price,
+            }))
+
+            const { error: itemsError } = await supabase
+                .from('order_items')
+                .insert(orderItems)
+
+            if (itemsError) {
+                console.error('Error creating order items:', itemsError)
+                // Don't fail the order creation if items fail
+            }
         }
 
         return NextResponse.json({ order, success: true })

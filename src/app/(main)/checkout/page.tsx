@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { 
-    ShoppingCart, 
-    Trash2, 
-    ArrowLeft, 
-    User, 
-    Mail, 
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+    ShoppingCart,
+    Trash2,
+    ArrowLeft,
+    User,
+    Mail,
     Phone,
     CreditCard,
     QrCode,
@@ -16,11 +16,17 @@ import {
     Copy,
     Building2,
     Loader2,
-    Download
+    Download,
+    Upload,
+    Camera,
+    Clock,
+    AlertCircle,
+    X
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
+import { trackInitiateCheckout, trackPurchase, trackButtonClick } from '@/hooks/useAnalytics'
 
 interface PaymentMethod {
     id: number
@@ -45,7 +51,17 @@ export default function CheckoutPage() {
     const [copied, setCopied] = useState(false)
     const [orderNumber, setOrderNumber] = useState('')
     const [purchasedItems, setPurchasedItems] = useState<typeof items>([])
-    
+    const [qrisSettings, setQrisSettings] = useState({ enabled: false, image: '', merchantString: '' })
+    const [dynamicQrisImage, setDynamicQrisImage] = useState<string | null>(null)
+    const [generatingQris, setGeneratingQris] = useState(false)
+    const [showQrisConfirm, setShowQrisConfirm] = useState(false)
+    const [qrisProof, setQrisProof] = useState<{ file: File | null, preview: string }>({ file: null, preview: '' })
+    const [qrisNotes, setQrisNotes] = useState('')
+    const [uploadingProof, setUploadingProof] = useState(false)
+    const [confirmationSent, setConfirmationSent] = useState(false)
+    const [paymentConfirmed, setPaymentConfirmed] = useState(false)
+    const [errorDialog, setErrorDialog] = useState({ isOpen: false, title: '', message: '' })
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -53,15 +69,43 @@ export default function CheckoutPage() {
     })
 
     useEffect(() => {
-        // Fetch payment methods
-        fetch('/api/payments')
-            .then(res => res.json())
-            .then(data => {
-                if (data.payments) {
-                    setPaymentMethods(data.payments.filter((p: PaymentMethod) => p.isActive))
-                }
-            })
-            .catch(console.error)
+        // Fetch payment methods and QRIS settings
+        Promise.all([
+            fetch('/api/payments').then(res => res.json()),
+            fetch('/api/settings').then(res => res.json())
+        ]).then(([paymentData, settingsData]) => {
+            const methods: PaymentMethod[] = []
+
+            // Add QRIS from settings if enabled
+            if (settingsData.settings?.qris_enabled === 'true' && settingsData.settings?.qris_static_image) {
+                methods.push({
+                    id: -1,
+                    name: 'QRIS',
+                    type: 'internal',
+                    bankName: null,
+                    accountNumber: null,
+                    accountName: null,
+                    qrCodeImage: settingsData.settings.qris_static_image,
+                    externalUrl: null,
+                    instructions: 'Scan QR Code dengan GoPay, OVO, DANA, ShopeePay, atau M-Banking',
+                    isActive: true,
+                })
+
+                setQrisSettings({
+                    enabled: true,
+                    image: settingsData.settings.qris_static_image,
+                    merchantString: settingsData.settings.qris_merchant_string || '',
+                })
+            }
+
+            // Add other payment methods
+            if (paymentData.payments) {
+                const otherMethods = paymentData.payments.filter((p: PaymentMethod) => p.isActive)
+                methods.push(...otherMethods)
+            }
+
+            setPaymentMethods(methods)
+        }).catch(console.error)
     }, [])
 
     const handleCopy = (text: string) => {
@@ -70,19 +114,161 @@ export default function CheckoutPage() {
         setTimeout(() => setCopied(false), 2000)
     }
 
+    // Generate dynamic QRIS when merchant string is available
+    const generateDynamicQris = async () => {
+        if (!qrisSettings.merchantString || totalPrice <= 0) {
+            setDynamicQrisImage(null)
+            return
+        }
+
+        setGeneratingQris(true)
+        try {
+            const res = await fetch('/api/qris/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    staticQRIS: qrisSettings.merchantString,
+                    amount: totalPrice,
+                }),
+            })
+            const data = await res.json()
+            if (data.qrCode) {
+                setDynamicQrisImage(data.qrCode)
+            }
+        } catch (error) {
+            console.error('Error generating dynamic QRIS:', error)
+        } finally {
+            setGeneratingQris(false)
+        }
+    }
+
+    // Generate QRIS when settings or total price changes
+    useEffect(() => {
+        if (qrisSettings.merchantString && totalPrice > 0) {
+            generateDynamicQris()
+        }
+    }, [qrisSettings.merchantString, totalPrice])
+
+    // Poll payment confirmation status
+    useEffect(() => {
+        if (!confirmationSent || !orderNumber || paymentConfirmed) return
+
+        const checkPaymentStatus = async () => {
+            try {
+                const res = await fetch(`/api/qris-confirmation?orderNumber=${orderNumber}`)
+                const data = await res.json()
+                if (data.confirmations && data.confirmations.length > 0) {
+                    const confirmation = data.confirmations[0]
+                    if (confirmation.status === 'approved') {
+                        setPaymentConfirmed(true)
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking payment status:', error)
+            }
+        }
+
+        // Check immediately
+        checkPaymentStatus()
+
+        // Then poll every 10 seconds
+        const interval = setInterval(checkPaymentStatus, 10000)
+        return () => clearInterval(interval)
+    }, [confirmationSent, orderNumber, paymentConfirmed])
+
+    const handleProofUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            const preview = URL.createObjectURL(file)
+            setQrisProof({ file, preview })
+        }
+    }
+
+    const handleSubmitQrisConfirmation = async () => {
+        if (!qrisProof.file || !orderNumber) return
+
+        setUploadingProof(true)
+        try {
+            // Upload proof image using public endpoint
+            const uploadFormData = new FormData()
+            uploadFormData.append('file', qrisProof.file)
+
+            const uploadRes = await fetch('/api/upload-proof', {
+                method: 'POST',
+                body: uploadFormData,
+            })
+
+            const uploadData = await uploadRes.json()
+            if (!uploadData.url) {
+                console.error('Upload failed:', uploadData.error)
+                setErrorDialog({
+                    isOpen: true,
+                    title: 'Gagal Upload',
+                    message: 'Gagal upload bukti pembayaran. Silakan coba lagi.'
+                })
+                return
+            }
+
+            // Submit confirmation
+            const confirmRes = await fetch('/api/qris-confirmation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderNumber,
+                    customerName: formData.name,
+                    customerEmail: formData.email,
+                    customerPhone: formData.phone,
+                    amount: totalPrice,
+                    proofImage: uploadData.url,
+                    notes: qrisNotes,
+                    paymentMethod: selectedPayment?.name || 'Transfer',
+                }),
+            })
+
+            if (confirmRes.ok) {
+                setConfirmationSent(true)
+                setShowQrisConfirm(false)
+                setQrisProof({ file: null, preview: '' })
+                setQrisNotes('')
+            } else {
+                const errorData = await confirmRes.json()
+                console.error('Confirmation failed:', errorData)
+                setErrorDialog({
+                    isOpen: true,
+                    title: 'Gagal Mengirim',
+                    message: 'Gagal mengirim konfirmasi. Silakan coba lagi.'
+                })
+            }
+        } catch (error) {
+            console.error('Error submitting confirmation:', error)
+            setErrorDialog({
+                isOpen: true,
+                title: 'Terjadi Kesalahan',
+                message: 'Tidak dapat terhubung ke server. Silakan coba lagi.'
+            })
+        } finally {
+            setUploadingProof(false)
+        }
+    }
+
     const generateOrderNumber = () => {
         const date = new Date()
         const random = Math.random().toString(36).substring(2, 8).toUpperCase()
-        return `RSQ-${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}-${random}`
+        return `RSQ-${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}-${random}`
     }
 
     const handleSubmitOrder = async () => {
         if (!selectedPayment) return
-        
+
         setLoading(true)
         const newOrderNumber = generateOrderNumber()
-        
+
+        // Track checkout initiation
+        trackInitiateCheckout(totalPrice)
+        trackButtonClick('Lanjut ke Pembayaran', 'Checkout')
+
         try {
+            // Create order
             const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -102,6 +288,28 @@ export default function CheckoutPage() {
             })
 
             if (res.ok) {
+                // Save customer data
+                await fetch('/api/admin/customers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+                        amount: totalPrice,
+                    }),
+                })
+
+                // Track purchase conversion
+                trackPurchase({
+                    orderId: newOrderNumber,
+                    value: totalPrice,
+                    items: items.map(item => ({
+                        name: item.title,
+                        price: item.discountPrice || item.price,
+                    })),
+                })
+
                 setOrderNumber(newOrderNumber)
                 setPurchasedItems([...items])
                 setStep(3)
@@ -120,8 +328,25 @@ export default function CheckoutPage() {
 
     if (items.length === 0 && step !== 3) {
         return (
-            <div className="min-h-screen bg-gray-50 py-12">
-                <div className="container mx-auto px-6">
+            <div className="min-h-screen relative py-12">
+                {/* Background with Grid and Shapes */}
+                <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-b from-orange-50/30 to-white" />
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
+                    <motion.div
+                        animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute top-20 left-[10%] w-24 h-24 opacity-20"
+                    >
+                        <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-500 rounded-xl transform rotate-45" />
+                    </motion.div>
+                    <motion.div
+                        animate={{ y: [0, 30, 0], scale: [1, 1.1, 1] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        className="absolute top-40 right-[15%] w-32 h-32 rounded-full bg-gradient-to-tr from-blue-400/30 to-purple-500/30 blur-2xl"
+                    />
+                </div>
+                <div className="container mx-auto px-6 relative z-10">
                     <div className="max-w-md mx-auto text-center py-16">
                         <ShoppingCart className="h-20 w-20 mx-auto text-gray-200 mb-6" />
                         <h1 className="text-2xl font-bold text-gray-900 mb-2">Keranjang Kosong</h1>
@@ -136,8 +361,41 @@ export default function CheckoutPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="container mx-auto px-6">
+        <div className="min-h-screen relative py-8">
+            {/* Background with Grid and Shapes */}
+            <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-b from-orange-50/30 to-white" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear_gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
+                {/* Floating Shape 1 */}
+                <motion.div
+                    animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-20 left-[5%] w-20 h-20 opacity-15"
+                >
+                    <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-500 rounded-xl transform rotate-45" />
+                </motion.div>
+                {/* Floating Shape 2 */}
+                <motion.div
+                    animate={{ y: [0, 30, 0], scale: [1, 1.1, 1] }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute top-32 right-[10%] w-28 h-28 rounded-full bg-gradient-to-tr from-blue-400/20 to-purple-500/20 blur-2xl"
+                />
+                {/* Floating Shape 3 */}
+                <motion.div
+                    animate={{ y: [0, -25, 0], rotate: [0, -15, 0] }}
+                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                    className="absolute bottom-40 left-[15%] w-32 h-32 opacity-10"
+                >
+                    <div className="w-full h-full border-4 border-orange-300 rounded-3xl transform -rotate-12" />
+                </motion.div>
+                {/* Floating Shape 4 */}
+                <motion.div
+                    animate={{ y: [0, 20, 0], scale: [1, 0.95, 1] }}
+                    transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    className="absolute bottom-20 right-[8%] w-24 h-24 rounded-full bg-gradient-to-bl from-amber-400/20 to-orange-500/20 blur-xl"
+                />
+            </div>
+            <div className="container mx-auto px-6 relative z-10">
                 {/* Header */}
                 <div className="mb-8">
                     <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4">
@@ -150,9 +408,8 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-center gap-4 mb-8">
                     {[1, 2, 3].map((s) => (
                         <div key={s} className="flex items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${
-                                step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'
-                            }`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'
+                                }`}>
                                 {step > s ? <Check className="h-4 w-4" /> : s}
                             </div>
                             {s < 3 && <div className={`w-16 h-1 mx-2 ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />}
@@ -273,7 +530,7 @@ export default function CheckoutPage() {
                                 <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                                     <CreditCard className="h-5 w-5 text-orange-500" /> Pilih Metode Pembayaran
                                 </h2>
-                                
+
                                 {paymentMethods.length === 0 ? (
                                     <div className="text-center py-8">
                                         <CreditCard className="h-12 w-12 text-gray-300 mx-auto mb-3" />
@@ -286,15 +543,13 @@ export default function CheckoutPage() {
                                             <button
                                                 key={method.id}
                                                 onClick={() => setSelectedPayment(method)}
-                                                className={`flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                                                    selectedPayment?.id === method.id
-                                                        ? 'border-orange-500 bg-orange-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
-                                                }`}
+                                                className={`flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${selectedPayment?.id === method.id
+                                                    ? 'border-orange-500 bg-orange-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
                                             >
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                                    selectedPayment?.id === method.id ? 'bg-orange-500' : 'bg-gray-100'
-                                                }`}>
+                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedPayment?.id === method.id ? 'bg-orange-500' : 'bg-gray-100'
+                                                    }`}>
                                                     {method.type === 'external' ? (
                                                         <CreditCard className={`h-6 w-6 ${selectedPayment?.id === method.id ? 'text-white' : 'text-gray-500'}`} />
                                                     ) : method.qrCodeImage ? (
@@ -306,20 +561,18 @@ export default function CheckoutPage() {
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2">
                                                         <p className="font-semibold text-gray-900">{method.name}</p>
-                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                                            method.type === 'external' 
-                                                                ? 'bg-purple-100 text-purple-700' 
-                                                                : 'bg-blue-100 text-blue-700'
-                                                        }`}>
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${method.type === 'external'
+                                                            ? 'bg-purple-100 text-purple-700'
+                                                            : 'bg-blue-100 text-blue-700'
+                                                            }`}>
                                                             {method.type === 'external' ? 'External' : 'Transfer'}
                                                         </span>
                                                     </div>
                                                     {method.bankName && <p className="text-sm text-gray-500">{method.bankName}</p>}
                                                     {method.type === 'external' && <p className="text-sm text-gray-500">Redirect ke halaman pembayaran</p>}
                                                 </div>
-                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                                                    selectedPayment?.id === method.id ? 'border-orange-500 bg-orange-500' : 'border-gray-300'
-                                                }`}>
+                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedPayment?.id === method.id ? 'border-orange-500 bg-orange-500' : 'border-gray-300'
+                                                    }`}>
                                                     {selectedPayment?.id === method.id && <Check className="h-4 w-4 text-white" />}
                                                 </div>
                                             </button>
@@ -329,13 +582,13 @@ export default function CheckoutPage() {
 
                                 {/* Payment Details */}
                                 {selectedPayment && (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: 'auto' }}
                                         className="mt-6 p-6 bg-gray-50 rounded-xl"
                                     >
                                         <h3 className="font-semibold text-gray-900 mb-4">Detail Pembayaran</h3>
-                                        
+
                                         {/* External Payment */}
                                         {selectedPayment.type === 'external' && selectedPayment.externalUrl && (
                                             <div className="text-center mb-4 p-6 bg-purple-50 rounded-xl border border-purple-200">
@@ -357,13 +610,27 @@ export default function CheckoutPage() {
                                         {selectedPayment.type === 'internal' && selectedPayment.qrCodeImage && (
                                             <div className="text-center mb-4">
                                                 <div className="inline-block p-4 bg-white rounded-xl shadow-sm">
-                                                    <img 
-                                                        src={selectedPayment.qrCodeImage} 
-                                                        alt="QRIS" 
-                                                        className="w-48 h-48 mx-auto"
-                                                    />
+                                                    {generatingQris ? (
+                                                        <div className="w-48 h-48 flex items-center justify-center">
+                                                            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                                                        </div>
+                                                    ) : dynamicQrisImage ? (
+                                                        <img
+                                                            src={dynamicQrisImage}
+                                                            alt="QRIS Dinamis"
+                                                            className="w-48 h-48 mx-auto"
+                                                        />
+                                                    ) : (
+                                                        <img
+                                                            src={selectedPayment.qrCodeImage}
+                                                            alt="QRIS"
+                                                            className="w-48 h-48 mx-auto"
+                                                        />
+                                                    )}
                                                 </div>
-                                                <p className="text-sm text-gray-500 mt-2">Scan QR Code dengan aplikasi e-wallet atau m-banking</p>
+                                                <p className="text-sm text-gray-500 mt-2">
+                                                    Scan QR Code dengan aplikasi e-wallet atau m-banking
+                                                </p>
                                             </div>
                                         )}
 
@@ -452,48 +719,189 @@ export default function CheckoutPage() {
                                 <p className="text-xl font-mono font-bold text-orange-600 mb-4">{orderNumber}</p>
                             </div>
 
-                            {/* Download Links */}
+                            {/* Download Links - Only show if payment confirmed or product is free */}
                             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 max-w-lg mx-auto">
                                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                     <Download className="h-5 w-5 text-green-500" />
                                     Link Download Template
                                 </h3>
                                 <div className="space-y-3">
-                                    {purchasedItems.map((item) => (
-                                        <div key={item.id} className="p-4 bg-gray-50 rounded-xl">
-                                            <p className="font-medium text-gray-900 mb-2">{item.title}</p>
-                                            {item.downloadUrl ? (
-                                                <a
-                                                    href={item.downloadUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
-                                                >
-                                                    <Download className="h-4 w-4" />
-                                                    Download Template
-                                                </a>
-                                            ) : (
-                                                <p className="text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
-                                                    Link download akan tersedia setelah pembayaran dikonfirmasi
-                                                </p>
-                                            )}
-                                        </div>
-                                    ))}
+                                    {purchasedItems.map((item) => {
+                                        const isFree = (item.discountPrice || item.price) === 0
+                                        const canDownload = isFree || paymentConfirmed
+
+                                        return (
+                                            <div key={item.id} className="p-4 bg-gray-50 rounded-xl">
+                                                <p className="font-medium text-gray-900 mb-2">{item.title}</p>
+                                                {canDownload && item.downloadUrl ? (
+                                                    <a
+                                                        href={item.downloadUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+                                                    >
+                                                        <Download className="h-4 w-4" />
+                                                        Download Template
+                                                    </a>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+                                                        <Clock className="h-4 w-4" />
+                                                        <span>Link download akan muncul setelah pembayaran dikonfirmasi admin</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             </div>
 
-                            {/* Payment Reminder */}
-                            {selectedPayment && selectedPayment.type === 'internal' && (
-                                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6 max-w-lg mx-auto">
-                                    <h3 className="font-bold text-amber-800 mb-2">Catatan Pembayaran</h3>
-                                    <p className="text-sm text-amber-700">
-                                        Silakan lakukan pembayaran ke {selectedPayment.bankName || selectedPayment.name} sesuai nominal yang tertera. 
-                                        Setelah melakukan pembayaran, konfirmasi via WhatsApp untuk mempercepat proses verifikasi.
-                                    </p>
+                            {/* Payment Confirmation Section - RSQUARE Theme */}
+                            {!confirmationSent && (
+                                <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-6 shadow-lg border border-orange-200 mb-6 max-w-lg mx-auto overflow-hidden relative">
+                                    {/* RSQUARE Branding */}
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-200/30 to-amber-200/30 rounded-full -translate-y-1/2 translate-x-1/2" />
+
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-200">
+                                                <span className="text-white font-bold text-lg">R</span>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-gray-900 text-lg">Konfirmasi Pembayaran</h3>
+                                            </div>
+                                        </div>
+
+                                        {/* QRIS Section */}
+                                        {qrisSettings.enabled && (qrisSettings.image || dynamicQrisImage) && (
+                                            <div className="bg-white rounded-xl p-5 mb-4 shadow-sm">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <QrCode className="h-5 w-5 text-orange-500" />
+                                                    <span className="font-semibold text-gray-900">Bayar dengan QRIS</span>
+                                                </div>
+                                                <div className="flex justify-center mb-3">
+                                                    <div className="p-3 bg-white rounded-xl border-2 border-orange-200 shadow-inner">
+                                                        {dynamicQrisImage ? (
+                                                            <img
+                                                                src={dynamicQrisImage}
+                                                                alt="QRIS Dinamis RSQUARE"
+                                                                width={180}
+                                                                height={180}
+                                                                className="rounded-lg"
+                                                            />
+                                                        ) : (
+                                                            <Image
+                                                                src={qrisSettings.image}
+                                                                alt="QRIS RSQUARE"
+                                                                width={180}
+                                                                height={180}
+                                                                className="rounded-lg"
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <p className="text-xs text-center text-gray-500">
+                                                    Scan dengan GoPay, OVO, DANA, ShopeePay, atau M-Banking
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Bank Transfer Info */}
+                                        {selectedPayment && selectedPayment.type === 'internal' && selectedPayment.accountNumber && (
+                                            <div className="bg-white rounded-xl p-5 mb-4 shadow-sm">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <Building2 className="h-5 w-5 text-orange-500" />
+                                                    <span className="font-semibold text-gray-900">Transfer Bank</span>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                        <span className="text-sm text-gray-600">Bank</span>
+                                                        <span className="font-semibold">{selectedPayment.bankName}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                        <span className="text-sm text-gray-600">No. Rekening</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-mono font-semibold">{selectedPayment.accountNumber}</span>
+                                                            <button
+                                                                onClick={() => handleCopy(selectedPayment.accountNumber!)}
+                                                                className="p-1 text-orange-500 hover:bg-orange-50 rounded"
+                                                            >
+                                                                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                        <span className="text-sm text-gray-600">Atas Nama</span>
+                                                        <span className="font-semibold">{selectedPayment.accountName}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Amount */}
+                                        <div className="p-4 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl mb-4 text-white">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-medium opacity-90">Total Pembayaran</span>
+                                                <span className="text-2xl font-bold">
+                                                    Rp {totalPrice.toLocaleString('id-ID')}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Confirmation Button */}
+                                        <button
+                                            onClick={() => setShowQrisConfirm(true)}
+                                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors shadow-lg"
+                                        >
+                                            <Camera className="h-5 w-5" />
+                                            Sudah Bayar? Upload Bukti Transfer
+                                        </button>
+
+                                        <p className="text-xs text-center text-gray-500 mt-3">
+                                            Pembayaran akan diverifikasi dalam 1x24 jam kerja
+                                        </p>
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="flex justify-center gap-4">
+                            {/* Payment Confirmed Success */}
+                            {paymentConfirmed && (
+                                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 mb-6 max-w-lg mx-auto">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-green-200">
+                                            <Check className="h-6 w-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-green-800 text-lg mb-1">Pembayaran Dikonfirmasi!</h3>
+                                            <p className="text-sm text-green-700 mb-3">
+                                                Pembayaran Kamu telah diverifikasi. Silakan download template di atas.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {/* Confirmation Sent - Waiting */}
+                            {confirmationSent && !paymentConfirmed && (
+                                <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl p-6 mb-6 max-w-lg mx-auto">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-200">
+                                            <Clock className="h-6 w-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-amber-800 text-lg mb-1">Menunggu Verifikasi</h3>
+                                            <p className="text-sm text-amber-700 mb-3">
+                                                Konfirmasi pembayaran Kamu sedang diverifikasi oleh tim RSQUARE.
+                                                Halaman ini akan otomatis terupdate setelah pembayaran dikonfirmasi.
+                                            </p>
+                                            <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 rounded-lg text-sm text-amber-700">
+                                                <Clock className="h-4 w-4" />
+                                                <span>Estimasi verifikasi: 1x24 jam kerja</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex justify-center">
                                 <button
                                     onClick={handleFinish}
                                     className="px-8 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors"
@@ -501,10 +909,185 @@ export default function CheckoutPage() {
                                     Kembali ke Beranda
                                 </button>
                             </div>
+                            {/* Save order info hint */}
+                            {confirmationSent && orderNumber && (
+                                <div className="text-center mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 max-w-md mx-auto">
+                                    <p className="text-sm text-gray-600 mb-2">
+                                        Simpan nomor pesanan untuk mengecek status:
+                                    </p>
+                                    <p className="font-mono font-bold text-lg text-gray-900 bg-white px-4 py-2 rounded-lg border border-gray-200">
+                                        {orderNumber}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        Cek status pesanan melalui ikon keranjang di header &rarr; tab &quot;Cek Pesanan&quot;
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* QRIS Confirmation Modal */}
+                            {showQrisConfirm && (
+                                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+                                    >
+                                        <div className="p-6">
+                                            <div className="flex items-center justify-between mb-6">
+                                                <h2 className="text-xl font-bold text-gray-900">Konfirmasi Pembayaran QRIS</h2>
+                                                <button
+                                                    onClick={() => setShowQrisConfirm(false)}
+                                                    className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+
+                                            {/* Order Info */}
+                                            <div className="p-4 bg-gray-50 rounded-xl mb-4">
+                                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-500">No. Pesanan</p>
+                                                        <p className="font-mono font-bold">{orderNumber}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500">Total</p>
+                                                        <p className="font-bold text-orange-600">Rp {totalPrice.toLocaleString('id-ID')}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Upload Proof */}
+                                            <div className="mb-4">
+                                                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                                    Upload Bukti Pembayaran *
+                                                </label>
+                                                {qrisProof.preview ? (
+                                                    <div className="relative">
+                                                        <div className="aspect-video rounded-xl overflow-hidden bg-gray-100">
+                                                            <Image
+                                                                src={qrisProof.preview}
+                                                                alt="Bukti Pembayaran"
+                                                                fill
+                                                                className="object-contain"
+                                                            />
+                                                        </div>
+                                                        <button
+                                                            onClick={() => setQrisProof({ file: null, preview: '' })}
+                                                            className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <label className="block cursor-pointer">
+                                                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-purple-400 hover:bg-purple-50 transition-all">
+                                                            <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                                                            <p className="text-sm text-gray-500">Klik untuk upload screenshot bukti transfer</p>
+                                                            <p className="text-xs text-gray-400 mt-1">JPG, PNG max 5MB</p>
+                                                        </div>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={handleProofUpload}
+                                                            className="hidden"
+                                                        />
+                                                    </label>
+                                                )}
+                                            </div>
+
+                                            {/* Notes */}
+                                            <div className="mb-6">
+                                                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                                    Catatan (Opsional)
+                                                </label>
+                                                <textarea
+                                                    value={qrisNotes}
+                                                    onChange={(e) => setQrisNotes(e.target.value)}
+                                                    placeholder="Tambahkan catatan jika perlu..."
+                                                    rows={3}
+                                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                                                />
+                                            </div>
+
+                                            {/* Warning */}
+                                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl mb-6">
+                                                <div className="flex gap-2">
+                                                    <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                                                    <p className="text-xs text-amber-700">
+                                                        Pastikan bukti pembayaran jelas dan menunjukkan nominal yang sesuai. Konfirmasi palsu akan ditolak.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Submit Button */}
+                                            <button
+                                                onClick={handleSubmitQrisConfirmation}
+                                                disabled={!qrisProof.file || uploadingProof}
+                                                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-500 text-white rounded-xl font-medium hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                {uploadingProof ? (
+                                                    <>
+                                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                                        Mengirim...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Check className="h-5 w-5" />
+                                                        Kirim Konfirmasi
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            )}
                         </motion.div>
                     )}
                 </div>
             </div>
+
+            {/* Error Dialog */}
+            <AnimatePresence>
+                {errorDialog.isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+                        onClick={() => setErrorDialog({ ...errorDialog, isOpen: false })}
+                    >
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button
+                                onClick={() => setErrorDialog({ ...errorDialog, isOpen: false })}
+                                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+
+                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <AlertCircle className="h-8 w-8 text-red-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">{errorDialog.title}</h3>
+                            <p className="text-gray-600 mb-6">{errorDialog.message}</p>
+                            <button
+                                onClick={() => setErrorDialog({ ...errorDialog, isOpen: false })}
+                                className="w-full py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors"
+                            >
+                                Tutup
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

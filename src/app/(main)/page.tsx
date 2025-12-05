@@ -4,6 +4,7 @@ import { Marquee } from '@/components/home/Marquee'
 import { Features } from '@/components/home/Features'
 import { TemplateSection } from '@/components/home/TemplateSection'
 import { VideoTutorials } from '@/components/home/VideoTutorials'
+import { Testimonials } from '@/components/home/Testimonials'
 import { FAQ } from '@/components/home/FAQ'
 import { RequestTemplate } from '@/components/home/RequestTemplate'
 import { AboutUs } from '@/components/home/AboutUs'
@@ -100,6 +101,7 @@ export default async function Home() {
             />
 
             <VideoTutorials />
+            <Testimonials />
             <FAQ />
             <RequestTemplate />
             <AboutUs />

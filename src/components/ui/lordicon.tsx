@@ -6,69 +6,69 @@ const ICON_URLS: Record<string, string> = {
     'arrow-right': 'https://cdn.lordicon.com/whtfgdfm.json',
     'arrow-left': 'https://cdn.lordicon.com/zmkotitn.json',
     'external-link': 'https://cdn.lordicon.com/ercyvufy.json',
-    
+
     // E-commerce
     'shopping-cart': 'https://cdn.lordicon.com/pbrgppbb.json',
     'shopping-bag': 'https://cdn.lordicon.com/cosvjkbu.json',
     'credit-card': 'https://cdn.lordicon.com/qmcsqnle.json',
     'discount': 'https://cdn.lordicon.com/ternnbni.json',
-    
+
     // Communication
     'mail': 'https://cdn.lordicon.com/diihvcfp.json',
     'phone': 'https://cdn.lordicon.com/srsgifqc.json',
     'message': 'https://cdn.lordicon.com/fdxqrdfe.json',
     'send': 'https://cdn.lordicon.com/ternnbni.json',
-    
+
     // Media
     'play': 'https://cdn.lordicon.com/becebamh.json',
     'youtube': 'https://cdn.lordicon.com/aklfruoc.json',
     'video': 'https://cdn.lordicon.com/aklfruoc.json',
-    
+
     // Features & Status
     'sparkles': 'https://cdn.lordicon.com/hvueufdo.json',
     'star': 'https://cdn.lordicon.com/mdgrhyca.json',
     'check': 'https://cdn.lordicon.com/oqdmuxru.json',
     'verified': 'https://cdn.lordicon.com/egiwmiit.json',
-    
+
     // Business
     'chart': 'https://cdn.lordicon.com/gqdnbnwt.json',
     'trending-up': 'https://cdn.lordicon.com/yxyampao.json',
     'zap': 'https://cdn.lordicon.com/akqsdstj.json',
     'bolt': 'https://cdn.lordicon.com/akqsdstj.json',
-    
+
     // UI Elements
     'menu': 'https://cdn.lordicon.com/eouimtlu.json',
     'close': 'https://cdn.lordicon.com/nqtddedc.json',
     'plus': 'https://cdn.lordicon.com/zrkkrrpl.json',
     'minus': 'https://cdn.lordicon.com/hwuyodym.json',
     'search': 'https://cdn.lordicon.com/kkvxgpti.json',
-    
+
     // Help & Support
     'help': 'https://cdn.lordicon.com/ujxzdfjx.json',
     'question': 'https://cdn.lordicon.com/ujxzdfjx.json',
     'info': 'https://cdn.lordicon.com/yqzmiobz.json',
-    
+
     // Files & Documents
     'file': 'https://cdn.lordicon.com/foxhetpf.json',
     'spreadsheet': 'https://cdn.lordicon.com/ghhwiltn.json',
     'download': 'https://cdn.lordicon.com/ternnbni.json',
-    
+
     // Social
     'instagram': 'https://cdn.lordicon.com/qfmqzqts.json',
     'tiktok': 'https://cdn.lordicon.com/vqcuhczx.json',
-    
+
     // Location
     'location': 'https://cdn.lordicon.com/surcxhka.json',
     'map-pin': 'https://cdn.lordicon.com/surcxhka.json',
-    
+
     // Security
     'shield': 'https://cdn.lordicon.com/jgnvfzqg.json',
     'lock': 'https://cdn.lordicon.com/egrthbtj.json',
-    
+
     // Users
     'user': 'https://cdn.lordicon.com/dxjqoygy.json',
     'users': 'https://cdn.lordicon.com/bhfjfgqz.json',
-    
+
     // Misc
     'fire': 'https://cdn.lordicon.com/lkwvvpfj.json',
     'rocket': 'https://cdn.lordicon.com/xkumezul.json',
@@ -81,38 +81,43 @@ const ICON_URLS: Record<string, string> = {
 }
 
 interface LordIconProps {
-    icon: keyof typeof ICON_URLS | string
+    icon?: keyof typeof ICON_URLS | string
+    src?: string
     size?: number
     trigger?: 'hover' | 'click' | 'loop' | 'loop-on-hover' | 'morph' | 'boomerang' | 'in' | 'morph-two-way'
-    colors?: {
-        primary?: string
-        secondary?: string
-    }
+    colors?: string | Record<string, string>
     state?: string
     className?: string
     delay?: number
 }
 
-export function LordIcon({ 
-    icon, 
-    size = 24, 
+export function LordIcon({
+    icon,
+    src,
+    size = 24,
     trigger = 'hover',
     colors,
     state,
     className = '',
     delay = 0
 }: LordIconProps) {
-    const iconUrl = ICON_URLS[icon] || icon
+    const iconUrl = src || (icon ? (ICON_URLS[icon] || icon) : '')
+
+    const colorString = typeof colors === 'string'
+        ? colors
+        : colors
+            ? Object.entries(colors).map(([k, v]) => `${k}:${v}`).join(',')
+            : 'primary:#f97316,secondary:#fbbf24'
 
     return (
         <lord-icon
             src={iconUrl}
             trigger={trigger}
             delay={delay}
-            colors={colors ? `primary:${colors.primary || '#f97316'},secondary:${colors.secondary || '#fbbf24'}` : 'primary:#f97316,secondary:#fbbf24'}
+            colors={colorString}
             state={state}
-            style={{ 
-                width: `${size}px`, 
+            style={{
+                width: `${size}px`,
                 height: `${size}px`,
             }}
             className={className}
@@ -153,25 +158,25 @@ export function AnimatedButton({
     rel,
 }: AnimatedButtonProps) {
     const baseStyles = 'inline-flex items-center justify-center gap-2 font-medium transition-all duration-300 ease-out relative overflow-hidden group'
-    
+
     const variants = {
         primary: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:shadow-lg hover:shadow-orange-300/50 hover:-translate-y-0.5 active:translate-y-0',
         secondary: 'bg-gray-900 text-white hover:bg-gray-800 hover:shadow-lg hover:-translate-y-0.5',
         outline: 'border-2 border-gray-200 text-gray-700 hover:border-orange-400 hover:text-orange-600 hover:bg-orange-50 hover:-translate-y-0.5',
         ghost: 'text-gray-600 hover:text-orange-600 hover:bg-orange-50',
     }
-    
+
     const sizes = {
         sm: 'h-9 px-4 text-sm rounded-lg',
         md: 'h-11 px-6 text-base rounded-xl',
         lg: 'h-14 px-8 text-lg rounded-xl',
     }
-    
+
     const buttonContent = (
         <>
             {/* Shimmer effect */}
             <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-            
+
             {icon && iconPosition === 'left' && (
                 <span className="transition-transform duration-300 group-hover:-translate-x-0.5">
                     <LordIcon icon={icon} size={iconSize} trigger="loop-on-hover" />
@@ -185,9 +190,9 @@ export function AnimatedButton({
             )}
         </>
     )
-    
+
     const combinedClassName = `${baseStyles} ${variants[variant]} ${sizes[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`
-    
+
     if (href) {
         return (
             <a href={href} className={combinedClassName} target={target} rel={rel}>
@@ -195,11 +200,11 @@ export function AnimatedButton({
             </a>
         )
     }
-    
+
     return (
-        <button 
-            type={type} 
-            onClick={onClick} 
+        <button
+            type={type}
+            onClick={onClick}
             disabled={disabled}
             className={combinedClassName}
         >

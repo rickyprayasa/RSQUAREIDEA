@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-    LayoutDashboard, 
-    Package, 
-    CreditCard, 
+import {
+    LayoutDashboard,
+    Package,
+    CreditCard,
     FolderOpen,
     Settings,
     ShoppingCart,
@@ -14,6 +14,13 @@ import {
     X,
     Menu,
     ArrowLeft,
+    QrCode,
+    MessageSquare,
+    Star,
+    FileSpreadsheet,
+    Users,
+    ChevronDown,
+    Inbox,
     type LucideIcon
 } from 'lucide-react'
 import { useState } from 'react'
@@ -25,12 +32,47 @@ interface NavItem {
     color: string
 }
 
-const navigation: NavItem[] = [
+interface NavGroup {
+    name: string
+    icon: LucideIcon
+    color: string
+    items: NavItem[]
+}
+
+// Main navigation items
+const mainNav: NavItem[] = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, color: 'from-blue-500 to-cyan-500' },
     { name: 'Produk', href: '/admin/products', icon: Package, color: 'from-orange-500 to-amber-500' },
     { name: 'Kategori', href: '/admin/categories', icon: FolderOpen, color: 'from-green-500 to-emerald-500' },
-    { name: 'Video Tutorial', href: '/admin/videos', icon: Play, color: 'from-red-500 to-pink-500' },
-    { name: 'Pesanan', href: '/admin/orders', icon: ShoppingCart, color: 'from-purple-500 to-violet-500' },
+    { name: 'Video', href: '/admin/videos', icon: Play, color: 'from-red-500 to-pink-500' },
+]
+
+// Grouped navigation
+const navGroups: NavGroup[] = [
+    {
+        name: 'Transaksi',
+        icon: ShoppingCart,
+        color: 'from-purple-500 to-violet-500',
+        items: [
+            { name: 'Pesanan', href: '/admin/orders', icon: ShoppingCart, color: 'from-purple-500 to-violet-500' },
+            { name: 'Pelanggan', href: '/admin/customers', icon: Users, color: 'from-cyan-500 to-blue-500' },
+        ]
+    },
+    {
+        name: 'Inbox',
+        icon: Inbox,
+        color: 'from-pink-500 to-rose-500',
+        items: [
+            { name: 'Pesan', href: '/admin/messages', icon: MessageSquare, color: 'from-pink-500 to-rose-500' },
+            { name: 'Feedback', href: '/admin/feedback', icon: Star, color: 'from-amber-500 to-yellow-500' },
+            { name: 'Request', href: '/admin/requests', icon: FileSpreadsheet, color: 'from-lime-500 to-green-500' },
+        ]
+    },
+]
+
+// Bottom navigation
+const bottomNav: NavItem[] = [
+    { name: 'Analytics', href: '/admin/analytics', icon: LayoutDashboard, color: 'from-cyan-500 to-blue-500' },
     { name: 'Pembayaran', href: '/admin/payments', icon: CreditCard, color: 'from-teal-500 to-cyan-500' },
     { name: 'Pengaturan', href: '/admin/settings', icon: Settings, color: 'from-gray-500 to-slate-500' },
 ]
@@ -38,100 +80,130 @@ const navigation: NavItem[] = [
 export function AdminSidebar() {
     const pathname = usePathname()
     const [mobileOpen, setMobileOpen] = useState(false)
-    const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+    const [expandedGroups, setExpandedGroups] = useState<string[]>(['Transaksi', 'Inbox'])
+
+    const toggleGroup = (groupName: string) => {
+        setExpandedGroups(prev =>
+            prev.includes(groupName)
+                ? prev.filter(g => g !== groupName)
+                : [...prev, groupName]
+        )
+    }
+
+    const isGroupActive = (group: NavGroup) => {
+        return group.items.some(item =>
+            pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
+        )
+    }
+
+    const NavLink = ({ item, compact = false }: { item: NavItem, compact?: boolean }) => {
+        const isActive = pathname === item.href ||
+            (item.href !== '/admin' && pathname.startsWith(item.href))
+
+        return (
+            <Link
+                href={item.href}
+                prefetch={true}
+                onClick={() => setMobileOpen(false)}
+                className="relative block"
+            >
+                <div
+                    className={`flex items-center gap-2.5 px-3 ${compact ? 'py-2 pl-9' : 'py-2.5'} rounded-lg text-sm font-medium transition-all ${isActive
+                            ? `bg-gradient-to-r ${item.color} text-white shadow-lg`
+                            : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                        }`}
+                >
+                    <item.icon className={`${compact ? 'h-4 w-4' : 'h-4.5 w-4.5'}`} />
+                    <span>{item.name}</span>
+                    {isActive && (
+                        <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />
+                    )}
+                </div>
+            </Link>
+        )
+    }
 
     const SidebarContent = () => (
         <div className="flex flex-col h-full">
             {/* Logo */}
-            <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-800">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
-                    <span className="text-white font-bold text-lg">R</span>
+            <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-800">
+                <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg flex items-center justify-center shadow-lg shadow-orange-500/20">
+                    <span className="text-white font-bold">R</span>
                 </div>
                 <div>
-                    <span className="text-white font-bold text-lg">RSQUARE</span>
-                    <p className="text-gray-400 text-xs">Admin Panel</p>
+                    <span className="text-white font-bold">RSQUARE</span>
+                    <p className="text-gray-500 text-xs">Admin</p>
                 </div>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 py-6 space-y-1">
-                {navigation.map((item) => {
-                    const isActive = pathname === item.href || 
-                        (item.href !== '/admin' && pathname.startsWith(item.href))
-                    const isHovered = hoveredItem === item.name
-                    
+            <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+                {/* Main Nav */}
+                {mainNav.map((item) => (
+                    <NavLink key={item.name} item={item} />
+                ))}
+
+                {/* Divider */}
+                <div className="my-3 border-t border-gray-800" />
+
+                {/* Grouped Nav */}
+                {navGroups.map((group) => {
+                    const isExpanded = expandedGroups.includes(group.name)
+                    const groupActive = isGroupActive(group)
+
                     return (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            prefetch={true}
-                            onClick={() => setMobileOpen(false)}
-                            onMouseEnter={() => setHoveredItem(item.name)}
-                            onMouseLeave={() => setHoveredItem(null)}
-                            className="relative block"
-                        >
-                            <motion.div
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors relative overflow-hidden ${
-                                    isActive
-                                        ? 'text-white'
-                                        : 'text-gray-400 hover:text-white'
-                                }`}
-                                whileHover={{ x: 4 }}
-                                whileTap={{ scale: 0.98 }}
-                                transition={{ duration: 0.15 }}
+                        <div key={group.name}>
+                            <button
+                                onClick={() => toggleGroup(group.name)}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${groupActive ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                    }`}
                             >
-                                {/* Active/Hover Background */}
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="activeBg"
-                                        className={`absolute inset-0 bg-gradient-to-r ${item.color} rounded-xl`}
-                                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                                    />
+                                <group.icon className="h-4.5 w-4.5" />
+                                <span>{group.name}</span>
+                                {groupActive && (
+                                    <span className="ml-1 w-2 h-2 bg-orange-500 rounded-full" />
                                 )}
-                                
-                                {/* Hover Glow */}
-                                {!isActive && isHovered && (
+                                <ChevronDown
+                                    className={`ml-auto h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                />
+                            </button>
+                            <AnimatePresence>
+                                {isExpanded && (
                                     <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        className="absolute inset-0 bg-gray-800 rounded-xl"
-                                    />
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="py-1 space-y-0.5">
+                                            {group.items.map((item) => (
+                                                <NavLink key={item.name} item={item} compact />
+                                            ))}
+                                        </div>
+                                    </motion.div>
                                 )}
-
-                                {/* Icon */}
-                                <div className="relative z-10">
-                                    <item.icon className="h-5 w-5" />
-                                </div>
-
-                                {/* Label */}
-                                <span className="relative z-10">{item.name}</span>
-
-                                {/* Active Indicator */}
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="activeIndicator"
-                                        className="ml-auto w-2 h-2 bg-white rounded-full relative z-10"
-                                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                                    />
-                                )}
-                            </motion.div>
-                        </Link>
+                            </AnimatePresence>
+                        </div>
                     )
                 })}
+
+                {/* Divider */}
+                <div className="my-3 border-t border-gray-800" />
+
+                {/* Bottom Nav */}
+                {bottomNav.map((item) => (
+                    <NavLink key={item.name} item={item} />
+                ))}
             </nav>
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-800">
+            <div className="p-3 border-t border-gray-800">
                 <Link href="/">
-                    <motion.div 
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 text-gray-400 hover:text-white text-sm rounded-xl hover:bg-gray-800 transition-colors"
-                        whileHover={{ x: -4 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
+                    <div className="flex items-center justify-center gap-2 px-3 py-2 text-gray-400 hover:text-white text-sm rounded-lg hover:bg-gray-800 transition-colors">
                         <ArrowLeft className="h-4 w-4" />
-                        Kembali ke Website
-                    </motion.div>
+                        <span>Kembali</span>
+                    </div>
                 </Link>
             </div>
         </div>
@@ -174,7 +246,7 @@ export function AdminSidebar() {
             {/* Mobile Overlay */}
             <AnimatePresence>
                 {mobileOpen && (
-                    <motion.div 
+                    <motion.div
                         className="lg:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
                         onClick={() => setMobileOpen(false)}
                         initial={{ opacity: 0 }}
@@ -188,7 +260,7 @@ export function AdminSidebar() {
             {/* Mobile Sidebar */}
             <AnimatePresence>
                 {mobileOpen && (
-                    <motion.div 
+                    <motion.div
                         className="lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-gray-900"
                         initial={{ x: '-100%' }}
                         animate={{ x: 0 }}

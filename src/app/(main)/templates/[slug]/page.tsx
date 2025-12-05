@@ -12,19 +12,19 @@ interface TemplateDetailProps {
 
 async function getTemplate(slug: string) {
     const supabase = await createClient()
-    
+
     const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('slug', slug)
         .eq('is_active', true)
         .single()
-    
+
     if (error || !data) {
         return null
     }
-    
-    return {
+
+    const initialResult = {
         _id: data.id.toString(),
         title: data.title,
         slug: data.slug,
@@ -40,7 +40,27 @@ async function getTemplate(slug: string) {
         externalLinks: data.external_links || [],
         isFree: data.is_free,
         isFeatured: data.is_featured,
+        rating: 0,
+        reviewCount: 0,
     }
+
+    // Fetch rating stats from feedback
+    const { data: feedbackData } = await supabase
+        .from('feedback')
+        .select('rating')
+        .eq('template_name', data.title)
+        .eq('status', 'published')
+
+    if (feedbackData && feedbackData.length > 0) {
+        const totalRating = feedbackData.reduce((sum, item) => sum + item.rating, 0)
+        return {
+            ...initialResult,
+            rating: Number((totalRating / feedbackData.length).toFixed(1)),
+            reviewCount: feedbackData.length
+        }
+    }
+
+    return initialResult
 }
 
 export default async function TemplateDetailPage({ params }: TemplateDetailProps) {

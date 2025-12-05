@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
 
 const faqs = [
     {
@@ -33,51 +34,72 @@ export function FAQ() {
 
     return (
         <section ref={sectionRef} className="py-20 md:py-28 relative overflow-hidden">
-            {/* Animated Background */}
-            <div className="absolute inset-0 -z-10">
-                <div className="absolute inset-0 bg-gradient-to-b from-orange-50/50 via-white to-white" />
-                
-                {/* Floating Circles */}
+            {/* Animated Background with Grid */}
+            <div className="absolute inset-0 -z-10 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-b from-orange-50/30 via-white to-white" />
+
+                {/* Grid Pattern - Same as Hero */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
+
+                {/* Floating Hexagon */}
                 <motion.div
-                    className="absolute top-20 left-10 w-72 h-72 bg-orange-200/30 rounded-full blur-3xl"
-                    animate={{
-                        x: [0, 30, 0],
-                        y: [0, -20, 0],
-                        scale: [1, 1.1, 1],
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div
-                    className="absolute bottom-20 right-10 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl"
-                    animate={{
-                        x: [0, -40, 0],
-                        y: [0, 30, 0],
-                        scale: [1, 1.15, 1],
-                    }}
+                    className="absolute top-20 left-[8%] w-20 h-20 opacity-15"
+                    animate={{ y: [0, -15, 0], rotate: [0, 60, 0] }}
                     transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                />
+                >
+                    <svg viewBox="0 0 100 100" className="w-full h-full fill-orange-400">
+                        <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" />
+                    </svg>
+                </motion.div>
+
+                {/* Floating Circle */}
                 <motion.div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-100/20 rounded-full blur-3xl"
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.3, 0.5, 0.3],
-                    }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-32 right-[12%] w-24 h-24 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 blur-xl"
+                    animate={{ y: [0, 20, 0], scale: [1, 1.15, 1] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                 />
 
-                {/* Grid Pattern */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#f97316_1px,transparent_1px),linear-gradient(to_bottom,#f97316_1px,transparent_1px)] bg-[size:60px_60px] opacity-[0.03]" />
+                {/* Floating Triangle */}
+                <motion.div
+                    className="absolute bottom-32 left-[15%] w-16 h-16 opacity-10"
+                    animate={{ y: [0, -20, 0], rotate: [0, 180, 360] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                >
+                    <svg viewBox="0 0 100 100" className="w-full h-full fill-orange-500">
+                        <polygon points="50,10 90,90 10,90" />
+                    </svg>
+                </motion.div>
+
+                {/* Floating Star */}
+                <motion.div
+                    className="absolute bottom-40 right-[10%] w-14 h-14 opacity-15"
+                    animate={{ y: [0, 15, 0], rotate: [0, -45, 0], scale: [1, 1.1, 1] }}
+                    transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                >
+                    <svg viewBox="0 0 100 100" className="w-full h-full fill-amber-500">
+                        <polygon points="50,5 61,40 98,40 68,62 79,97 50,75 21,97 32,62 2,40 39,40" />
+                    </svg>
+                </motion.div>
+
+                {/* Floating Ring */}
+                <motion.div
+                    className="absolute top-1/2 right-[5%] w-28 h-28 opacity-10"
+                    animate={{ y: [0, -25, 0], rotate: [0, 90, 0] }}
+                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+                >
+                    <div className="w-full h-full border-4 border-orange-400 rounded-full" />
+                </motion.div>
             </div>
 
-            <div className="container mx-auto px-6">
+            <div className="container mx-auto px-6 relative z-10">
                 {/* Header */}
-                <motion.div 
+                <motion.div
                     className="text-center mb-14"
                     initial={{ opacity: 0, y: 30 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.6 }}
                 >
-                    <motion.div 
+                    <motion.div
                         className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 rounded-full mb-5"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={isInView ? { opacity: 1, scale: 1 } : {}}
@@ -86,13 +108,13 @@ export function FAQ() {
                         <lord-icon
                             src="https://cdn.lordicon.com/ujxzdfjx.json"
                             trigger="loop"
-                            delay="3000"
+                            delay="2000"
                             colors="primary:#ea580c"
                             style={{ width: '20px', height: '20px' }}
                         />
                         <span className="text-sm font-medium text-orange-700">FAQ</span>
                     </motion.div>
-                    
+
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
                         Pertanyaan yang Sering{' '}
                         <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
@@ -114,45 +136,39 @@ export function FAQ() {
                             transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
                         >
                             <div
-                                className={`bg-white rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
-                                    openIndex === index 
-                                        ? 'border-orange-300 shadow-lg shadow-orange-100' 
-                                        : 'border-gray-100 hover:border-orange-200 hover:shadow-md'
-                                }`}
+                                className={`bg-white rounded-2xl border-2 transition-all duration-300 overflow-hidden ${openIndex === index
+                                    ? 'border-orange-300 shadow-lg shadow-orange-100'
+                                    : 'border-gray-100 hover:border-orange-200 hover:shadow-md'
+                                    }`}
                             >
                                 <button
                                     onClick={() => setOpenIndex(openIndex === index ? null : index)}
                                     className="w-full px-6 py-5 flex items-center gap-4 text-left group"
                                 >
                                     {/* Question */}
-                                    <span className={`flex-1 font-semibold text-lg transition-colors ${
-                                        openIndex === index ? 'text-orange-600' : 'text-gray-900'
-                                    }`}>
+                                    <span className={`flex-1 font-semibold text-lg transition-colors ${openIndex === index ? 'text-orange-600' : 'text-gray-900'
+                                        }`}>
                                         {faq.question}
                                     </span>
-                                    
+
                                     {/* Toggle Icon */}
                                     <motion.div
-                                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                                            openIndex === index 
-                                                ? 'bg-orange-500' 
-                                                : 'bg-gray-100 group-hover:bg-orange-100'
-                                        }`}
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${openIndex === index
+                                            ? 'bg-orange-500'
+                                            : 'bg-gray-100 group-hover:bg-orange-100'
+                                            }`}
                                         animate={{ rotate: openIndex === index ? 180 : 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
                                         <lord-icon
-                                            src={openIndex === index 
-                                                ? "https://cdn.lordicon.com/hwuyodym.json" 
-                                                : "https://cdn.lordicon.com/zrkkrrpl.json"
-                                            }
+                                            src="https://cdn.lordicon.com/xcrjfuzb.json"
                                             trigger="hover"
                                             colors={openIndex === index ? "primary:#ffffff" : "primary:#6b7280"}
-                                            style={{ width: '18px', height: '18px' }}
+                                            style={{ width: '16px', height: '16px' }}
                                         />
                                     </motion.div>
                                 </button>
-                                
+
                                 {/* Answer */}
                                 <AnimatePresence>
                                     {openIndex === index && (
@@ -178,7 +194,7 @@ export function FAQ() {
                 </div>
 
                 {/* CTA */}
-                <motion.div 
+                <motion.div
                     className="text-center mt-12"
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -194,19 +210,19 @@ export function FAQ() {
                         />
                         Masih punya pertanyaan lain?
                     </p>
-                    <a
+                    <Link
                         href="/kontak"
                         className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-orange-300/50 hover:-translate-y-0.5 active:translate-y-0"
                     >
                         <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
                         <lord-icon
-                            src="https://cdn.lordicon.com/hvueufdo.json"
+                            src="https://cdn.lordicon.com/fdxqrdfe.json"
                             trigger="loop-on-hover"
                             colors="primary:#ffffff"
                             style={{ width: '20px', height: '20px' }}
                         />
                         <span className="relative z-10">Hubungi Kami</span>
-                    </a>
+                    </Link>
                 </motion.div>
             </div>
         </section>

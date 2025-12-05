@@ -65,10 +65,51 @@ export function VideoTutorials() {
 
     return (
         <>
-            <section ref={sectionRef} className="py-16 md:py-20 overflow-hidden bg-gradient-to-b from-gray-50 to-white">
-                <div className="container mx-auto px-6">
+            <section ref={sectionRef} className="py-16 md:py-20 overflow-hidden relative">
+                {/* Grid Background with Floating Shapes */}
+                <div className="absolute inset-0 -z-10 pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white" />
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
+
+                    {/* Floating Play Button Shape */}
+                    <motion.div
+                        className="absolute top-20 right-[8%] w-14 h-14 opacity-12"
+                        animate={{ y: [0, -15, 0], rotate: [0, 10, 0] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                        <svg viewBox="0 0 50 50" className="w-full h-full fill-red-400">
+                            <polygon points="15,10 40,25 15,40" />
+                        </svg>
+                    </motion.div>
+
+                    {/* Floating Blur Circle */}
+                    <motion.div
+                        className="absolute top-[30%] left-[5%] w-28 h-28 rounded-full bg-gradient-to-br from-red-400/15 to-orange-500/15 blur-2xl"
+                        animate={{ y: [0, 25, 0], scale: [1, 1.15, 1] }}
+                        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    />
+
+                    {/* Floating Rounded Rectangle */}
+                    <motion.div
+                        className="absolute bottom-[25%] right-[10%] w-16 h-10 opacity-10"
+                        animate={{ y: [0, 18, 0], rotate: [0, -8, 0] }}
+                        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                    >
+                        <div className="w-full h-full bg-gradient-to-r from-red-500 to-rose-400 rounded-xl" />
+                    </motion.div>
+
+                    {/* Floating Circle */}
+                    <motion.div
+                        className="absolute bottom-[40%] left-[12%] w-8 h-8 opacity-15"
+                        animate={{ y: [0, -20, 0], scale: [1, 1.2, 1] }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    >
+                        <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-400 to-orange-500" />
+                    </motion.div>
+                </div>
+                <div className="container mx-auto px-6 relative z-10">
                     {/* Header */}
-                    <motion.div 
+                    <motion.div
                         className="text-center mb-10"
                         initial={{ opacity: 0, y: 20 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -138,7 +179,7 @@ export function VideoTutorials() {
                                                 exit={{ opacity: 0, x: -50 }}
                                                 transition={{ duration: 0.3 }}
                                             >
-                                                <button 
+                                                <button
                                                     onClick={() => setActiveVideo(currentVideo)}
                                                     className="relative w-full aspect-video bg-gray-900 rounded-2xl overflow-hidden group focus:outline-none focus:ring-4 focus:ring-orange-500/50 shadow-2xl"
                                                 >
@@ -147,8 +188,8 @@ export function VideoTutorials() {
                                                         const videoId = getYouTubeId(currentVideo.youtubeUrl)
                                                         const thumbnailUrl = currentVideo.thumbnailUrl || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null)
                                                         return thumbnailUrl && (
-                                                            <img 
-                                                                src={thumbnailUrl} 
+                                                            <img
+                                                                src={thumbnailUrl}
                                                                 alt={currentVideo.title}
                                                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                                 onError={(e) => {
@@ -160,10 +201,10 @@ export function VideoTutorials() {
                                                             />
                                                         )
                                                     })()}
-                                                    
+
                                                     {/* Gradient Overlay */}
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                                                    
+
                                                     {/* Play Button */}
                                                     <div className="absolute inset-0 flex items-center justify-center">
                                                         <div className="relative">
@@ -226,11 +267,10 @@ export function VideoTutorials() {
                                         <button
                                             key={index}
                                             onClick={() => setCurrentIndex(index)}
-                                            className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${
-                                                index === currentIndex 
-                                                    ? 'bg-orange-500 w-8' 
-                                                    : 'bg-gray-300 hover:bg-gray-400'
-                                            }`}
+                                            className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${index === currentIndex
+                                                ? 'bg-orange-500 w-8'
+                                                : 'bg-gray-300 hover:bg-gray-400'
+                                                }`}
                                         />
                                     ))}
                                 </div>
@@ -246,7 +286,7 @@ export function VideoTutorials() {
                     )}
 
                     {/* YouTube Channel Button */}
-                    <motion.div 
+                    <motion.div
                         className="text-center mt-10"
                         initial={{ opacity: 0, y: 20 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -318,7 +358,7 @@ export function VideoTutorials() {
                                     allowFullScreen
                                 />
                             </div>
-                            
+
                             <div className="mt-4 text-center">
                                 <h3 className="text-white text-lg font-semibold">
                                     {activeVideo.title}

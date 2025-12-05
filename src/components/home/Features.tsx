@@ -56,12 +56,60 @@ const containerVariants = {
 export function Features() {
   return (
     <section id="features" className="py-24 relative overflow-hidden">
-      {/* Grid Background */}
-      <div className="absolute inset-0 -z-10">
+      {/* Grid Background with Floating Shapes */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
         <div className="absolute inset-0 bg-white" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
+
+        {/* Floating Pentagon */}
+        <motion.div
+          className="absolute top-32 right-[8%] w-16 h-16 opacity-15"
+          animate={{ y: [0, -20, 0], rotate: [0, 15, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full fill-orange-400">
+            <polygon points="50,5 95,35 80,90 20,90 5,35" />
+          </svg>
+        </motion.div>
+
+        {/* Floating Blur Circle */}
+        <motion.div
+          className="absolute top-[20%] left-[5%] w-32 h-32 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-500/20 blur-2xl"
+          animate={{ y: [0, 30, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        />
+
+        {/* Floating Plus/Cross */}
+        <motion.div
+          className="absolute top-[60%] right-[12%] w-10 h-10 opacity-12"
+          animate={{ y: [0, -15, 0], rotate: [0, 90, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        >
+          <svg viewBox="0 0 40 40" className="w-full h-full fill-purple-500">
+            <rect x="16" y="4" width="8" height="32" rx="2" />
+            <rect x="4" y="16" width="32" height="8" rx="2" />
+          </svg>
+        </motion.div>
+
+        {/* Floating Diamond */}
+        <motion.div
+          className="absolute bottom-[25%] left-[10%] w-12 h-12 opacity-15"
+          animate={{ y: [0, 20, 0], rotate: [45, 45, 45], scale: [1, 1.1, 1] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        >
+          <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg transform rotate-45" />
+        </motion.div>
+
+        {/* Floating Ring */}
+        <motion.div
+          className="absolute bottom-[40%] right-[20%] w-14 h-14 opacity-10"
+          animate={{ y: [0, -18, 0], scale: [1, 1.15, 1] }}
+          transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        >
+          <div className="w-full h-full rounded-full border-4 border-green-500" />
+        </motion.div>
       </div>
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

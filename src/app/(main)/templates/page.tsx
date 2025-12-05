@@ -56,38 +56,58 @@ export default function TemplatesPage() {
     return (
         <main className="min-h-screen relative overflow-hidden">
             {/* Animated Background */}
-            <div className="fixed inset-0 -z-10">
+            <div className="fixed inset-0 -z-10 pointer-events-none">
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-white to-amber-50/20" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
-                
-                {/* Floating Shapes */}
+
+                {/* Floating Octagon */}
                 <motion.div
-                    className="absolute top-20 right-[10%] w-64 h-64 bg-orange-200/40 rounded-full blur-3xl"
-                    animate={{
-                        x: [0, 40, 0],
-                        y: [0, -30, 0],
-                        scale: [1, 1.2, 1],
-                    }}
-                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                />
+                    className="absolute top-24 right-[8%] w-18 h-18 opacity-12"
+                    animate={{ y: [0, -18, 0], rotate: [0, 45, 0] }}
+                    transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+                >
+                    <svg viewBox="0 0 100 100" className="w-16 h-16 fill-orange-400">
+                        <polygon points="30,10 70,10 90,30 90,70 70,90 30,90 10,70 10,30" />
+                    </svg>
+                </motion.div>
+
+                {/* Floating Blur Sphere */}
                 <motion.div
-                    className="absolute top-[40%] left-[5%] w-48 h-48 bg-amber-300/30 rounded-full blur-3xl"
-                    animate={{
-                        x: [0, -20, 0],
-                        y: [0, 40, 0],
-                        scale: [1, 1.15, 1],
-                    }}
+                    className="absolute top-[35%] left-[6%] w-24 h-24 rounded-full bg-gradient-to-br from-amber-400/25 to-orange-500/25 blur-xl"
+                    animate={{ y: [0, 30, 0], scale: [1, 1.2, 1] }}
                     transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                 />
+
+                {/* Floating Rounded Square */}
                 <motion.div
-                    className="absolute bottom-[20%] right-[15%] w-72 h-72 bg-orange-100/50 rounded-full blur-3xl"
-                    animate={{
-                        x: [0, 30, 0],
-                        y: [0, -20, 0],
-                        scale: [1, 1.1, 1],
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                />
+                    className="absolute bottom-[30%] right-[12%] w-14 h-14 opacity-15"
+                    animate={{ y: [0, -22, 0], rotate: [0, 90, 180] }}
+                    transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                >
+                    <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-400 rounded-lg" />
+                </motion.div>
+
+                {/* Floating Semi-circle */}
+                <motion.div
+                    className="absolute top-[60%] right-[5%] w-20 h-10 opacity-10"
+                    animate={{ y: [0, 15, 0], rotate: [0, -30, 0] }}
+                    transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                >
+                    <div className="w-full h-full bg-amber-500 rounded-t-full" />
+                </motion.div>
+
+                {/* Floating Dots Pattern */}
+                <motion.div
+                    className="absolute bottom-[15%] left-[10%] w-16 h-16 opacity-10"
+                    animate={{ y: [0, -12, 0], scale: [1, 1.1, 1] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+                >
+                    <div className="grid grid-cols-3 gap-2">
+                        {[...Array(9)].map((_, i) => (
+                            <div key={i} className="w-3 h-3 bg-orange-400 rounded-full" />
+                        ))}
+                    </div>
+                </motion.div>
             </div>
 
             {/* Hero Header */}
@@ -110,7 +130,7 @@ export default function TemplatesPage() {
                                 Koleksi Lengkap
                             </span>
                         </motion.div>
-                        <motion.h1 
+                        <motion.h1
                             className="text-4xl md:text-5xl font-bold text-gray-900 mb-5 leading-tight"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -121,7 +141,7 @@ export default function TemplatesPage() {
                                 Segala Kebutuhan
                             </span>
                         </motion.h1>
-                        <motion.p 
+                        <motion.p
                             className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -147,7 +167,7 @@ export default function TemplatesPage() {
                             <p className="text-gray-500 mt-4">Memuat template...</p>
                         </div>
                     ) : templates.length === 0 ? (
-                        <motion.div 
+                        <motion.div
                             className="text-center py-20"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -175,8 +195,8 @@ export default function TemplatesPage() {
                             </div>
                         </motion.div>
                     ) : (
-                        <TemplatesList 
-                            initialTemplates={templates} 
+                        <TemplatesList
+                            initialTemplates={templates}
                             categories={categories}
                         />
                     )}

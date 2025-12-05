@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Mail, MapPin, ExternalLink } from 'lucide-react'
+import { LordIcon } from '@/components/ui/lordicon'
 
 const footerLinks = {
     products: [
@@ -12,16 +14,31 @@ const footerLinks = {
         { name: 'Jasa Kustom', href: '/jasa-kustom' },
     ],
     company: [
-        { name: 'Tentang Kami', href: '/kontak' },
+        { name: 'Tentang Kami', href: '/tentang-kami' },
         { name: 'Kirim Masukan', href: '/feedback' },
         { name: 'Kebijakan Privasi', href: '/kebijakan-privasi' },
         { name: 'Syarat & Ketentuan', href: '/syarat-ketentuan' },
     ],
     social: [
-        { name: 'YouTube', iconSrc: 'https://cdn.lordicon.com/aklfruoc.json', href: 'https://www.youtube.com/@RSQUAREIDEA', color: 'hover:bg-red-500' },
-        { name: 'Instagram', iconSrc: 'https://cdn.lordicon.com/lplsfbqx.json', href: 'https://www.instagram.com/rsquareidea/', color: 'hover:bg-gradient-to-br hover:from-purple-500 hover:via-pink-500 hover:to-orange-400' },
-        { name: 'TikTok', iconSrc: 'https://cdn.lordicon.com/qfmqzqts.json', href: 'https://www.tiktok.com/@rsquareidea', color: 'hover:bg-black' },
-    ],
+        {
+            name: 'YouTube',
+            lordicon: '/icons/wired-lineal-2676-logo-square-youtube-morph-logotype.json',
+            href: 'https://www.youtube.com/@RSQUAREIDEA',
+            colors: { primary: '#121331', secondary: '#e83a30', tertiary: '#ffffff' }
+        },
+        {
+            name: 'Instagram',
+            lordicon: '/icons/wired-lineal-2542-logo-instagram-hover-pinch.json',
+            href: 'https://www.instagram.com/rsquareidea/',
+            colors: { primary: '#121331', secondary: '#d62976', tertiary: '#ffffff' }
+        },
+        {
+            name: 'TikTok',
+            lordicon: '/icons/wired-lineal-2675-logo-square-tiktok-hover-draw.json',
+            href: 'https://www.tiktok.com/@rsquareidea',
+            colors: { primary: '#121331', secondary: '#000000', tertiary: '#25f4ee', quaternary: '#fe2c55' }
+        },
+    ] as Array<{ name: string; lordicon: string; href: string; colors: Record<string, string> }>,
     portfolio: [
         { name: 'Omzetin', href: 'https://omzetin.web.id/', description: 'Aplikasi Kasir & Inventory' },
     ],
@@ -73,27 +90,22 @@ export function Footer() {
                                 </span>
                             </Link>
                             <p className="text-gray-400 max-w-md mb-8 leading-relaxed">
-                                Template Google Sheets premium untuk meningkatkan produktivitas bisnis dan personal Kamu. 
+                                Template Google Sheets premium untuk meningkatkan produktivitas bisnis dan personal Kamu.
                                 Hemat waktu, kurangi stres, dan buat keputusan lebih cerdas.
                             </p>
 
                             {/* Social Links */}
-                            <div className="flex gap-3">
+                            <div className="flex gap-4">
                                 {footerLinks.social.map((item) => (
                                     <a
                                         key={item.name}
                                         href={item.href}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className={`w-11 h-11 rounded-xl bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300 ${item.color}`}
+                                        className="transition-all duration-300 hover:scale-110"
                                         aria-label={item.name}
                                     >
-                                        <lord-icon
-                                            src={item.iconSrc}
-                                            trigger="hover"
-                                            colors="primary:#9ca3af"
-                                            style={{ width: '22px', height: '22px' }}
-                                        />
+                                        <LordIcon src={item.lordicon} trigger="hover" size={44} colors={item.colors} />
                                     </a>
                                 ))}
                             </div>
@@ -111,18 +123,11 @@ export function Footer() {
                                     <ul className="space-y-3">
                                         {footerLinks.products.map((item) => (
                                             <li key={item.name}>
-                                                <Link 
-                                                    href={item.href} 
-                                                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-center gap-1 group"
+                                                <Link
+                                                    href={item.href}
+                                                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
                                                 >
-                                                    <span>{item.name}</span>
-                                                    <lord-icon
-                                                        src="https://cdn.lordicon.com/whtfgdfm.json"
-                                                        trigger="hover"
-                                                        colors="primary:#fb923c"
-                                                        style={{ width: '14px', height: '14px' }}
-                                                        className="opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200"
-                                                    />
+                                                    {item.name}
                                                 </Link>
                                             </li>
                                         ))}
@@ -138,18 +143,11 @@ export function Footer() {
                                     <ul className="space-y-3">
                                         {footerLinks.company.map((item) => (
                                             <li key={item.name}>
-                                                <Link 
-                                                    href={item.href} 
-                                                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-center gap-1 group"
+                                                <Link
+                                                    href={item.href}
+                                                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
                                                 >
-                                                    <span>{item.name}</span>
-                                                    <lord-icon
-                                                        src="https://cdn.lordicon.com/whtfgdfm.json"
-                                                        trigger="hover"
-                                                        colors="primary:#fb923c"
-                                                        style={{ width: '14px', height: '14px' }}
-                                                        className="opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-200"
-                                                    />
+                                                    {item.name}
                                                 </Link>
                                             </li>
                                         ))}
@@ -164,26 +162,16 @@ export function Footer() {
                                     </h3>
                                     <ul className="space-y-4">
                                         <li>
-                                            <a 
+                                            <a
                                                 href={`mailto:${contactEmail}`}
                                                 className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-start gap-3"
                                             >
-                                                <lord-icon
-                                                    src="https://cdn.lordicon.com/diihvcfp.json"
-                                                    trigger="hover"
-                                                    colors="primary:#9ca3af"
-                                                    style={{ width: '18px', height: '18px', marginTop: '2px', flexShrink: 0 }}
-                                                />
+                                                <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
                                                 <span className="text-sm break-all">{contactEmail}</span>
                                             </a>
                                         </li>
                                         <li className="flex items-start gap-3 text-gray-400">
-                                            <lord-icon
-                                                src="https://cdn.lordicon.com/surcxhka.json"
-                                                trigger="hover"
-                                                colors="primary:#9ca3af"
-                                                style={{ width: '18px', height: '18px', marginTop: '2px', flexShrink: 0 }}
-                                            />
+                                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                                             <span className="text-sm">Indonesia</span>
                                         </li>
                                     </ul>
@@ -196,28 +184,16 @@ export function Footer() {
                                     <ul className="space-y-3">
                                         {footerLinks.portfolio.map((item) => (
                                             <li key={item.name}>
-                                                <a 
+                                                <a
                                                     href={item.href}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-center gap-2 group"
                                                 >
-                                                    <lord-icon
-                                                        src="https://cdn.lordicon.com/osuxyevn.json"
-                                                        trigger="hover"
-                                                        colors="primary:#9ca3af"
-                                                        style={{ width: '18px', height: '18px' }}
-                                                    />
                                                     <span>{item.name}</span>
-                                                    <lord-icon
-                                                        src="https://cdn.lordicon.com/ercyvufy.json"
-                                                        trigger="hover"
-                                                        colors="primary:#fb923c"
-                                                        style={{ width: '14px', height: '14px' }}
-                                                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    />
+                                                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                 </a>
-                                                <p className="text-xs text-gray-500 ml-6">{item.description}</p>
+                                                <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                                             </li>
                                         ))}
                                     </ul>

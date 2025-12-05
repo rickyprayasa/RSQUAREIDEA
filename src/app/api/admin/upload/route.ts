@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate bucket
-        const validBuckets = ['products', 'payments', 'thumbnails']
+        const validBuckets = ['products', 'payments', 'thumbnails', 'qris']
         if (!validBuckets.includes(bucket)) {
             return NextResponse.json({ error: 'Invalid bucket' }, { status: 400 })
         }
@@ -85,7 +85,7 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ error: 'Path and bucket are required' }, { status: 400 })
         }
 
-        const validBuckets = ['products', 'payments', 'thumbnails']
+        const validBuckets = ['products', 'payments', 'thumbnails', 'qris']
         if (!validBuckets.includes(bucket)) {
             return NextResponse.json({ error: 'Invalid bucket' }, { status: 400 })
         }

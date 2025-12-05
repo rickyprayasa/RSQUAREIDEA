@@ -1,0 +1,329 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { 
+    Users, 
+    Mail,
+    Phone,
+    ShoppingCart,
+    DollarSign,
+    Download,
+    Loader2,
+    Search,
+    Trash2
+} from 'lucide-react'
+import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal'
+
+interface Customer {
+    id: number
+    name: string
+    email: string
+    phone: string | null
+    total_orders: number
+    total_spent: number
+    last_order_at: string | null
+    created_at: string
+    products: string[]
+}
+
+export default function CustomersPage() {
+    const [customers, setCustomers] = useState<Customer[]>([])
+    const [loading, setLoading] = useState(true)
+    const [search, setSearch] = useState('')
+    const [exporting, setExporting] = useState(false)
+    const [deletingId, setDeletingId] = useState<number | null>(null)
+    const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; customer: Customer | null }>({ isOpen: false, customer: null })
+
+    useEffect(() => {
+        fetchCustomers()
+    }, [])
+
+    const fetchCustomers = async () => {
+        try {
+            const res = await fetch('/api/admin/customers')
+            const data = await res.json()
+            if (data.customers) setCustomers(data.customers)
+        } catch (error) {
+            console.error('Error:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const deleteCustomer = async () => {
+        if (!deleteModal.customer) return
+        setDeletingId(deleteModal.customer.id)
+        try {
+            const res = await fetch(`/api/admin/customers/${deleteModal.customer.id}`, { method: 'DELETE' })
+            if (res.ok) {
+                await fetchCustomers()
+                setDeleteModal({ isOpen: false, customer: null })
+            }
+        } catch (error) {
+            console.error('Error:', error)
+        } finally {
+            setDeletingId(null)
+        }
+    }
+
+    const handleExport = async (format: 'csv' | 'excel') => {
+        setExporting(true)
+        try {
+            const headers = ['ID', 'Nama', 'Email', 'Telepon', 'Total Pesanan', 'Total Belanja', 'Pesanan Terakhir', 'Terdaftar']
+            const rows = customers.map(c => [
+                c.id,
+                c.name,
+                c.email,
+                c.phone || '-',
+                c.total_orders,
+                c.total_spent,
+                c.last_order_at ? new Date(c.last_order_at).toLocaleDateString('id-ID') : '-',
+                new Date(c.created_at).toLocaleDateString('id-ID'),
+            ])
+
+            if (format === 'csv') {
+                const csvContent = [
+                    headers.join(','),
+                    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+                ].join('\n')
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `customers_${new Date().toISOString().split('T')[0]}.csv`
+                link.click()
+                URL.revokeObjectURL(url)
+            } else {
+                // Simple Excel format (tab-separated)
+                const excelContent = [
+                    headers.join('\t'),
+                    ...rows.map(row => row.join('\t'))
+                ].join('\n')
+
+                const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel' })
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `customers_${new Date().toISOString().split('T')[0]}.xls`
+                link.click()
+                URL.revokeObjectURL(url)
+            }
+        } catch (error) {
+            console.error('Error exporting:', error)
+        } finally {
+            setExporting(false)
+        }
+    }
+
+    const filteredCustomers = customers.filter(c => 
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.email.toLowerCase().includes(search.toLowerCase()) ||
+        (c.phone && c.phone.includes(search))
+    )
+
+    const totalRevenue = customers.reduce((sum, c) => sum + (c.total_spent || 0), 0)
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            </div>
+        )
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Pelanggan</h1>
+                    <p className="text-gray-500 mt-1">Database pelanggan ({customers.length} total)</p>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => handleExport('csv')}
+                        disabled={exporting}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 disabled:opacity-50 transition-colors"
+                    >
+                        <Download className="h-4 w-4" />
+                        Export CSV
+                    </button>
+                    <button
+                        onClick={() => handleExport('excel')}
+                        disabled={exporting}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                    >
+                        <Download className="h-4 w-4" />
+                        Export Excel
+                    </button>
+                </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-xl p-5 border border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <Users className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Total Pelanggan</p>
+                            <p className="text-2xl font-bold text-gray-900">{customers.length}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-xl p-5 border border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                            <DollarSign className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Total Pendapatan</p>
+                            <p className="text-2xl font-bold text-gray-900">Rp {totalRevenue.toLocaleString('id-ID')}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-xl p-5 border border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <ShoppingCart className="h-5 w-5 text-orange-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Total Pesanan</p>
+                            <p className="text-2xl font-bold text-gray-900">{customers.reduce((sum, c) => sum + (c.total_orders || 0), 0)}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Search */}
+            <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Cari pelanggan..."
+                    className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                />
+            </div>
+
+            {/* Table */}
+            {filteredCustomers.length === 0 ? (
+                <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
+                    <Users className="h-16 w-16 text-gray-200 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada Pelanggan</h3>
+                    <p className="text-gray-500">Data pelanggan akan muncul setelah ada pembelian</p>
+                </div>
+            ) : (
+                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-gray-50 border-b border-gray-100">
+                                <tr>
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Pelanggan</th>
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Kontak</th>
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Produk Dibeli</th>
+                                    <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Pesanan</th>
+                                    <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Total Belanja</th>
+                                    <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {filteredCustomers.map((customer) => (
+                                    <motion.tr
+                                        key={customer.id}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="hover:bg-gray-50 transition-colors"
+                                    >
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold">
+                                                    {customer.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900">{customer.name}</p>
+                                                    <p className="text-xs text-gray-500">
+                                                        Bergabung {new Date(customer.created_at).toLocaleDateString('id-ID')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <Mail className="h-3.5 w-3.5" />
+                                                    {customer.email}
+                                                </div>
+                                                {customer.phone && (
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                        <Phone className="h-3.5 w-3.5" />
+                                                        {customer.phone}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-wrap gap-1 max-w-xs">
+                                                {customer.products?.length > 0 ? (
+                                                    customer.products.slice(0, 3).map((product, idx) => (
+                                                        <span 
+                                                            key={idx}
+                                                            className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium truncate max-w-[150px]"
+                                                            title={product}
+                                                        >
+                                                            {product}
+                                                        </span>
+                                                    ))
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm">-</span>
+                                                )}
+                                                {customer.products?.length > 3 && (
+                                                    <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
+                                                        +{customer.products.length - 3}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+                                                <ShoppingCart className="h-3.5 w-3.5" />
+                                                {customer.total_orders || 0}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <span className="font-semibold text-green-600">
+                                                Rp {(customer.total_spent || 0).toLocaleString('id-ID')}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <button
+                                                onClick={() => setDeleteModal({ isOpen: true, customer })}
+                                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirm Modal */}
+            <DeleteConfirmModal
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, customer: null })}
+                onConfirm={deleteCustomer}
+                title="Hapus Pelanggan"
+                message="Apakah Anda yakin ingin menghapus pelanggan ini? Riwayat pesanan pelanggan ini akan tetap tersimpan."
+                itemName={deleteModal.customer?.name}
+                isDeleting={deletingId !== null}
+            />
+        </div>
+    )
+}

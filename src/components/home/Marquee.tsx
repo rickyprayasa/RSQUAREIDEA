@@ -1,16 +1,16 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { 
-    BarChart3, 
-    Calculator, 
-    Calendar, 
-    ClipboardList, 
-    CreditCard, 
-    FileSpreadsheet, 
-    PieChart, 
-    Receipt, 
-    Target, 
+import {
+    BarChart3,
+    Calculator,
+    Calendar,
+    ClipboardList,
+    CreditCard,
+    FileSpreadsheet,
+    PieChart,
+    Receipt,
+    Target,
     TrendingUp,
     Wallet,
     LineChart,
@@ -39,10 +39,10 @@ const marqueeItems = [
 
 function MarqueeRow({ direction = 'left' }: { direction?: 'left' | 'right' }) {
     const items = [...marqueeItems, ...marqueeItems]
-    
+
     return (
         <div className="flex overflow-hidden">
-            <div 
+            <div
                 className={`flex gap-4 py-4 ${direction === 'right' ? 'animate-marquee-reverse' : 'animate-marquee'}`}
             >
                 {items.map((item, index) => (
@@ -61,7 +61,7 @@ function MarqueeRow({ direction = 'left' }: { direction?: 'left' | 'right' }) {
                     </div>
                 ))}
             </div>
-            <div 
+            <div
                 className={`flex gap-4 py-4 ${direction === 'right' ? 'animate-marquee-reverse' : 'animate-marquee'}`}
                 aria-hidden="true"
             >
@@ -89,11 +89,11 @@ export function Marquee() {
     return (
         <section className="relative py-16 overflow-hidden">
             {/* Grid Background */}
-            <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 -z-10 pointer-events-none">
                 <div className="absolute inset-0 bg-white" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
             </div>
-            <div className="container mx-auto px-6 mb-10">
+            <div className="container mx-auto px-6 mb-10 relative z-10">
                 <div className="text-center">
                     <motion.p
                         initial={{ opacity: 0, y: 10 }}

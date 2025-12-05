@@ -26,10 +26,10 @@ interface TemplateSectionProps {
     emptyDescription?: string
 }
 
-export function TemplateSection({ 
-    title, 
-    subtitle, 
-    templates, 
+export function TemplateSection({
+    title,
+    subtitle,
+    templates,
     viewAllLink,
     emptyTitle = "Segera Hadir",
     emptyDescription = "Template sedang dalam proses persiapan. Nantikan koleksi template premium kami!"
@@ -37,10 +37,10 @@ export function TemplateSection({
     return (
         <section className="py-16 relative overflow-hidden">
             {/* Background with floating shapes */}
-            <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 -z-10 pointer-events-none">
                 <div className="absolute inset-0 bg-white" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
-                
+
                 {/* Floating Shapes */}
                 <motion.div
                     className="absolute top-10 right-[10%] w-40 h-40 bg-orange-100/40 rounded-full blur-3xl"
@@ -60,7 +60,7 @@ export function TemplateSection({
                     }}
                     transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                 />
-                
+
                 {/* Small floating squares */}
                 <motion.div
                     className="absolute top-[20%] left-[15%] w-4 h-4 bg-orange-300/30 rounded"
@@ -81,7 +81,7 @@ export function TemplateSection({
                 />
             </div>
 
-            <div className="container mx-auto px-6">
+            <div className="container mx-auto px-6 relative z-10">
                 {/* Header */}
                 <div className="text-center mb-8">
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{title}</h2>
@@ -90,15 +90,15 @@ export function TemplateSection({
 
                 {/* Content */}
                 {templates.length === 0 ? (
-                    <motion.div 
+                    <motion.div
                         className="text-center py-16"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        <motion.div 
+                        <motion.div
                             className="w-20 h-20 bg-gradient-to-br from-orange-100 to-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg"
-                            animate={{ 
+                            animate={{
                                 y: [0, -8, 0],
                                 rotate: [0, 5, -5, 0]
                             }}
@@ -133,7 +133,7 @@ export function TemplateSection({
 
                         {/* View All Button */}
                         <div className="text-center mt-6">
-                            <Link 
+                            <Link
                                 href={viewAllLink}
                                 className="group relative inline-flex items-center gap-2 h-11 px-8 border-2 border-gray-200 rounded-xl text-gray-700 font-medium overflow-hidden transition-all duration-300 hover:border-orange-400 hover:text-orange-600 hover:bg-orange-50 hover:-translate-y-0.5 active:translate-y-0"
                             >

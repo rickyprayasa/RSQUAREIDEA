@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TemplateCard } from '@/components/templates/TemplateCard'
-import { Search, Grid3X3, LayoutGrid, Layers, Wallet, BarChart3, Zap, Palette } from 'lucide-react'
 
 interface Template {
     _id: string
@@ -27,28 +26,28 @@ interface TemplatesListProps {
 }
 
 const defaultCategories = [
-    { id: 'All', label: 'Semua', Icon: Layers },
-    { id: 'Budgeting', label: 'Keuangan', Icon: Wallet },
-    { id: 'Business', label: 'Bisnis', Icon: BarChart3 },
-    { id: 'Productivity', label: 'Produktivitas', Icon: Zap },
-    { id: 'Lifestyle', label: 'Lifestyle', Icon: Palette },
+    { id: 'All', label: 'Semua', iconSrc: 'https://cdn.lordicon.com/ofwpzftr.json' },
+    { id: 'Budgeting', label: 'Keuangan', iconSrc: 'https://cdn.lordicon.com/qhviklyi.json' },
+    { id: 'Business', label: 'Bisnis', iconSrc: 'https://cdn.lordicon.com/fjvfsqea.json' },
+    { id: 'Productivity', label: 'Produktivitas', iconSrc: 'https://cdn.lordicon.com/vduvxizq.json' },
+    { id: 'Lifestyle', label: 'Lifestyle', iconSrc: 'https://cdn.lordicon.com/oegrrprk.json' },
 ]
 
-const categoryIcons: Record<string, typeof Layers> = {
-    'Budgeting': Wallet,
-    'Business': BarChart3,
-    'Productivity': Zap,
-    'Lifestyle': Palette,
+const categoryIconMap: Record<string, string> = {
+    'Budgeting': 'https://cdn.lordicon.com/qhviklyi.json',
+    'Business': 'https://cdn.lordicon.com/fjvfsqea.json',
+    'Productivity': 'https://cdn.lordicon.com/vduvxizq.json',
+    'Lifestyle': 'https://cdn.lordicon.com/oegrrprk.json',
 }
 
 export function TemplatesList({ initialTemplates, categories: propCategories }: TemplatesListProps) {
     const categories = propCategories && propCategories.length > 0
         ? [
-            { id: 'All', label: 'Semua', Icon: Layers },
+            { id: 'All', label: 'Semua', iconSrc: 'https://cdn.lordicon.com/ofwpzftr.json' },
             ...propCategories.map(c => ({
                 id: c.name,
                 label: c.name,
-                Icon: categoryIcons[c.name] || Layers,
+                iconSrc: categoryIconMap[c.name] || 'https://cdn.lordicon.com/ofwpzftr.json',
             }))
         ]
         : defaultCategories
@@ -74,7 +73,12 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
             >
                 {/* Search Input */}
                 <div className="relative mb-6">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <lord-icon
+                        src="https://cdn.lordicon.com/kkvxgpti.json"
+                        trigger="hover"
+                        colors="primary:#9ca3af"
+                        style={{ width: '22px', height: '22px', position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }}
+                    />
                     <input
                         type="text"
                         placeholder="Cari template..."
@@ -98,7 +102,12 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                         >
-                            <category.Icon className="w-4 h-4" />
+                            <lord-icon
+                                src={category.iconSrc}
+                                trigger="hover"
+                                colors={activeCategory === category.id ? "primary:#ffffff" : "primary:#4b5563"}
+                                style={{ width: '18px', height: '18px' }}
+                            />
                             <span>{category.label}</span>
                         </motion.button>
                     ))}
@@ -114,13 +123,23 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                             onClick={() => setViewMode('grid')}
                             className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-100'}`}
                         >
-                            <LayoutGrid className="w-5 h-5" />
+                            <lord-icon
+                                src="https://cdn.lordicon.com/jeuxydnh.json"
+                                trigger="hover"
+                                colors={viewMode === 'grid' ? "primary:#ea580c" : "primary:#9ca3af"}
+                                style={{ width: '22px', height: '22px' }}
+                            />
                         </button>
                         <button
                             onClick={() => setViewMode('compact')}
                             className={`p-2 rounded-lg transition-colors ${viewMode === 'compact' ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-100'}`}
                         >
-                            <Grid3X3 className="w-5 h-5" />
+                            <lord-icon
+                                src="https://cdn.lordicon.com/qqkwcnqq.json"
+                                trigger="hover"
+                                colors={viewMode === 'compact' ? "primary:#ea580c" : "primary:#9ca3af"}
+                                style={{ width: '22px', height: '22px' }}
+                            />
                         </button>
                     </div>
                 </div>
@@ -148,6 +167,7 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                             transition={{ duration: 0.4, delay: index * 0.05 }}
                         >
                             <TemplateCard
+                                id={template._id}
                                 title={template.title}
                                 slug={template.slug}
                                 price={template.price}
@@ -170,7 +190,12 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                     className="text-center py-16"
                 >
                     <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Search className="w-8 h-8 text-gray-400" />
+                        <lord-icon
+                            src="https://cdn.lordicon.com/kkvxgpti.json"
+                            trigger="loop"
+                            colors="primary:#9ca3af"
+                            style={{ width: '40px', height: '40px' }}
+                        />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Tidak ada template ditemukan</h3>
                     <p className="text-gray-500">Coba ubah filter atau kata kunci pencarian</p>

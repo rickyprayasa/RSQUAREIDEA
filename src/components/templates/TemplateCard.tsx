@@ -4,8 +4,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Eye, Star, ArrowRight } from 'lucide-react'
+import { trackProductClick } from '@/hooks/useAnalytics'
 
 interface TemplateCardProps {
+    id?: string
     title: string
     slug: string
     price: number
@@ -17,6 +19,7 @@ interface TemplateCardProps {
 }
 
 export function TemplateCard({
+    id,
     title,
     slug,
     price,
@@ -28,9 +31,19 @@ export function TemplateCard({
 }: TemplateCardProps) {
     const discountPercent = discountPrice ? Math.round((1 - discountPrice / price) * 100) : 0
 
+    const handleClick = () => {
+        trackProductClick({
+            productId: id || slug,
+            productSlug: slug,
+            productTitle: title,
+            clickType: 'click',
+            value: discountPrice || price,
+        })
+    }
+
     if (compact) {
         return (
-            <Link href={`/templates/${slug}`}>
+            <Link href={`/templates/${slug}`} onClick={handleClick}>
                 <motion.div
                     whileHover={{ y: -4 }}
                     className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-orange-200 transition-all duration-300"
@@ -67,7 +80,7 @@ export function TemplateCard({
     }
 
     return (
-        <Link href={`/templates/${slug}`}>
+        <Link href={`/templates/${slug}`} onClick={handleClick}>
             <motion.div
                 whileHover={{ y: -6 }}
                 className="group h-full bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-orange-200 transition-all duration-300"

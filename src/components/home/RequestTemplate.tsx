@@ -6,10 +6,10 @@ import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 
 const features = [
-    { iconSrc: 'https://cdn.lordicon.com/hvueufdo.json', text: 'Desain Sesuai Kebutuhan', color: 'primary:#f97316' },
-    { iconSrc: 'https://cdn.lordicon.com/kbtmbyzy.json', text: 'Pengerjaan Cepat', color: 'primary:#f97316' },
-    { iconSrc: 'https://cdn.lordicon.com/jgnvfzqg.json', text: 'Revisi Gratis', color: 'primary:#f97316' },
-    { iconSrc: 'https://cdn.lordicon.com/akqsdstj.json', text: 'Support Prioritas', color: 'primary:#f97316' },
+    { iconSrc: 'https://cdn.lordicon.com/oegrrprk.json', text: 'Desain Sesuai Kebutuhan' },
+    { iconSrc: 'https://cdn.lordicon.com/kbtmbyzy.json', text: 'Pengerjaan Cepat' },
+    { iconSrc: 'https://cdn.lordicon.com/jgnvfzqg.json', text: 'Revisi Gratis' },
+    { iconSrc: 'https://cdn.lordicon.com/vduvxizq.json', text: 'Support Prioritas' },
 ]
 
 export function RequestTemplate() {
@@ -18,15 +18,59 @@ export function RequestTemplate() {
 
     return (
         <section ref={sectionRef} className="py-20 relative overflow-hidden">
-            {/* Grid Background */}
-            <div className="absolute inset-0 -z-10">
+            {/* Grid Background with Floating Shapes */}
+            <div className="absolute inset-0 -z-10 pointer-events-none">
                 <div className="absolute inset-0 bg-white" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
+
+                {/* Floating Spreadsheet/Grid Icon */}
+                <motion.div
+                    className="absolute top-24 right-[10%] w-16 h-16 opacity-12"
+                    animate={{ y: [0, -18, 0], rotate: [0, 5, 0] }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                >
+                    <svg viewBox="0 0 50 50" className="w-full h-full stroke-orange-400" fill="none" strokeWidth="2">
+                        <rect x="5" y="5" width="40" height="40" rx="4" />
+                        <line x1="5" y1="18" x2="45" y2="18" />
+                        <line x1="5" y1="31" x2="45" y2="31" />
+                        <line x1="20" y1="5" x2="20" y2="45" />
+                        <line x1="35" y1="5" x2="35" y2="45" />
+                    </svg>
+                </motion.div>
+
+                {/* Floating Blur Circle */}
+                <motion.div
+                    className="absolute top-[30%] left-[5%] w-32 h-32 rounded-full bg-gradient-to-br from-orange-400/15 to-amber-500/15 blur-2xl"
+                    animate={{ y: [0, 25, 0], scale: [1, 1.15, 1] }}
+                    transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                />
+
+                {/* Floating Pencil/Edit Icon */}
+                <motion.div
+                    className="absolute bottom-[35%] right-[8%] w-12 h-12 opacity-10"
+                    animate={{ y: [0, 15, 0], rotate: [0, -10, 0] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                >
+                    <svg viewBox="0 0 50 50" className="w-full h-full fill-amber-500">
+                        <path d="M40,8 L42,10 L15,37 L10,40 L13,35 Z M38,6 L44,12 L42,14 L36,8 Z" />
+                    </svg>
+                </motion.div>
+
+                {/* Floating Hexagon */}
+                <motion.div
+                    className="absolute bottom-[20%] left-[12%] w-14 h-14 opacity-12"
+                    animate={{ y: [0, -20, 0], rotate: [0, 30, 0] }}
+                    transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                >
+                    <svg viewBox="0 0 100 100" className="w-full h-full fill-orange-300">
+                        <polygon points="50,5 93,25 93,75 50,95 7,75 7,25" />
+                    </svg>
+                </motion.div>
             </div>
 
             <div className="container mx-auto px-6 relative z-10">
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
-                    
+
                     {/* Left: Illustration */}
                     <motion.div
                         initial={{ opacity: 0, x: -40 }}
@@ -36,7 +80,7 @@ export function RequestTemplate() {
                     >
                         <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-br from-orange-200 to-amber-100 rounded-3xl blur-2xl opacity-60 scale-90" />
-                            
+
                             <Image
                                 src="/images/spreadsheets-illustration.png"
                                 alt="Custom Spreadsheet Illustration"
@@ -56,7 +100,7 @@ export function RequestTemplate() {
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                                     <lord-icon
-                                        src="https://cdn.lordicon.com/oqdmuxru.json"
+                                        src="https://cdn.lordicon.com/egiwmiit.json"
                                         trigger="loop"
                                         delay="2000"
                                         colors="primary:#16a34a"
@@ -116,12 +160,12 @@ export function RequestTemplate() {
                                     transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
                                     className="flex items-center gap-3 text-gray-700"
                                 >
-                                    <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <lord-icon
                                             src={feature.iconSrc}
                                             trigger="loop"
                                             delay="3000"
-                                            colors={feature.color}
+                                            colors="primary:#ea580c"
                                             style={{ width: '20px', height: '20px' }}
                                         />
                                     </div>
@@ -137,23 +181,22 @@ export function RequestTemplate() {
                             transition={{ duration: 0.5, delay: 0.6 }}
                             className="flex flex-col sm:flex-row gap-3"
                         >
-                            <Link 
+                            <Link
                                 href="/jasa-kustom"
-                                className="group relative h-12 px-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-medium rounded-xl shadow-lg shadow-orange-200 hover:shadow-xl hover:shadow-orange-300 transition-all duration-300 inline-flex items-center justify-center gap-2 overflow-hidden"
+                                className="group relative h-12 px-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-medium rounded-xl shadow-lg shadow-orange-200 hover:shadow-xl hover:shadow-orange-300 transition-all duration-300 inline-flex items-center justify-center gap-2 overflow-hidden hover:-translate-y-0.5"
                             >
                                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                                 <span className="relative z-10">Request Template</span>
                                 <lord-icon
-                                    src="https://cdn.lordicon.com/whtfgdfm.json"
+                                    src="https://cdn.lordicon.com/vduvxizq.json"
                                     trigger="loop-on-hover"
                                     colors="primary:#ffffff"
                                     style={{ width: '20px', height: '20px' }}
-                                    className="relative z-10"
                                 />
                             </Link>
-                            <Link 
+                            <Link
                                 href="/kontak"
-                                className="group h-12 px-6 border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 font-medium rounded-xl transition-all duration-300 inline-flex items-center justify-center gap-2"
+                                className="group h-12 px-6 border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 font-medium rounded-xl transition-all duration-300 inline-flex items-center justify-center gap-2 hover:-translate-y-0.5"
                             >
                                 <span>Konsultasi Gratis</span>
                                 <lord-icon
@@ -173,7 +216,7 @@ export function RequestTemplate() {
                             className="mt-6 text-sm text-gray-500 flex items-center gap-2"
                         >
                             <lord-icon
-                                src="https://cdn.lordicon.com/oqdmuxru.json"
+                                src="https://cdn.lordicon.com/egiwmiit.json"
                                 trigger="loop"
                                 delay="3000"
                                 colors="primary:#22c55e"

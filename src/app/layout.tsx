@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from 'next'
 import { Poppins } from 'next/font/google'
+import Script from 'next/script'
+
 import './globals.css'
 import { CartProvider } from '@/contexts/CartContext'
+import { TrackingScripts } from '@/components/TrackingScripts'
+import { AnalyticsProvider } from '@/components/AnalyticsProvider'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -77,12 +81,18 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://connect.facebook.net" />
         {/* Lordicon script for animated icons */}
         <script src="https://cdn.lordicon.com/lordicon.js" async />
+        {/* Tracking pixels - load early for proper detection */}
+        <Script src="/api/tracking-script" strategy="beforeInteractive" />
       </head>
       <body className={`${poppins.variable} font-sans antialiased bg-gray-50 text-gray-900`}>
+        <TrackingScripts />
         <CartProvider>
-          {children}
+          <AnalyticsProvider>
+            {children}
+          </AnalyticsProvider>
         </CartProvider>
       </body>
     </html>
