@@ -54,21 +54,23 @@ export function TemplateCard({
                                 src={image}
                                 alt={title}
                                 fill
-                                className="object-cover"
+                                className="object-contain"
                             />
                         ) : (
                             <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs">
                                 {title}
                             </div>
                         )}
-                        {isFeatured && (
-                            <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-semibold px-2 py-1 rounded-md flex items-center gap-1">
-                                <Star className="w-3 h-3 fill-current" />
-                            </div>
-                        )}
                     </div>
                     <div className="p-3">
-                        <p className="text-[10px] text-orange-500 font-semibold uppercase mb-1">{category}</p>
+                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                            <p className="text-[10px] text-orange-500 font-semibold uppercase">{category}</p>
+                            {isFeatured && (
+                                <span className="bg-orange-500 text-white text-[8px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                    <Star className="w-2 h-2 fill-current" />
+                                </span>
+                            )}
+                        </div>
                         <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 group-hover:text-orange-600 transition-colors">{title}</h3>
                         <p className="text-sm font-bold text-gray-900 mt-1">
                             {discountPrice ? `Rp ${discountPrice.toLocaleString('id-ID')}` : `Rp ${price.toLocaleString('id-ID')}`}
@@ -92,7 +94,7 @@ export function TemplateCard({
                             src={image}
                             alt={title}
                             fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="object-contain group-hover:scale-105 transition-transform duration-500"
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium">
@@ -110,29 +112,25 @@ export function TemplateCard({
                             Lihat Detail
                         </span>
                     </div>
-                    
-                    {/* Badges */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-2">
-                        {isFeatured && (
-                            <span className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1 shadow-lg">
-                                <Star className="w-3 h-3 fill-current" />
-                                Featured
-                            </span>
-                        )}
-                        {discountPercent > 0 && (
-                            <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                -{discountPercent}%
-                            </span>
-                        )}
-                    </div>
                 </div>
 
                 {/* Content Section */}
                 <div className="p-5">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className="text-xs font-semibold text-orange-500 uppercase tracking-wider">
                             {category}
                         </span>
+                        {isFeatured && (
+                            <span className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <Star className="w-2.5 h-2.5 fill-current" />
+                                Featured
+                            </span>
+                        )}
+                        {discountPercent > 0 && (
+                            <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                -{discountPercent}%
+                            </span>
+                        )}
                     </div>
                     
                     <h3 className="font-bold text-lg text-gray-900 line-clamp-2 mb-3 group-hover:text-orange-600 transition-colors leading-tight">

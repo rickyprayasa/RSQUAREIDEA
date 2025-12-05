@@ -108,6 +108,13 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
         setScale(prev => Math.max(MIN_SCALE, prev - ZOOM_STEP))
     }, [])
 
+    // Handle click on backdrop to close
+    const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+        if (e.target === e.currentTarget && scale === 1) {
+            setIsZoomed(false)
+        }
+    }, [scale])
+
     const slideVariants = {
         enter: (direction: number) => ({
             x: direction > 0 ? 300 : -300,
@@ -138,6 +145,35 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
         setPage([index, newDirection])
         setCurrentIndex(index)
     }
+
+    // Handle keyboard ESC to close modal and arrow keys for navigation
+    useEffect(() => {
+        if (!isZoomed) return
+        
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setIsZoomed(false)
+            } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
+                const newIndex = currentIndex - 1
+                setPage([newIndex, -1])
+                setCurrentIndex(newIndex)
+            } else if (e.key === 'ArrowRight' && currentIndex < images.length - 1) {
+                const newIndex = currentIndex + 1
+                setPage([newIndex, 1])
+                setCurrentIndex(newIndex)
+            } else if (e.key === '+' || e.key === '=') {
+                setScale(prev => Math.min(MAX_SCALE, prev + ZOOM_STEP))
+            } else if (e.key === '-') {
+                setScale(prev => Math.max(MIN_SCALE, prev - ZOOM_STEP))
+            } else if (e.key === '0') {
+                setScale(1)
+                setPosition({ x: 0, y: 0 })
+            }
+        }
+        
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [isZoomed, currentIndex, images.length])
 
     return (
         <div className="space-y-4">
@@ -253,7 +289,10 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
 
             {/* Zoom Modal - Using Portal */}
             {mounted && isZoomed && createPortal(
-                <div 
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                     className="fixed inset-0 z-[99999]"
                     style={{ 
                         position: 'fixed', 
@@ -263,110 +302,171 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                         bottom: 0,
                         width: '100vw',
                         height: '100vh',
-                        backgroundColor: '#000000'
+                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.98) 50%, rgba(15, 23, 42, 0.95) 100%)',
+                        backdropFilter: 'blur(20px)'
                     }}
                 >
-                    {/* Top controls */}
-                    <div 
-                        className="absolute top-4 left-1/2 flex items-center gap-2 rounded-full px-3 py-2"
-                        style={{ 
-                            transform: 'translateX(-50%)', 
-                            zIndex: 100,
-                            backgroundColor: 'rgba(255,255,255,0.15)',
-                            backdropFilter: 'blur(8px)'
-                        }}
-                    >
-                        <button
-                            onClick={(e) => { e.stopPropagation(); zoomOut(); }}
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
-                            title="Zoom Out (-)"
-                        >
-                            <ZoomOut className="w-5 h-5 text-white" />
-                        </button>
-                        <span className="text-white text-sm min-w-[60px] text-center font-medium">
-                            {Math.round(scale * 100)}%
-                        </span>
-                        <button
-                            onClick={(e) => { e.stopPropagation(); zoomIn(); }}
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
-                            title="Zoom In (+)"
-                        >
-                            <ZoomIn className="w-5 h-5 text-white" />
-                        </button>
-                        <div className="w-px h-6 bg-white/30 mx-1" />
-                        <button
-                            onClick={(e) => { e.stopPropagation(); resetZoom(); }}
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
-                            title="Reset"
-                        >
-                            <RotateCcw className="w-5 h-5 text-white" />
-                        </button>
+                    {/* Decorative gradient orbs */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl" />
+                        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl" />
                     </div>
 
-                    {/* Close button */}
-                    <button
-                        onClick={() => setIsZoomed(false)}
-                        className="absolute top-4 right-4 w-14 h-14 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
-                        style={{ zIndex: 100, backgroundColor: 'rgba(255,255,255,0.15)' }}
+                    {/* Top controls */}
+                    <motion.div 
+                        initial={{ y: -20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.1 }}
+                        className="absolute top-6 left-0 right-0 flex justify-center pointer-events-none"
+                        style={{ zIndex: 100 }}
                     >
-                        <X className="w-7 h-7 text-white" />
-                    </button>
+                        <div 
+                            className="flex items-center gap-1 rounded-2xl px-2 py-2 shadow-2xl pointer-events-auto"
+                            style={{ 
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                                backdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(255,255,255,0.1)'
+                            }}
+                        >
+                            <button
+                                onClick={(e) => { e.stopPropagation(); zoomOut(); }}
+                                className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 hover:bg-white/10 hover:scale-105 active:scale-95"
+                                title="Zoom Out (-)"
+                            >
+                                <ZoomOut className="w-5 h-5 text-white/90" />
+                            </button>
+                            
+                            {/* Zoom slider visual */}
+                            <div className="flex items-center gap-2 px-3">
+                                <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                    <motion.div 
+                                        className="h-full bg-gradient-to-r from-orange-400 to-amber-400 rounded-full"
+                                        style={{ width: `${((scale - MIN_SCALE) / (MAX_SCALE - MIN_SCALE)) * 100}%` }}
+                                        transition={{ duration: 0.15 }}
+                                    />
+                                </div>
+                                <span className="text-white/90 text-sm min-w-[50px] text-center font-medium tabular-nums">
+                                    {Math.round(scale * 100)}%
+                                </span>
+                            </div>
+                            
+                            <button
+                                onClick={(e) => { e.stopPropagation(); zoomIn(); }}
+                                className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 hover:bg-white/10 hover:scale-105 active:scale-95"
+                                title="Zoom In (+)"
+                            >
+                                <ZoomIn className="w-5 h-5 text-white/90" />
+                            </button>
+                            
+                            <div className="w-px h-7 bg-white/10 mx-1" />
+                        
+                            <button
+                                onClick={(e) => { e.stopPropagation(); resetZoom(); }}
+                                className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 hover:bg-white/10 hover:scale-105 active:scale-95"
+                                title="Reset"
+                            >
+                                <RotateCcw className="w-5 h-5 text-white/90" />
+                            </button>
+                        </div>
+                    </motion.div>
+
+                    {/* Close button */}
+                    <motion.button
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.15, type: "spring", stiffness: 200 }}
+                        onClick={() => setIsZoomed(false)}
+                        className="absolute top-6 right-6 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 hover:rotate-90 active:scale-95 shadow-2xl group"
+                        style={{ 
+                            zIndex: 100, 
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                            backdropFilter: 'blur(20px)',
+                            border: '1px solid rgba(255,255,255,0.1)'
+                        }}
+                    >
+                        <X className="w-5 h-5 text-white/90 group-hover:text-white transition-colors" />
+                    </motion.button>
 
                     {/* Navigation buttons */}
                     {images.length > 1 && (
                         <>
-                            <button
+                            <motion.button
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: 0.2 }}
                                 onClick={(e) => { e.stopPropagation(); paginate(-1); }}
                                 disabled={currentIndex === 0}
-                                className="absolute left-4 top-1/2 w-14 h-14 rounded-full flex items-center justify-center transition-colors hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed"
-                                style={{ transform: 'translateY(-50%)', zIndex: 100, backgroundColor: 'rgba(255,255,255,0.15)' }}
+                                className="absolute left-6 top-1/2 w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-2xl group"
+                                style={{ 
+                                    transform: 'translateY(-50%)', 
+                                    zIndex: 100, 
+                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                                    backdropFilter: 'blur(20px)',
+                                    border: '1px solid rgba(255,255,255,0.1)'
+                                }}
                             >
-                                <ChevronLeft className="w-7 h-7 text-white" />
-                            </button>
-                            <button
+                                <ChevronLeft className="w-6 h-6 text-white/90 group-hover:text-white transition-colors" />
+                            </motion.button>
+                            <motion.button
+                                initial={{ x: 20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: 0.2 }}
                                 onClick={(e) => { e.stopPropagation(); paginate(1); }}
                                 disabled={currentIndex === images.length - 1}
-                                className="absolute right-4 top-1/2 w-14 h-14 rounded-full flex items-center justify-center transition-colors hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed"
-                                style={{ transform: 'translateY(-50%)', zIndex: 100, backgroundColor: 'rgba(255,255,255,0.15)' }}
+                                className="absolute right-6 top-1/2 w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-2xl group"
+                                style={{ 
+                                    transform: 'translateY(-50%)', 
+                                    zIndex: 100, 
+                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                                    backdropFilter: 'blur(20px)',
+                                    border: '1px solid rgba(255,255,255,0.1)'
+                                }}
                             >
-                                <ChevronRight className="w-7 h-7 text-white" />
-                            </button>
+                                <ChevronRight className="w-6 h-6 text-white/90 group-hover:text-white transition-colors" />
+                            </motion.button>
                         </>
                     )}
 
                     {/* Zoomable image container */}
                     <div
                         ref={containerRef}
+                        onClick={handleBackdropClick}
                         onMouseDown={handleMouseDown}
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
                         className="w-full h-full flex items-center justify-center overflow-hidden"
                         style={{ 
-                            cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'
+                            cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'pointer'
                         }}
                     >
                         <div
                             className="flex items-center justify-center select-none"
                             style={{
                                 transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
-                                transition: isDragging ? 'none' : 'transform 0.15s ease-out'
+                                transition: isDragging ? 'none' : 'transform 0.2s ease-out'
                             }}
                         >
                             {images[currentIndex] ? (
-                                <Image
-                                    src={images[currentIndex]}
-                                    alt={`${title} - Full Preview`}
-                                    width={1920}
-                                    height={1440}
-                                    className="object-contain select-none"
-                                    style={{ maxWidth: '95vw', maxHeight: '95vh', width: 'auto', height: 'auto' }}
-                                    draggable={false}
-                                    unoptimized
-                                    priority
-                                />
+                                <div 
+                                    className="relative rounded-2xl overflow-hidden shadow-2xl"
+                                    style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <Image
+                                        src={images[currentIndex]}
+                                        alt={`${title} - Full Preview`}
+                                        width={1920}
+                                        height={1440}
+                                        className="object-contain select-none"
+                                        style={{ maxWidth: '90vw', maxHeight: '80vh', width: 'auto', height: 'auto' }}
+                                        draggable={false}
+                                        unoptimized
+                                        priority
+                                    />
+                                </div>
                             ) : (
-                                <div className="flex items-center justify-center text-white text-2xl">
+                                <div className="flex items-center justify-center text-white/60 text-2xl">
                                     Preview {currentIndex + 1}
                                 </div>
                             )}
@@ -374,24 +474,61 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                     </div>
                     
                     {/* Bottom info */}
-                    <div 
-                        className="absolute bottom-6 left-1/2 flex flex-col items-center gap-2"
-                        style={{ transform: 'translateX(-50%)', zIndex: 100 }}
+                    <motion.div 
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.25 }}
+                        className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-3 pointer-events-none"
+                        style={{ zIndex: 100 }}
                     >
+                        {/* Thumbnail strip for multiple images */}
+                        {images.length > 1 && (
+                            <div 
+                                className="flex items-center gap-2 p-2 rounded-2xl pointer-events-auto"
+                                style={{ 
+                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                                    backdropFilter: 'blur(20px)',
+                                    border: '1px solid rgba(255,255,255,0.1)'
+                                }}
+                            >
+                                {images.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={(e) => { e.stopPropagation(); goToSlide(idx); }}
+                                        className={`relative w-12 h-9 rounded-lg overflow-hidden transition-all duration-200 ${
+                                            idx === currentIndex 
+                                                ? 'ring-2 ring-orange-400 ring-offset-2 ring-offset-slate-900 scale-110' 
+                                                : 'opacity-50 hover:opacity-100 hover:scale-105'
+                                        }`}
+                                    >
+                                        {img ? (
+                                            <Image
+                                                src={img}
+                                                alt={`Thumb ${idx + 1}`}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-white/20 flex items-center justify-center text-white/60 text-xs">
+                                                {idx + 1}
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        
                         <div 
-                            className="text-white/70 text-xs px-4 py-2 rounded-full"
-                            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+                            className="text-white/50 text-xs px-4 py-2 rounded-full"
+                            style={{ 
+                                background: 'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.2) 100%)',
+                                backdropFilter: 'blur(10px)'
+                            }}
                         >
-                            Scroll untuk zoom • Drag untuk geser • Klik X untuk tutup
+                            Klik di luar gambar atau tekan ESC untuk tutup • Scroll/+- untuk zoom • Arrow keys untuk navigasi
                         </div>
-                        <div 
-                            className="text-white text-sm px-4 py-2 rounded-full font-medium"
-                            style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
-                        >
-                            {currentIndex + 1} / {images.length}
-                        </div>
-                    </div>
-                </div>,
+                    </motion.div>
+                </motion.div>,
                 document.body
             )}
         </div>

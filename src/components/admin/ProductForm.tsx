@@ -321,23 +321,6 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                 </p>
                             </div>
 
-                            {/* Cover Image */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Gambar Utama (Cover)
-                                </label>
-                                <ImageUpload
-                                    value={formData.image}
-                                    onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
-                                    onRemove={() => setFormData(prev => ({ ...prev, image: '' }))}
-                                    bucket="products"
-                                    aspectRatio="video"
-                                />
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Gambar utama di halaman detail produk. Rekomendasi: 1280x720px (16:9) atau resolusi lebih tinggi
-                                </p>
-                            </div>
-
                             {/* Gallery */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">

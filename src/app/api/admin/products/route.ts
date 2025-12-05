@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
                 price: data.price || 0,
                 discount_price: data.discountPrice,
                 category: data.category,
-                image: data.image,
+                image: data.thumbnail || data.image,
                 thumbnail: data.thumbnail || null,
                 images: data.images || [],
                 demo_url: data.demoUrl,
