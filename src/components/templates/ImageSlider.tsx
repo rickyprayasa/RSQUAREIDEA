@@ -48,7 +48,7 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
     return (
         <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 aspect-[4/3] group shadow-sm border border-gray-200">
+            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 group shadow-sm border border-gray-200" style={{ minHeight: '300px', maxHeight: '70vh' }}>
                 <AnimatePresence initial={false} custom={direction} mode="wait">
                     <motion.div
                         key={currentIndex}
@@ -61,17 +61,20 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                             x: { type: "spring", stiffness: 300, damping: 30 },
                             opacity: { duration: 0.2 }
                         }}
-                        className="absolute inset-0 flex items-center justify-center"
+                        className="flex items-center justify-center w-full"
+                        style={{ minHeight: '300px', maxHeight: '70vh' }}
                     >
                         {images[currentIndex] ? (
                             <Image
                                 src={images[currentIndex]}
                                 alt={`${title} - Preview ${currentIndex + 1}`}
-                                fill
-                                className="object-cover"
+                                width={1200}
+                                height={900}
+                                className="max-w-full max-h-[70vh] w-auto h-auto object-contain"
+                                unoptimized
                             />
                         ) : (
-                            <div className="flex flex-col items-center justify-center text-gray-400">
+                            <div className="flex flex-col items-center justify-center text-gray-400 py-20">
                                 <ImageIcon className="w-12 h-12 mb-2 stroke-[1.5]" />
                                 <span className="text-sm font-medium">Preview {currentIndex + 1}</span>
                             </div>
