@@ -1,5 +1,6 @@
 'use client'
 
+/* eslint-disable @next/next/no-img-element */
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -114,38 +115,39 @@ export default function CheckoutPage() {
         setTimeout(() => setCopied(false), 2000)
     }
 
-    // Generate dynamic QRIS when merchant string is available
-    const generateDynamicQris = async () => {
-        if (!qrisSettings.merchantString || totalPrice <= 0) {
-            setDynamicQrisImage(null)
-            return
-        }
 
-        setGeneratingQris(true)
-        try {
-            const res = await fetch('/api/qris/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    staticQRIS: qrisSettings.merchantString,
-                    amount: totalPrice,
-                }),
-            })
-            const data = await res.json()
-            if (data.qrCode) {
-                setDynamicQrisImage(data.qrCode)
-            }
-        } catch (error) {
-            console.error('Error generating dynamic QRIS:', error)
-        } finally {
-            setGeneratingQris(false)
-        }
-    }
 
     // Generate QRIS when settings or total price changes
     useEffect(() => {
+        const generateQris = async () => {
+            if (!qrisSettings.merchantString || totalPrice <= 0) {
+                setDynamicQrisImage(null)
+                return
+            }
+
+            setGeneratingQris(true)
+            try {
+                const res = await fetch('/api/qris/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        staticQRIS: qrisSettings.merchantString,
+                        amount: totalPrice,
+                    }),
+                })
+                const data = await res.json()
+                if (data.qrCode) {
+                    setDynamicQrisImage(data.qrCode)
+                }
+            } catch (error) {
+                console.error('Error generating dynamic QRIS:', error)
+            } finally {
+                setGeneratingQris(false)
+            }
+        }
+
         if (qrisSettings.merchantString && totalPrice > 0) {
-            generateDynamicQris()
+            generateQris()
         }
     }, [qrisSettings.merchantString, totalPrice])
 

@@ -53,7 +53,6 @@ export function CartButton() {
     const [searchError, setSearchError] = useState('')
     const [orderResult, setOrderResult] = useState<OrderConfirmation | null>(null)
     const [searched, setSearched] = useState(false)
-    const [showDetails, setShowDetails] = useState(false)
     const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
 
     useEffect(() => {
@@ -78,7 +77,6 @@ export function CartButton() {
         setSearchError('')
         setOrderResult(null)
         setSearched(true)
-        setShowDetails(false)
         setEmailStatus('idle') // Reset email status on new search
 
         try {

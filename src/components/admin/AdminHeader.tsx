@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LogOut, User, ChevronDown, Bell, Mail, Star, FileSpreadsheet, QrCode, Check, X } from 'lucide-react'
+import { LogOut, User, ChevronDown, Bell, Mail, Star, FileSpreadsheet, QrCode, Check } from 'lucide-react'
 
 interface Notification {
     id: number

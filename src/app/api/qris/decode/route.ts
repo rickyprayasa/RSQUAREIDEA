@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import jsQR from 'jsqr'
 
 export async function POST(request: NextRequest) {
     try {
@@ -9,10 +8,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Image URL required' }, { status: 400 })
         }
 
-        // Fetch the image
-        const imageResponse = await fetch(imageUrl)
-        const arrayBuffer = await imageResponse.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
+        // Fetch the image (for future implementation)
+        await fetch(imageUrl)
 
         // We need to decode the image to get pixel data
         // Using sharp or canvas would be ideal, but for simplicity we'll use a different approach

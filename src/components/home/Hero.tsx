@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Background3D } from '@/components/ui/background-3d'
 
@@ -100,10 +101,13 @@ export function Hero() {
                     className="relative mx-auto max-w-5xl mt-10"
                 >
                     <div className="relative z-10 hover:scale-[1.02] transition-transform duration-500">
-                        <img
+                        <Image
                             src="/images/hero-image.png"
                             alt="Kumpulan Template RSQUARE"
+                            width={1200}
+                            height={800}
                             className="w-full h-auto drop-shadow-2xl"
+                            priority
                         />
                     </div>
 

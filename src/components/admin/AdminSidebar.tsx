@@ -14,7 +14,6 @@ import {
     X,
     Menu,
     ArrowLeft,
-    QrCode,
     MessageSquare,
     Star,
     FileSpreadsheet,

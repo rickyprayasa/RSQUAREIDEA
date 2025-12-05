@@ -3,6 +3,19 @@
 import { useEffect, useState } from 'react'
 import Script from 'next/script'
 
+// Extend Window interface for tracking pixels
+declare global {
+    interface Window {
+        fbq?: (...args: unknown[]) => void
+        gtag?: (...args: unknown[]) => void
+        ttq?: {
+            track: (event: string, data?: Record<string, unknown>) => void
+            page: () => void
+        }
+        dataLayer?: unknown[]
+    }
+}
+
 interface TrackingSettings {
     meta_pixel_id?: string
     google_analytics_id?: string
@@ -31,7 +44,7 @@ export function TrackingScripts() {
     useEffect(() => {
         if (isLoaded && settings.meta_pixel_id && typeof window !== 'undefined') {
             // Check if fbq is already initialized
-            if (!(window as any).fbq) {
+            if (!window.fbq) {
                 // Create and inject the Meta Pixel script
                 const script = document.createElement('script')
                 script.innerHTML = `
@@ -139,48 +152,48 @@ export function TrackingScripts() {
 export const trackEvent = {
     // Meta Pixel events
     metaPageView: () => {
-        if (typeof window !== 'undefined' && (window as any).fbq) {
-            (window as any).fbq('track', 'PageView')
+        if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('track', 'PageView')
         }
     },
     metaViewContent: (data: { content_name?: string; content_category?: string; value?: number }) => {
-        if (typeof window !== 'undefined' && (window as any).fbq) {
-            (window as any).fbq('track', 'ViewContent', data)
+        if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('track', 'ViewContent', data)
         }
     },
     metaAddToCart: (data: { content_name?: string; value?: number; currency?: string }) => {
-        if (typeof window !== 'undefined' && (window as any).fbq) {
-            (window as any).fbq('track', 'AddToCart', { ...data, currency: data.currency || 'IDR' })
+        if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('track', 'AddToCart', { ...data, currency: data.currency || 'IDR' })
         }
     },
     metaPurchase: (data: { value: number; currency?: string }) => {
-        if (typeof window !== 'undefined' && (window as any).fbq) {
-            (window as any).fbq('track', 'Purchase', { ...data, currency: data.currency || 'IDR' })
+        if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('track', 'Purchase', { ...data, currency: data.currency || 'IDR' })
         }
     },
     metaInitiateCheckout: (data?: { value?: number }) => {
-        if (typeof window !== 'undefined' && (window as any).fbq) {
-            (window as any).fbq('track', 'InitiateCheckout', data)
+        if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('track', 'InitiateCheckout', data)
         }
     },
 
     // Google Analytics events
-    gaEvent: (eventName: string, params?: Record<string, any>) => {
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-            (window as any).gtag('event', eventName, params)
+    gaEvent: (eventName: string, params?: Record<string, unknown>) => {
+        if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('event', eventName, params)
         }
     },
-    gaPurchase: (data: { transaction_id: string; value: number; items: any[] }) => {
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-            (window as any).gtag('event', 'purchase', {
+    gaPurchase: (data: { transaction_id: string; value: number; items: { item_name: string; price: number }[] }) => {
+        if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('event', 'purchase', {
                 ...data,
                 currency: 'IDR',
             })
         }
     },
     gaAddToCart: (data: { item_name: string; value: number }) => {
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-            (window as any).gtag('event', 'add_to_cart', {
+        if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('event', 'add_to_cart', {
                 currency: 'IDR',
                 items: [{ item_name: data.item_name, price: data.value }],
             })
@@ -189,23 +202,23 @@ export const trackEvent = {
 
     // TikTok Pixel events
     tiktokViewContent: (data?: { content_name?: string; value?: number }) => {
-        if (typeof window !== 'undefined' && (window as any).ttq) {
-            (window as any).ttq.track('ViewContent', data)
+        if (typeof window !== 'undefined' && window.ttq) {
+            window.ttq.track('ViewContent', data)
         }
     },
     tiktokAddToCart: (data?: { content_name?: string; value?: number }) => {
-        if (typeof window !== 'undefined' && (window as any).ttq) {
-            (window as any).ttq.track('AddToCart', { ...data, currency: 'IDR' })
+        if (typeof window !== 'undefined' && window.ttq) {
+            window.ttq.track('AddToCart', { ...data, currency: 'IDR' })
         }
     },
     tiktokInitiateCheckout: (data?: { value?: number }) => {
-        if (typeof window !== 'undefined' && (window as any).ttq) {
-            (window as any).ttq.track('InitiateCheckout', { ...data, currency: 'IDR' })
+        if (typeof window !== 'undefined' && window.ttq) {
+            window.ttq.track('InitiateCheckout', { ...data, currency: 'IDR' })
         }
     },
     tiktokCompletePayment: (data?: { value?: number }) => {
-        if (typeof window !== 'undefined' && (window as any).ttq) {
-            (window as any).ttq.track('CompletePayment', { ...data, currency: 'IDR' })
+        if (typeof window !== 'undefined' && window.ttq) {
+            window.ttq.track('CompletePayment', { ...data, currency: 'IDR' })
         }
     },
 }

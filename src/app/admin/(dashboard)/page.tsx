@@ -9,11 +9,7 @@ import {
     Users, 
     TrendingUp,
     DollarSign,
-    Eye,
-    BarChart3,
-    ArrowUpRight,
-    ArrowDownRight,
-    Star
+    BarChart3
 } from 'lucide-react'
 
 interface Order {

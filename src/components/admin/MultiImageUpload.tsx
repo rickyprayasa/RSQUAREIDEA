@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, X, Plus, Loader2, GripVertical } from 'lucide-react'
+import { X, Plus, Loader2, GripVertical } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useImageUpload } from '@/hooks/useImageUpload'
 import { cn } from '@/lib/utils'
@@ -89,10 +90,12 @@ export function MultiImageUpload({
                             draggedIndex === index ? 'border-orange-500 opacity-50' : 'border-gray-200'
                         )}
                     >
-                        <img
+                        <Image
                             src={url}
                             alt={`Image ${index + 1}`}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            unoptimized
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <Button

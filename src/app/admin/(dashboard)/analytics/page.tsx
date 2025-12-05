@@ -14,9 +14,7 @@ import {
     Globe,
     TrendingUp,
     BarChart3,
-    PieChart,
-    Clock,
-    ExternalLink
+    Clock
 } from 'lucide-react'
 
 interface AnalyticsData {
@@ -43,21 +41,20 @@ export default function AnalyticsPage() {
     const [period, setPeriod] = useState('7d')
 
     useEffect(() => {
+        const fetchAnalytics = async () => {
+            setLoading(true)
+            try {
+                const res = await fetch(`/api/admin/analytics?period=${period}`)
+                const result = await res.json()
+                setData(result)
+            } catch (error) {
+                console.error('Error:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
         fetchAnalytics()
     }, [period])
-
-    const fetchAnalytics = async () => {
-        setLoading(true)
-        try {
-            const res = await fetch(`/api/admin/analytics?period=${period}`)
-            const result = await res.json()
-            setData(result)
-        } catch (error) {
-            console.error('Error:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
 
     if (loading) {
         return (

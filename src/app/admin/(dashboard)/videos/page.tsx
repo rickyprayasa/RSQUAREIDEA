@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Plus, Play, ExternalLink, Pencil, Trash2 } from 'lucide-react'
+import Image from 'next/image'
+import { Plus, Play, ExternalLink, Pencil } from 'lucide-react'
 import { DeleteVideoButton } from '@/components/admin/DeleteVideoButton'
 
 async function getVideos() {
@@ -64,10 +65,12 @@ export default async function VideosPage() {
                             >
                                 <div className="relative aspect-video bg-gray-100">
                                     {thumbnail && (
-                                        <img
+                                        <Image
                                             src={thumbnail}
                                             alt={video.title}
-                                            className="w-full h-full object-cover"
+                                            fill
+                                            className="object-cover"
+                                            unoptimized={thumbnail.includes('youtube.com') || thumbnail.includes('ytimg.com')}
                                         />
                                     )}
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { X, Image as ImageIcon, Loader2, Upload } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useImageUpload } from '@/hooks/useImageUpload'
 import { cn } from '@/lib/utils'
@@ -89,10 +90,12 @@ export function ImageUpload({
             >
                 {value ? (
                     <>
-                        <img
+                        <Image
                             src={value}
                             alt="Uploaded"
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            unoptimized
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                             <Button

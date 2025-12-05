@@ -79,7 +79,7 @@ export function CardStack({ templates }: CardStackProps) {
                         <motion.div
                             key={template._id}
                             layoutId={`card-${template._id}`}
-                            onClick={(e) => {
+                            onClick={() => {
                                 if (!isModalOpen) {
                                     setSelectedId(template._id)
                                 }

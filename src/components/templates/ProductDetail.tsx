@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion, useInView } from 'framer-motion'
-import { ArrowRight, ShoppingCart, Play, ExternalLink, Youtube, Store } from 'lucide-react'
+import { ArrowRight, Play, ExternalLink, Youtube, Store } from 'lucide-react'
 import { ImageSlider } from './ImageSlider'
 import { useCart } from '@/contexts/CartContext'
 import { LordIcon } from '@/components/ui/lordicon'
@@ -108,7 +108,7 @@ const platformConfig: Record<string, { bg: string, hoverBg: string, textColor: s
 }
 
 // SVG Icons for each platform
-const PlatformIcon = ({ name }: { name: string }) => {
+const _PlatformIcon = ({ name }: { name: string }) => {
     const key = name.toLowerCase()
 
     if (key.includes('tokopedia')) {

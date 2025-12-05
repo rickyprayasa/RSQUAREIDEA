@@ -32,7 +32,26 @@ export default function ProductsPage() {
         fetch('/api/admin/products')
             .then(res => res.json())
             .then(data => {
-                const transformed = (data.products || []).map((p: any) => ({
+                interface RawProduct {
+                    id: number
+                    title: string
+                    slug: string
+                    description: string | null
+                    price: number
+                    discount_price: number | null
+                    category: string
+                    image: string | null
+                    images: string[] | null
+                    demo_url: string | null
+                    download_url: string | null
+                    is_featured: boolean
+                    is_free: boolean
+                    is_active: boolean
+                    features: string[] | null
+                    created_at: string
+                    updated_at: string
+                }
+                const transformed = (data.products || []).map((p: RawProduct) => ({
                     id: p.id,
                     title: p.title,
                     slug: p.slug,

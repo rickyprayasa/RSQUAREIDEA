@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
         })
 
         // Use custom HTML template
-        let htmlBody = htmlTemplate
+        const htmlBody = htmlTemplate
             .replace(/{{customer_name}}/g, customerName)
             .replace(/{{order_number}}/g, orderNumber)
             .replace(/{{total_amount}}/g, totalAmount.toLocaleString('id-ID'))

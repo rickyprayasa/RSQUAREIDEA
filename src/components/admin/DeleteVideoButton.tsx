@@ -27,7 +27,7 @@ export function DeleteVideoButton({ id, title }: DeleteVideoButtonProps) {
             }
 
             router.refresh()
-        } catch (error) {
+        } catch {
             alert('Gagal menghapus video')
         } finally {
             setLoading(false)

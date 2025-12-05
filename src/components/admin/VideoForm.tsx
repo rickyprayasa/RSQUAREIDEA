@@ -52,7 +52,7 @@ export function VideoForm({ video }: VideoFormProps) {
             .then(res => res.json())
             .then(data => {
                 if (data.products) {
-                    setProducts(data.products.map((p: any) => ({ id: p.id, title: p.title })))
+                    setProducts(data.products.map((p: { id: number; title: string }) => ({ id: p.id, title: p.title })))
                 }
             })
             .catch(console.error)
