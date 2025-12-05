@@ -137,8 +137,8 @@ export function FAQ() {
                         >
                             <div
                                 className={`bg-white rounded-2xl border-2 transition-all duration-300 overflow-hidden ${openIndex === index
-                                    ? 'border-orange-300 shadow-lg shadow-orange-100'
-                                    : 'border-gray-100 hover:border-orange-200 hover:shadow-md'
+                                    ? 'border-orange-300 shadow-xl shadow-orange-100'
+                                    : 'border-gray-200 shadow-md hover:border-orange-200 hover:shadow-lg'
                                     }`}
                             >
                                 <button
