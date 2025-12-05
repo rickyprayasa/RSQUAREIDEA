@@ -18,6 +18,7 @@ interface Template {
 interface Category {
     name: string
     slug: string
+    icon?: string
 }
 
 interface TemplatesListProps {
@@ -47,7 +48,7 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
             ...propCategories.map(c => ({
                 id: c.name,
                 label: c.name,
-                iconSrc: categoryIconMap[c.name] || 'https://cdn.lordicon.com/ofwpzftr.json',
+                iconSrc: c.icon || categoryIconMap[c.name] || 'https://cdn.lordicon.com/ofwpzftr.json',
             }))
         ]
         : defaultCategories

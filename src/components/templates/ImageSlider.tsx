@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Maximize2, ImageIcon } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Maximize2, ImageIcon, X } from 'lucide-react'
 
 interface ImageSliderProps {
     images: string[]
@@ -13,6 +13,18 @@ interface ImageSliderProps {
 export function ImageSlider({ images, title }: ImageSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [isZoomed, setIsZoomed] = useState(false)
+
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (isZoomed) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => {
+            document.body.style.overflow = ''
+        }
+    }, [isZoomed])
 
     const slideVariants = {
         enter: (direction: number) => ({
@@ -157,43 +169,78 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                 </div>
             )}
 
-            {/* Zoom Modal */}
+            {/* Zoom Modal - Portal to body */}
             <AnimatePresence>
                 {isZoomed && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={() => setIsZoomed(false)}
-                        className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 cursor-zoom-out"
+                        className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
+                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
                     >
+                        {/* Close button */}
+                        <button
+                            onClick={() => setIsZoomed(false)}
+                            className="absolute top-4 right-4 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                        >
+                            <X className="w-6 h-6 text-white" />
+                        </button>
+
+                        {/* Navigation buttons for zoom modal */}
+                        {images.length > 1 && (
+                            <>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); paginate(-1); }}
+                                    disabled={currentIndex === 0}
+                                    className={`absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors ${
+                                        currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''
+                                    }`}
+                                >
+                                    <ChevronLeft className="w-6 h-6 text-white" />
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); paginate(1); }}
+                                    disabled={currentIndex === images.length - 1}
+                                    className={`absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors ${
+                                        currentIndex === images.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
+                                    }`}
+                                >
+                                    <ChevronRight className="w-6 h-6 text-white" />
+                                </button>
+                            </>
+                        )}
+
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="relative w-auto h-auto max-w-[95vw] max-h-[90vh] flex items-center justify-center"
+                            onClick={() => setIsZoomed(false)}
+                            className="w-full h-full flex items-center justify-center p-4 cursor-zoom-out"
                         >
                             {images[currentIndex] ? (
                                 <Image
                                     src={images[currentIndex]}
                                     alt={`${title} - Full Preview`}
                                     width={1920}
-                                    height={1080}
-                                    className="max-w-full max-h-[90vh] w-auto h-auto object-contain"
+                                    height={1440}
+                                    className="max-w-full max-h-full w-auto h-auto object-contain"
+                                    style={{ maxWidth: '95vw', maxHeight: '95vh' }}
                                     unoptimized
+                                    priority
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-white text-2xl">
+                                <div className="flex items-center justify-center text-white text-2xl">
                                     Preview {currentIndex + 1}
                                 </div>
                             )}
                         </motion.div>
                         
-                        {/* Close hint */}
-                        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/60 text-sm">
-                            Klik di mana saja untuk menutup
-                        </p>
+                        {/* Slide counter */}
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-sm text-white text-sm px-4 py-2 rounded-full">
+                            {currentIndex + 1} / {images.length}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

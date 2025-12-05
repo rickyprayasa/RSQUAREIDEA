@@ -19,6 +19,7 @@ interface Template {
 interface Category {
     name: string
     slug: string
+    icon?: string
 }
 
 export default function TemplatesPage() {
