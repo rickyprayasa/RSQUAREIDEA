@@ -173,7 +173,7 @@ export function Testimonials() {
                                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                                     onClick={() => setActiveIndex(index)}
                                 >
-                                    <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow relative overflow-hidden">
+                                    <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 hover:shadow-2xl transition-shadow relative overflow-hidden">
                                         {/* Quote Icon */}
                                         <div className="absolute top-4 right-4 w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
                                             <lord-icon

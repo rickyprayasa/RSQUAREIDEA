@@ -46,7 +46,7 @@ export function TemplateCard({
             <Link href={`/templates/${slug}`} onClick={handleClick}>
                 <motion.div
                     whileHover={{ y: -4 }}
-                    className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-orange-200 transition-all duration-300"
+                    className="group bg-white rounded-xl border border-gray-200 shadow-md overflow-hidden hover:shadow-xl hover:border-orange-300 transition-all duration-300"
                 >
                     <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100">
                         {image ? (
@@ -85,7 +85,7 @@ export function TemplateCard({
         <Link href={`/templates/${slug}`} onClick={handleClick}>
             <motion.div
                 whileHover={{ y: -6 }}
-                className="group h-full bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-orange-200 transition-all duration-300"
+                className="group h-full bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-2xl hover:border-orange-300 transition-all duration-300"
             >
                 {/* Image Section */}
                 <div className="relative aspect-[4/3] bg-gradient-to-br from-orange-50 to-amber-50 overflow-hidden">

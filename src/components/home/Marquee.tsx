@@ -50,7 +50,7 @@ function MarqueeRow({ direction = 'left' }: { direction?: 'left' | 'right' }) {
                         key={`${item.label}-${index}`}
                         className="flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-1"
                     >
-                        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-300">
+                        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl border border-gray-200 bg-white shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-300">
                             <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center transition-transform duration-300 hover:scale-110`}>
                                 <item.icon className={`w-5 h-5 ${item.color}`} />
                             </div>
@@ -70,7 +70,7 @@ function MarqueeRow({ direction = 'left' }: { direction?: 'left' | 'right' }) {
                         key={`${item.label}-duplicate-${index}`}
                         className="flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-1"
                     >
-                        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-300">
+                        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl border border-gray-200 bg-white shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-300">
                             <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center transition-transform duration-300 hover:scale-110`}>
                                 <item.icon className={`w-5 h-5 ${item.color}`} />
                             </div>

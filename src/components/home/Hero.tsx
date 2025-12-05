@@ -118,7 +118,7 @@ export function Hero() {
                     <motion.div
                         animate={{ y: [0, -10, 0] }}
                         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute -right-4 top-10 md:-right-12 md:top-20 bg-white p-4 rounded-xl shadow-xl border border-gray-100 hidden sm:block z-20"
+                        className="absolute -right-4 top-10 md:-right-12 md:top-20 bg-white p-4 rounded-xl shadow-xl border border-gray-200 hidden sm:block z-20"
                     >
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-green-100 rounded-lg">
@@ -140,7 +140,7 @@ export function Hero() {
                     <motion.div
                         animate={{ y: [0, 10, 0] }}
                         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        className="absolute -left-4 bottom-10 md:-left-12 md:bottom-20 bg-white p-4 rounded-xl shadow-xl border border-gray-100 hidden sm:block z-20"
+                        className="absolute -left-4 bottom-10 md:-left-12 md:bottom-20 bg-white p-4 rounded-xl shadow-xl border border-gray-200 hidden sm:block z-20"
                     >
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-blue-100 rounded-lg">

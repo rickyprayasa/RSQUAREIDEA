@@ -425,7 +425,7 @@ export default function CheckoutPage() {
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                             <div className="grid md:grid-cols-2 gap-8">
                                 {/* Form */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                                     <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                                         <User className="h-5 w-5 text-orange-500" /> Data Pembeli
                                     </h2>
@@ -470,7 +470,7 @@ export default function CheckoutPage() {
                                 </div>
 
                                 {/* Order Summary */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                                     <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                                         <ShoppingCart className="h-5 w-5 text-orange-500" /> Ringkasan Pesanan
                                     </h2>
@@ -528,7 +528,7 @@ export default function CheckoutPage() {
                     {/* Step 2: Payment */}
                     {step === 2 && (
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+                            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6">
                                 <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                                     <CreditCard className="h-5 w-5 text-orange-500" /> Pilih Metode Pembayaran
                                 </h2>
@@ -722,7 +722,7 @@ export default function CheckoutPage() {
                             </div>
 
                             {/* Download Links - Only show if payment confirmed or product is free */}
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 max-w-lg mx-auto">
+                            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6 max-w-lg mx-auto">
                                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                     <Download className="h-5 w-5 text-green-500" />
                                     Link Download Template

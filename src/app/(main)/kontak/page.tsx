@@ -185,7 +185,7 @@ export default function KontakPage() {
                                 transition={{ duration: 0.6, delay: 0.1 }}
                                 className="md:col-span-2 space-y-4"
                             >
-                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                                     <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
                                         <lord-icon
                                             src="https://cdn.lordicon.com/nzixoeyk.json"
@@ -204,7 +204,7 @@ export default function KontakPage() {
                                     </a>
                                 </div>
 
-                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
                                         <lord-icon
                                             src="https://cdn.lordicon.com/surcxhka.json"
@@ -218,7 +218,7 @@ export default function KontakPage() {
                                     <p className="text-gray-600 text-sm">Indonesia</p>
                                 </div>
 
-                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                                     <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
                                         <lord-icon
                                             src="https://cdn.lordicon.com/aycieyht.json"
@@ -240,7 +240,7 @@ export default function KontakPage() {
                                 transition={{ duration: 0.6, delay: 0.2 }}
                                 className="md:col-span-3"
                             >
-                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+                                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
                                     <div className="flex items-center gap-2 mb-6">
                                         <lord-icon
                                             src="https://cdn.lordicon.com/hvueufdo.json"

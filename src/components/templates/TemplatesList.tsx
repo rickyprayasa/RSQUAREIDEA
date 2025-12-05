@@ -70,7 +70,7 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6"
+                className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 md:p-6"
             >
                 {/* Search Input */}
                 <div className="relative mb-6">

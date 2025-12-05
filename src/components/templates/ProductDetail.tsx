@@ -537,7 +537,7 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                                 transition={{ duration: 0.5, delay: 0.2 }}
-                                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+                                className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
                             >
                                 <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4">
                                     <h2 className="text-xl font-bold text-white">Fitur Unggulan</h2>
@@ -569,21 +569,21 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                 transition={{ duration: 0.5, delay: 0.4 }}
                                 className="grid sm:grid-cols-3 gap-4 mt-6"
                             >
-                                <div className="bg-white rounded-xl p-5 border border-gray-100 text-center hover:shadow-md transition-shadow">
+                                <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-md text-center hover:shadow-lg transition-shadow">
                                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
                                         <LordIcon src="https://cdn.lordicon.com/ternnbni.json" trigger="loop" size={28} colors={{ primary: '#2563eb' }} />
                                     </div>
                                     <h3 className="font-semibold text-gray-900 mb-1">Instant Download</h3>
                                     <p className="text-sm text-gray-500">Akses langsung setelah pembayaran</p>
                                 </div>
-                                <div className="bg-white rounded-xl p-5 border border-gray-100 text-center hover:shadow-md transition-shadow">
+                                <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-md text-center hover:shadow-lg transition-shadow">
                                     <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
                                         <LordIcon src="https://cdn.lordicon.com/qzwudxpy.json" trigger="loop" size={28} colors={{ primary: '#16a34a' }} />
                                     </div>
                                     <h3 className="font-semibold text-gray-900 mb-1">Garansi Uang Kembali</h3>
                                     <p className="text-sm text-gray-500">7 hari jika tidak puas</p>
                                 </div>
-                                <div className="bg-white rounded-xl p-5 border border-gray-100 text-center hover:shadow-md transition-shadow">
+                                <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-md text-center hover:shadow-lg transition-shadow">
                                     <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3">
                                         <LordIcon src="https://cdn.lordicon.com/yqzmiobz.json" trigger="loop" size={28} colors={{ primary: '#ea580c' }} />
                                     </div>
@@ -605,7 +605,7 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                                 transition={{ duration: 0.5, delay: 0.3 }}
-                                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+                                className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
                             >
                                 {/* Section Header */}
                                 <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
