@@ -367,7 +367,7 @@ export default function CheckoutPage() {
             {/* Background with Grid and Shapes */}
             <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
                 <div className="absolute inset-0 bg-gradient-to-b from-orange-50/30 to-white" />
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear_gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:32px_32px]" />
                 {/* Floating Shape 1 */}
                 <motion.div
                     animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
