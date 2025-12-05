@@ -49,14 +49,24 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
         resetZoom()
     }, [currentIndex, resetZoom])
 
-    // Handle mouse wheel zoom
-    const handleWheel = useCallback((e: React.WheelEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        
-        const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP
-        setScale(prev => Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev + delta)))
-    }, [])
+    // Handle mouse wheel zoom with native event listener (to allow preventDefault)
+    useEffect(() => {
+        const container = containerRef.current
+        if (!container || !isZoomed) return
+
+        const handleWheelNative = (e: WheelEvent) => {
+            e.preventDefault()
+            e.stopPropagation()
+            
+            const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP
+            setScale(prev => Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev + delta)))
+        }
+
+        container.addEventListener('wheel', handleWheelNative, { passive: false })
+        return () => {
+            container.removeEventListener('wheel', handleWheelNative)
+        }
+    }, [isZoomed])
 
     // Handle mouse down for drag
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -308,7 +318,6 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                         {/* Zoomable image container */}
                         <div
                             ref={containerRef}
-                            onWheel={handleWheel}
                             onMouseDown={handleMouseDown}
                             onMouseMove={handleMouseMove}
                             onMouseUp={handleMouseUp}
