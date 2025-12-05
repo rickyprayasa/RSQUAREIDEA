@@ -56,6 +56,7 @@ export async function PUT(
                 discount_price: data.discountPrice,
                 category: data.category,
                 image: data.image,
+                thumbnail: data.thumbnail || null,
                 images: data.images,
                 demo_url: data.demoUrl,
                 download_url: data.downloadUrl,

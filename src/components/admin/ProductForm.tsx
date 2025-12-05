@@ -21,6 +21,7 @@ interface Product {
     discount_price: number | null
     category: string
     image: string | null
+    thumbnail: string | null
     images: string[] | null
     demo_url: string | null
     download_url: string | null
@@ -56,6 +57,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         discountPrice: product?.discount_price || '',
         category: product?.category || '',
         image: product?.image || '',
+        thumbnail: product?.thumbnail || '',
         images: product?.images || [],
         demoUrl: product?.demo_url || '',
         downloadUrl: product?.download_url || '',
@@ -302,6 +304,24 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                     {/* Tab: Media */}
                     {activeTab === 'media' && (
                         <div className="space-y-6">
+                            {/* Thumbnail */}
+                            <div className="p-4 bg-orange-50 rounded-xl border border-orange-100">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Thumbnail (Card View)
+                                </label>
+                                <ImageUpload
+                                    value={formData.thumbnail}
+                                    onChange={(url) => setFormData(prev => ({ ...prev, thumbnail: url }))}
+                                    onRemove={() => setFormData(prev => ({ ...prev, thumbnail: '' }))}
+                                    bucket="products"
+                                    aspectRatio="video"
+                                />
+                                <p className="text-xs text-gray-500 mt-2">
+                                    Gambar kecil untuk tampilan card/list di halaman templates. Rekomendasi: 640x360px (16:9)
+                                </p>
+                            </div>
+
+                            {/* Cover Image */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Gambar Utama (Cover)
@@ -314,10 +334,11 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                     aspectRatio="video"
                                 />
                                 <p className="text-xs text-gray-500 mt-2">
-                                    Gambar ini akan ditampilkan sebagai thumbnail produk. Rekomendasi: 1280x720px (16:9)
+                                    Gambar utama di halaman detail produk. Rekomendasi: 1280x720px (16:9) atau resolusi lebih tinggi
                                 </p>
                             </div>
 
+                            {/* Gallery */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Galeri Gambar
