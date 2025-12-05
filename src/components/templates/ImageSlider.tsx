@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Maximize2, ImageIcon, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
@@ -19,7 +20,13 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
     const [position, setPosition] = useState({ x: 0, y: 0 })
     const [isDragging, setIsDragging] = useState(false)
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+    const [mounted, setMounted] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
+
+    // For portal
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     const MIN_SCALE = 0.5
     const MAX_SCALE = 5
@@ -244,135 +251,149 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                 </div>
             )}
 
-            {/* Zoom Modal - Portal to body */}
-            <AnimatePresence>
-                {isZoomed && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
-                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+            {/* Zoom Modal - Using Portal */}
+            {mounted && isZoomed && createPortal(
+                <div 
+                    className="fixed inset-0 z-[99999]"
+                    style={{ 
+                        position: 'fixed', 
+                        top: 0, 
+                        left: 0, 
+                        right: 0, 
+                        bottom: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        backgroundColor: '#000000'
+                    }}
+                >
+                    {/* Top controls */}
+                    <div 
+                        className="absolute top-4 left-1/2 flex items-center gap-2 rounded-full px-3 py-2"
+                        style={{ 
+                            transform: 'translateX(-50%)', 
+                            zIndex: 100,
+                            backgroundColor: 'rgba(255,255,255,0.15)',
+                            backdropFilter: 'blur(8px)'
+                        }}
                     >
-                        {/* Top controls */}
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
-                            <button
-                                onClick={zoomOut}
-                                className="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
-                                title="Zoom Out"
-                            >
-                                <ZoomOut className="w-5 h-5 text-white" />
-                            </button>
-                            <span className="text-white text-sm min-w-[60px] text-center font-medium">
-                                {Math.round(scale * 100)}%
-                            </span>
-                            <button
-                                onClick={zoomIn}
-                                className="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
-                                title="Zoom In"
-                            >
-                                <ZoomIn className="w-5 h-5 text-white" />
-                            </button>
-                            <div className="w-px h-6 bg-white/30 mx-1" />
-                            <button
-                                onClick={resetZoom}
-                                className="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
-                                title="Reset Zoom"
-                            >
-                                <RotateCcw className="w-5 h-5 text-white" />
-                            </button>
-                        </div>
-
-                        {/* Close button */}
                         <button
-                            onClick={() => setIsZoomed(false)}
-                            className="absolute top-4 right-4 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                            onClick={(e) => { e.stopPropagation(); zoomOut(); }}
+                            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
+                            title="Zoom Out (-)"
                         >
-                            <X className="w-6 h-6 text-white" />
+                            <ZoomOut className="w-5 h-5 text-white" />
                         </button>
+                        <span className="text-white text-sm min-w-[60px] text-center font-medium">
+                            {Math.round(scale * 100)}%
+                        </span>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); zoomIn(); }}
+                            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
+                            title="Zoom In (+)"
+                        >
+                            <ZoomIn className="w-5 h-5 text-white" />
+                        </button>
+                        <div className="w-px h-6 bg-white/30 mx-1" />
+                        <button
+                            onClick={(e) => { e.stopPropagation(); resetZoom(); }}
+                            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
+                            title="Reset"
+                        >
+                            <RotateCcw className="w-5 h-5 text-white" />
+                        </button>
+                    </div>
 
-                        {/* Navigation buttons for zoom modal */}
-                        {images.length > 1 && (
-                            <>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); paginate(-1); }}
-                                    disabled={currentIndex === 0}
-                                    className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors ${
-                                        currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''
-                                    }`}
-                                >
-                                    <ChevronLeft className="w-6 h-6 text-white" />
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); paginate(1); }}
-                                    disabled={currentIndex === images.length - 1}
-                                    className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors ${
-                                        currentIndex === images.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
-                                    }`}
-                                >
-                                    <ChevronRight className="w-6 h-6 text-white" />
-                                </button>
-                            </>
-                        )}
+                    {/* Close button */}
+                    <button
+                        onClick={() => setIsZoomed(false)}
+                        className="absolute top-4 right-4 w-14 h-14 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
+                        style={{ zIndex: 100, backgroundColor: 'rgba(255,255,255,0.15)' }}
+                    >
+                        <X className="w-7 h-7 text-white" />
+                    </button>
 
-                        {/* Zoomable image container */}
+                    {/* Navigation buttons */}
+                    {images.length > 1 && (
+                        <>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); paginate(-1); }}
+                                disabled={currentIndex === 0}
+                                className="absolute left-4 top-1/2 w-14 h-14 rounded-full flex items-center justify-center transition-colors hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                                style={{ transform: 'translateY(-50%)', zIndex: 100, backgroundColor: 'rgba(255,255,255,0.15)' }}
+                            >
+                                <ChevronLeft className="w-7 h-7 text-white" />
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); paginate(1); }}
+                                disabled={currentIndex === images.length - 1}
+                                className="absolute right-4 top-1/2 w-14 h-14 rounded-full flex items-center justify-center transition-colors hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                                style={{ transform: 'translateY(-50%)', zIndex: 100, backgroundColor: 'rgba(255,255,255,0.15)' }}
+                            >
+                                <ChevronRight className="w-7 h-7 text-white" />
+                            </button>
+                        </>
+                    )}
+
+                    {/* Zoomable image container */}
+                    <div
+                        ref={containerRef}
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp}
+                        className="w-full h-full flex items-center justify-center overflow-hidden"
+                        style={{ 
+                            cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'
+                        }}
+                    >
                         <div
-                            ref={containerRef}
-                            onMouseDown={handleMouseDown}
-                            onMouseMove={handleMouseMove}
-                            onMouseUp={handleMouseUp}
-                            onMouseLeave={handleMouseUp}
-                            className={`w-full h-full flex items-center justify-center overflow-hidden ${
-                                scale > 1 ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-zoom-in'
-                            }`}
-                            onClick={(e) => {
-                                if (!isDragging && scale === 1) {
-                                    setIsZoomed(false)
-                                }
+                            className="flex items-center justify-center select-none"
+                            style={{
+                                transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+                                transition: isDragging ? 'none' : 'transform 0.15s ease-out'
                             }}
                         >
-                            <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.9, opacity: 0 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                className="flex items-center justify-center"
-                                style={{
-                                    transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
-                                    transition: isDragging ? 'none' : 'transform 0.1s ease-out'
-                                }}
-                            >
-                                {images[currentIndex] ? (
-                                    <Image
-                                        src={images[currentIndex]}
-                                        alt={`${title} - Full Preview`}
-                                        width={1920}
-                                        height={1440}
-                                        className="max-w-[95vw] max-h-[95vh] w-auto h-auto object-contain select-none"
-                                        draggable={false}
-                                        unoptimized
-                                        priority
-                                    />
-                                ) : (
-                                    <div className="flex items-center justify-center text-white text-2xl">
-                                        Preview {currentIndex + 1}
-                                    </div>
-                                )}
-                            </motion.div>
+                            {images[currentIndex] ? (
+                                <Image
+                                    src={images[currentIndex]}
+                                    alt={`${title} - Full Preview`}
+                                    width={1920}
+                                    height={1440}
+                                    className="object-contain select-none"
+                                    style={{ maxWidth: '95vw', maxHeight: '95vh', width: 'auto', height: 'auto' }}
+                                    draggable={false}
+                                    unoptimized
+                                    priority
+                                />
+                            ) : (
+                                <div className="flex items-center justify-center text-white text-2xl">
+                                    Preview {currentIndex + 1}
+                                </div>
+                            )}
                         </div>
-                        
-                        {/* Bottom info */}
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
-                            <div className="bg-black/50 backdrop-blur-sm text-white/70 text-xs px-3 py-1 rounded-full">
-                                Scroll untuk zoom • Drag untuk geser
-                            </div>
-                            <div className="bg-white/10 backdrop-blur-sm text-white text-sm px-4 py-2 rounded-full">
-                                {currentIndex + 1} / {images.length}
-                            </div>
+                    </div>
+                    
+                    {/* Bottom info */}
+                    <div 
+                        className="absolute bottom-6 left-1/2 flex flex-col items-center gap-2"
+                        style={{ transform: 'translateX(-50%)', zIndex: 100 }}
+                    >
+                        <div 
+                            className="text-white/70 text-xs px-4 py-2 rounded-full"
+                            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+                        >
+                            Scroll untuk zoom • Drag untuk geser • Klik X untuk tutup
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        <div 
+                            className="text-white text-sm px-4 py-2 rounded-full font-medium"
+                            style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+                        >
+                            {currentIndex + 1} / {images.length}
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     )
 }
