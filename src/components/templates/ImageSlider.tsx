@@ -169,14 +169,16 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="relative max-w-5xl max-h-[90vh] w-full aspect-[4/3]"
+                            className="relative w-auto h-auto max-w-[95vw] max-h-[90vh] flex items-center justify-center"
                         >
                             {images[currentIndex] ? (
                                 <Image
                                     src={images[currentIndex]}
                                     alt={`${title} - Full Preview`}
-                                    fill
-                                    className="object-contain"
+                                    width={1920}
+                                    height={1080}
+                                    className="max-w-full max-h-[90vh] w-auto h-auto object-contain"
+                                    unoptimized
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-white text-2xl">
