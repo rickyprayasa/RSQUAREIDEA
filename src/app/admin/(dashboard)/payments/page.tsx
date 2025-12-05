@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Plus, CreditCard, ExternalLink, Building, Pencil, QrCode, Loader2, Trash2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, CreditCard, ExternalLink, Building, Pencil, QrCode, Loader2, Trash2, AlertTriangle } from 'lucide-react'
 
 interface Payment {
     id: number
@@ -20,6 +21,8 @@ interface Payment {
 export default function PaymentsPage() {
     const [payments, setPayments] = useState<Payment[]>([])
     const [loading, setLoading] = useState(true)
+    const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; payment: Payment | null }>({ isOpen: false, payment: null })
+    const [deleting, setDeleting] = useState(false)
 
     const fetchPayments = async () => {
         try {
@@ -52,13 +55,17 @@ export default function PaymentsPage() {
         }
     }
 
-    const deletePayment = async (id: number) => {
-        if (!confirm('Yakin ingin menghapus metode pembayaran ini?')) return
+    const handleDelete = async () => {
+        if (!deleteModal.payment) return
+        setDeleting(true)
         try {
-            await fetch(`/api/admin/payments/${id}`, { method: 'DELETE' })
+            await fetch(`/api/admin/payments/${deleteModal.payment.id}`, { method: 'DELETE' })
             fetchPayments()
+            setDeleteModal({ isOpen: false, payment: null })
         } catch (error) {
             console.error('Error deleting payment:', error)
+        } finally {
+            setDeleting(false)
         }
     }
 
@@ -160,7 +167,7 @@ export default function PaymentsPage() {
                                         <Pencil className="h-4 w-4" />
                                     </Link>
                                     <button
-                                        onClick={() => deletePayment(payment.id)}
+                                        onClick={() => setDeleteModal({ isOpen: true, payment })}
                                         className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                     >
                                         <Trash2 className="h-4 w-4" />
@@ -171,6 +178,63 @@ export default function PaymentsPage() {
                     ))}
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+                {deleteModal.isOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                            onClick={() => setDeleteModal({ isOpen: false, payment: null })}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+                        >
+                            <div className="p-6 text-center">
+                                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">Hapus Metode Pembayaran?</h3>
+                                <p className="text-gray-500 mb-6">
+                                    Apakah Anda yakin ingin menghapus <strong className="text-gray-900">{deleteModal.payment?.name}</strong>? 
+                                    Tindakan ini tidak dapat dibatalkan.
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setDeleteModal({ isOpen: false, payment: null })}
+                                        className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 font-medium"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        disabled={deleting}
+                                        className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {deleting ? (
+                                            <>
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                Menghapus...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Trash2 className="h-4 w-4" />
+                                                Hapus
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }
