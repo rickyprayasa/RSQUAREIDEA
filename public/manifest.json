@@ -1,0 +1,32 @@
+{
+  "name": "RSQUARE - Template Premium Google Sheets Indonesia",
+  "short_name": "RSQUARE",
+  "description": "Koleksi template Google Sheets premium untuk bisnis dan personal. Budget tracker, invoice, inventory, dan lainnya.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["productivity", "business", "finance"],
+  "lang": "id",
+  "dir": "ltr"
+}
