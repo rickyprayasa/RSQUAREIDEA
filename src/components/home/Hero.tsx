@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { ClientLordIcon } from '@/components/ui/lordicon'
+import { FlipWords } from '@/components/ui/flip-words'
 
 export function Hero() {
     return (
@@ -21,9 +22,12 @@ export function Hero() {
                 <h1 className="mx-auto max-w-5xl text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 md:mb-8 leading-tight animate-fade-in-up">
                     <span className="inline-block">Ubah Data Rumit Menjadi</span>
                     <br className="hidden sm:block" />
-                    <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500">
-                        Keputusan Cerdas
-                        <span className="absolute -bottom-1 md:-bottom-2 left-0 right-0 h-2 md:h-3 bg-orange-200/50 -z-10" />
+                    <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500 pb-2">
+                        <FlipWords 
+                            words={["Keputusan Cerdas", "Laporan Rapi", "Insight Bisnis", "Bisnis Profitable"]}
+                            className="!text-transparent !bg-clip-text !bg-gradient-to-r !from-orange-600 !to-amber-500 p-0"
+                        />
+                        <span className="absolute bottom-0 md:-bottom-1 left-0 right-0 h-2 md:h-3 bg-orange-200/50 -z-10" />
                     </span>
                 </h1>
 
