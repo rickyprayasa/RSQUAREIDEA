@@ -7,6 +7,7 @@ interface Customer {
     id: number
     name: string
     email: string
+    products?: string[]
 }
 
 function generateVoucherCode(): string {
@@ -18,7 +19,18 @@ function generateVoucherCode(): string {
     return code
 }
 
-function getCampaignEmailHtml(customerName: string, feedbackUrl: string): string {
+function getCampaignEmailHtml(customerName: string, feedbackUrl: string, products?: string[]): string {
+    const productsHtml = products && products.length > 0 
+        ? `
+            <div style="background-color: #eff6ff; border: 1px solid #dbeafe; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <h4 style="color: #1e40af; font-size: 14px; font-weight: 600; margin-top: 0; margin-bottom: 12px;">📦 Template yang Kamu Beli:</h4>
+                <ul style="color: #4b5563; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                    ${products.map(p => `<li>${p}</li>`).join('')}
+                </ul>
+            </div>
+        `
+        : ''
+
     return `
 <!DOCTYPE html>
 <html>
@@ -45,6 +57,8 @@ function getCampaignEmailHtml(customerName: string, feedbackUrl: string): string
             <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
                 Terima kasih sudah mempercayai RSQUARE untuk kebutuhan template spreadsheet Kamu!
             </p>
+
+            ${productsHtml}
 
             <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
                 Kami ingin mendengar pengalaman Kamu. Sebagai apresiasi, kami akan memberikan <strong style="color: #f97316;">1 Template Google Sheets GRATIS</strong> setelah Kamu memberikan feedback!
@@ -162,11 +176,14 @@ export async function POST(request: NextRequest) {
                     continue
                 }
 
-                // Generate HTML email
-                const htmlEmail = getCampaignEmailHtml(customer.name, feedbackUrl)
+                // Generate HTML email with products
+                const htmlEmail = getCampaignEmailHtml(customer.name, feedbackUrl, customer.products)
                 
-                // Plain text fallback
-                const textEmail = `Halo ${customer.name},\n\nTerima kasih sudah mempercayai RSQUARE!\n\nKami ingin mendengar pengalaman Kamu. Sebagai apresiasi, kami akan memberikan 1 Template Google Sheets GRATIS setelah Kamu memberikan feedback!\n\nBerikan feedback di: ${feedbackUrl}\n\nSetelah mengisi feedback dengan rating bagus, kode voucher akan dikirim ke email Kamu.\n\nTerima kasih!\nTim RSQUARE`
+                // Plain text fallback with products
+                const productsText = customer.products && customer.products.length > 0 
+                    ? `\n\nTemplate yang Kamu beli:\n${customer.products.map(p => `- ${p}`).join('\n')}\n` 
+                    : ''
+                const textEmail = `Halo ${customer.name},\n\nTerima kasih sudah mempercayai RSQUARE!${productsText}\n\nKami ingin mendengar pengalaman Kamu. Sebagai apresiasi, kami akan memberikan 1 Template Google Sheets GRATIS setelah Kamu memberikan feedback!\n\nBerikan feedback di: ${feedbackUrl}\n\nSetelah mengisi feedback dengan rating bagus, kode voucher akan dikirim ke email Kamu.\n\nTerima kasih!\nTim RSQUARE`
 
                 // Send email
                 await transporter.sendMail({

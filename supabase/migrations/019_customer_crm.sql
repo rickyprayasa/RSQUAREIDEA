@@ -4,6 +4,7 @@ ALTER TABLE customers ADD COLUMN IF NOT EXISTS notes TEXT;
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS feedback_email_sent_at TIMESTAMPTZ;
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS feedback_voucher_code TEXT;
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS voucher_sent_at TIMESTAMPTZ;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS purchased_products TEXT[];
 
 -- Create index for source filtering
 CREATE INDEX IF NOT EXISTS idx_customers_source ON customers(source);

@@ -8,6 +8,7 @@ interface Customer {
     id: number
     name: string
     email: string
+    products?: string[]
 }
 
 interface EmailCampaignModalProps {

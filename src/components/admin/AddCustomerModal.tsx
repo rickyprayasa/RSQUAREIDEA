@@ -1,8 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { UserPlus, X, Loader2 } from 'lucide-react'
+import { UserPlus, X, Loader2, Check } from 'lucide-react'
+
+interface Product {
+    id: number
+    title: string
+}
 
 interface AddCustomerModalProps {
     isOpen: boolean
@@ -20,6 +25,8 @@ const SOURCE_OPTIONS = [
 export default function AddCustomerModal({ isOpen, onClose, onSuccess }: AddCustomerModalProps) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [products, setProducts] = useState<Product[]>([])
+    const [selectedProducts, setSelectedProducts] = useState<string[]>([])
     const [form, setForm] = useState({
         name: '',
         email: '',
@@ -27,6 +34,25 @@ export default function AddCustomerModal({ isOpen, onClose, onSuccess }: AddCust
         source: 'lynk_id',
         notes: '',
     })
+
+    useEffect(() => {
+        if (isOpen) {
+            fetch('/api/products')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.products) setProducts(data.products)
+                })
+                .catch(console.error)
+        }
+    }, [isOpen])
+
+    const toggleProduct = (title: string) => {
+        setSelectedProducts(prev => 
+            prev.includes(title) 
+                ? prev.filter(p => p !== title)
+                : [...prev, title]
+        )
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -42,13 +68,14 @@ export default function AddCustomerModal({ isOpen, onClose, onSuccess }: AddCust
             const res = await fetch('/api/admin/customers/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
+                body: JSON.stringify({ ...form, products: selectedProducts }),
             })
             
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Gagal menambah pelanggan')
             
             setForm({ name: '', email: '', phone: '', source: 'lynk_id', notes: '' })
+            setSelectedProducts([])
             onSuccess()
             onClose()
         } catch (err) {
@@ -158,13 +185,54 @@ export default function AddCustomerModal({ isOpen, onClose, onSuccess }: AddCust
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                    Produk yang Dibeli
+                                </label>
+                                <div className="border border-gray-200 rounded-xl p-3 max-h-40 overflow-y-auto space-y-2">
+                                    {products.length === 0 ? (
+                                        <p className="text-sm text-gray-400">Memuat produk...</p>
+                                    ) : (
+                                        products.map((product) => (
+                                            <label
+                                                key={product.id}
+                                                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                                                    selectedProducts.includes(product.title)
+                                                        ? 'bg-orange-50 border border-orange-200'
+                                                        : 'hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                <div
+                                                    className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${
+                                                        selectedProducts.includes(product.title)
+                                                            ? 'bg-orange-500 text-white'
+                                                            : 'border-2 border-gray-300'
+                                                    }`}
+                                                    onClick={() => toggleProduct(product.title)}
+                                                >
+                                                    {selectedProducts.includes(product.title) && (
+                                                        <Check className="h-3 w-3" />
+                                                    )}
+                                                </div>
+                                                <span className="text-sm text-gray-700 truncate">{product.title}</span>
+                                            </label>
+                                        ))
+                                    )}
+                                </div>
+                                {selectedProducts.length > 0 && (
+                                    <p className="text-xs text-gray-500 mt-1.5">
+                                        {selectedProducts.length} produk dipilih
+                                    </p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                                     Catatan
                                 </label>
                                 <textarea
                                     value={form.notes}
                                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                                    placeholder="Produk yang dibeli, tanggal pembelian, dll."
-                                    rows={3}
+                                    placeholder="Tanggal pembelian, catatan lainnya, dll."
+                                    rows={2}
                                     className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
                                 />
                             </div>

@@ -34,6 +34,7 @@ export async function GET() {
             const customerOrders = orders?.filter(o => o.customer_email === customer.email) || []
             const products: string[] = []
             
+            // Add products from orders (website purchases)
             customerOrders.forEach(o => {
                 // Get from order_items if available
                 if (o.order_items && Array.isArray(o.order_items) && o.order_items.length > 0) {
@@ -49,6 +50,13 @@ export async function GET() {
                     })
                 }
             })
+
+            // Add purchased_products from external platforms (manual input)
+            if (customer.purchased_products && Array.isArray(customer.purchased_products)) {
+                customer.purchased_products.forEach((p: string) => {
+                    if (p && !products.includes(p)) products.push(p)
+                })
+            }
             
             return {
                 ...customer,

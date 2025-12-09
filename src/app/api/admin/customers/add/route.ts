@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
         }
 
         const data = await request.json()
-        const { name, email, phone, source, notes } = data
+        const { name, email, phone, source, notes, products } = data
 
         if (!name || !email) {
             return NextResponse.json({ error: 'Nama dan email wajib diisi' }, { status: 400 })
@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
                 phone: phone || null,
                 source: source || 'manual',
                 notes: notes || null,
-                total_orders: 0,
+                purchased_products: products && products.length > 0 ? products : null,
+                total_orders: products?.length || 0,
                 total_spent: 0,
             })
             .select()
