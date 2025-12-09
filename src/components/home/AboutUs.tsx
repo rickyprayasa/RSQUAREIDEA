@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { ClientLordIcon } from '@/components/ui/lordicon'
 
 const highlights = [
     { text: 'Template Berkualitas Tinggi', iconSrc: 'https://cdn.lordicon.com/xzalkbkz.json' },
@@ -50,7 +51,7 @@ export function AboutUs() {
                             transition={{ duration: 0.4, delay: 0.2 }}
                             className="inline-flex items-center gap-2 text-orange-500 font-semibold text-sm uppercase tracking-wider mb-3"
                         >
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/yqzmiobz.json"
                                 trigger="loop"
                                 delay="3000"
@@ -115,7 +116,7 @@ export function AboutUs() {
                                     className="flex items-center gap-3"
                                 >
                                     <div className="w-7 h-7 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src={item.iconSrc}
                                             trigger="loop"
                                             delay="3000"
@@ -138,7 +139,7 @@ export function AboutUs() {
                                 className="inline-flex items-center gap-2 text-orange-600 font-semibold hover:text-orange-700 transition-colors group"
                             >
                                 <span>Selengkapnya tentang kami</span>
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/vduvxizq.json"
                                     trigger="loop"
                                     delay="2000"

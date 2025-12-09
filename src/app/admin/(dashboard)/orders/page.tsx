@@ -172,33 +172,33 @@ export default function OrdersPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-2xl font-bold text-gray-900">Pesanan</h1>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Pesanan</h1>
                         {pendingCount > 0 && (
-                            <span className="px-3 py-1 bg-red-500 text-white text-sm font-bold rounded-full animate-pulse">
-                                {pendingCount} Menunggu Konfirmasi
+                            <span className="px-2 py-0.5 md:px-3 md:py-1 bg-red-500 text-white text-xs md:text-sm font-bold rounded-full animate-pulse">
+                                {pendingCount} Menunggu
                             </span>
                         )}
                     </div>
-                    <p className="text-gray-500 mt-1">Kelola pesanan dan konfirmasi pembayaran ({orders.length} pesanan)</p>
+                    <p className="text-sm text-gray-500 mt-0.5">Kelola pesanan ({orders.length} total)</p>
                 </div>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
+            {/* Filter Tabs - horizontal scroll on mobile */}
+            <div className="flex gap-2 p-1 bg-gray-100 rounded-xl overflow-x-auto scrollbar-hide">
                 {[
                     { key: 'all', label: 'Semua' },
-                    { key: 'pending_confirmation', label: `Menunggu Konfirmasi${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
-                    { key: 'pending', label: 'Menunggu Bayar' },
+                    { key: 'pending_confirmation', label: `Konfirmasi${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
+                    { key: 'pending', label: 'Menunggu' },
                     { key: 'paid', label: 'Dibayar' },
                     { key: 'completed', label: 'Selesai' },
                 ].map((f) => (
                     <button
                         key={f.key}
                         onClick={() => setFilter(f.key as typeof filter)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${filter === f.key
+                        className={`px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${filter === f.key
                             ? 'bg-white text-gray-900 shadow-sm'
                             : 'text-gray-600 hover:text-gray-900'
                             }`}
@@ -208,142 +208,208 @@ export default function OrdersPage() {
                 ))}
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                {filteredOrders.length === 0 ? (
-                    <div className="p-12 text-center">
-                        <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                        <p className="text-gray-500">Tidak ada pesanan</p>
-                    </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100">
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">No. Pesanan</th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Pelanggan</th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Produk</th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Total</th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Bukti Bayar</th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {filteredOrders.map((order) => {
-                                    const status = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending
-                                    const confirmStatus = order.confirmation ? confirmationStatusConfig[order.confirmation.status] : null
-                                    return (
-                                        <tr key={order.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4">
-                                                <span className="font-mono text-sm font-medium">{order.orderNumber}</span>
-                                                <p className="text-xs text-gray-400 mt-1">{formatDate(order.createdAt)}</p>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <p className="font-medium text-gray-900">{order.customerName}</p>
-                                                <p className="text-sm text-gray-500">{order.customerEmail}</p>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <p className="text-gray-900 line-clamp-2 max-w-xs">{order.productTitle}</p>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {order.amount === 0 ? (
-                                                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Gratis</span>
-                                                ) : (
-                                                    <>
-                                                        <p className="font-semibold text-gray-900">Rp {order.amount.toLocaleString('id-ID')}</p>
-                                                        {order.paymentMethod && (
-                                                            <p className="text-xs text-gray-500">{order.paymentMethod}</p>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="relative">
-                                                    <select
-                                                        value={order.status}
-                                                        onChange={(e) => updateStatus(order.id, e.target.value)}
-                                                        disabled={updatingStatus === order.id}
-                                                        className={`appearance-none cursor-pointer pr-8 pl-3 py-1.5 text-xs font-medium rounded-full border-0 ${status.color} ${updatingStatus === order.id ? 'opacity-50' : ''}`}
-                                                    >
-                                                        <option value="pending">Menunggu</option>
-                                                        <option value="paid">Dibayar</option>
-                                                        <option value="confirmed">Dikonfirmasi</option>
-                                                        <option value="completed">Selesai</option>
-                                                        <option value="cancelled">Dibatalkan</option>
-                                                    </select>
-                                                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 pointer-events-none" />
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {order.amount === 0 ? (
-                                                    <span className="text-xs text-gray-400 italic">Tidak perlu</span>
-                                                ) : order.confirmation ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 cursor-pointer group"
-                                                            onClick={() => setZoomedImage(order.confirmation!.proofImage)}>
-                                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                            <img
-                                                                src={order.confirmation.proofImage}
-                                                                alt="Bukti"
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                                                                <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                            </div>
-                                                        </div>
-                                                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${confirmStatus?.color}`}>
-                                                            {confirmStatus?.label}
-                                                        </span>
+            {/* Empty State */}
+            {filteredOrders.length === 0 ? (
+                <div className="bg-white rounded-xl p-8 md:p-12 text-center border border-gray-100">
+                    <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500">Tidak ada pesanan</p>
+                </div>
+            ) : (
+                <>
+                    {/* Mobile: Card layout */}
+                    <div className="md:hidden space-y-3">
+                        {filteredOrders.map((order) => {
+                            const status = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending
+                            const confirmStatus = order.confirmation ? confirmationStatusConfig[order.confirmation.status] : null
+                            return (
+                                <div key={order.id} className="bg-white rounded-xl p-4 border border-gray-100">
+                                    <div className="flex items-start justify-between gap-2 mb-3">
+                                        <div>
+                                            <p className="font-mono text-xs font-medium text-gray-900">{order.orderNumber}</p>
+                                            <p className="text-xs text-gray-400">{formatDate(order.createdAt)}</p>
+                                        </div>
+                                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${status.color}`}>
+                                            {status.label}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-2 mb-3">
+                                        <p className="text-sm font-medium text-gray-900">{order.customerName}</p>
+                                        <p className="text-xs text-gray-500 line-clamp-1">{order.productTitle}</p>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                                        <div>
+                                            {order.amount === 0 ? (
+                                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">Gratis</span>
+                                            ) : (
+                                                <span className="font-semibold text-gray-900 text-sm">Rp {order.amount.toLocaleString('id-ID')}</span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            {order.confirmation && (
+                                                <div className="flex items-center gap-1 mr-2">
+                                                    <div className="w-6 h-6 rounded overflow-hidden bg-gray-100"
+                                                        onClick={() => setZoomedImage(order.confirmation!.proofImage)}>
+                                                        <img src={order.confirmation.proofImage} alt="" className="w-full h-full object-cover" />
                                                     </div>
-                                                ) : (
-                                                    <span className="text-xs text-gray-400">-</span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-1">
-                                                    <button
-                                                        onClick={() => setSelectedOrder(order)}
-                                                        className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
-                                                    >
-                                                        <Eye className="h-4 w-4" />
+                                                    <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded-full ${confirmStatus?.color}`}>
+                                                        {confirmStatus?.label}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <button onClick={() => setSelectedOrder(order)} className="p-1.5 text-gray-400 hover:text-orange-500 rounded-lg">
+                                                <Eye className="h-4 w-4" />
+                                            </button>
+                                            {order.amount > 0 && order.confirmation?.status === 'pending' && (
+                                                <>
+                                                    <button onClick={() => handleConfirmationAction(order.confirmation!.id, 'approved')} className="p-1.5 text-green-500 rounded-lg">
+                                                        <Check className="h-4 w-4" />
                                                     </button>
-                                                    {/* Quick approve/reject for pending confirmations (hide for free orders) */}
-                                                    {order.amount > 0 && order.confirmation?.status === 'pending' && (
+                                                    <button onClick={() => handleConfirmationAction(order.confirmation!.id, 'rejected')} className="p-1.5 text-red-500 rounded-lg">
+                                                        <X className="h-4 w-4" />
+                                                    </button>
+                                                </>
+                                            )}
+                                            <button onClick={() => setDeleteModal({ isOpen: true, order })} className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg">
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    {/* Desktop: Table layout */}
+                    <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gray-50 border-b border-gray-100">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">No. Pesanan</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Pelanggan</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Produk</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Total</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Bukti Bayar</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {filteredOrders.map((order) => {
+                                        const status = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending
+                                        const confirmStatus = order.confirmation ? confirmationStatusConfig[order.confirmation.status] : null
+                                        return (
+                                            <tr key={order.id} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4">
+                                                    <span className="font-mono text-sm font-medium">{order.orderNumber}</span>
+                                                    <p className="text-xs text-gray-400 mt-1">{formatDate(order.createdAt)}</p>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <p className="font-medium text-gray-900">{order.customerName}</p>
+                                                    <p className="text-sm text-gray-500">{order.customerEmail}</p>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <p className="text-gray-900 line-clamp-2 max-w-xs">{order.productTitle}</p>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {order.amount === 0 ? (
+                                                        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">Gratis</span>
+                                                    ) : (
                                                         <>
-                                                            <button
-                                                                onClick={() => handleConfirmationAction(order.confirmation!.id, 'approved')}
-                                                                disabled={processingConfirmation}
-                                                                className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
-                                                                title="Setujui Pembayaran"
-                                                            >
-                                                                <Check className="h-4 w-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleConfirmationAction(order.confirmation!.id, 'rejected')}
-                                                                disabled={processingConfirmation}
-                                                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                                title="Tolak Pembayaran"
-                                                            >
-                                                                <X className="h-4 w-4" />
-                                                            </button>
+                                                            <p className="font-semibold text-gray-900">Rp {order.amount.toLocaleString('id-ID')}</p>
+                                                            {order.paymentMethod && (
+                                                                <p className="text-xs text-gray-500">{order.paymentMethod}</p>
+                                                            )}
                                                         </>
                                                     )}
-                                                    <button
-                                                        onClick={() => setDeleteModal({ isOpen: true, order })}
-                                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )
-                                })}
-                            </tbody>
-                        </table>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="relative">
+                                                        <select
+                                                            value={order.status}
+                                                            onChange={(e) => updateStatus(order.id, e.target.value)}
+                                                            disabled={updatingStatus === order.id}
+                                                            className={`appearance-none cursor-pointer pr-8 pl-3 py-1.5 text-xs font-medium rounded-full border-0 ${status.color} ${updatingStatus === order.id ? 'opacity-50' : ''}`}
+                                                        >
+                                                            <option value="pending">Menunggu</option>
+                                                            <option value="paid">Dibayar</option>
+                                                            <option value="confirmed">Dikonfirmasi</option>
+                                                            <option value="completed">Selesai</option>
+                                                            <option value="cancelled">Dibatalkan</option>
+                                                        </select>
+                                                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 pointer-events-none" />
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {order.amount === 0 ? (
+                                                        <span className="text-xs text-gray-400 italic">Tidak perlu</span>
+                                                    ) : order.confirmation ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 cursor-pointer group"
+                                                                onClick={() => setZoomedImage(order.confirmation!.proofImage)}>
+                                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                <img
+                                                                    src={order.confirmation.proofImage}
+                                                                    alt="Bukti"
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                                                                    <ZoomIn className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                                </div>
+                                                            </div>
+                                                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${confirmStatus?.color}`}>
+                                                                {confirmStatus?.label}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400">-</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-1">
+                                                        <button
+                                                            onClick={() => setSelectedOrder(order)}
+                                                            className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+                                                        >
+                                                            <Eye className="h-4 w-4" />
+                                                        </button>
+                                                        {order.amount > 0 && order.confirmation?.status === 'pending' && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleConfirmationAction(order.confirmation!.id, 'approved')}
+                                                                    disabled={processingConfirmation}
+                                                                    className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+                                                                    title="Setujui Pembayaran"
+                                                                >
+                                                                    <Check className="h-4 w-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleConfirmationAction(order.confirmation!.id, 'rejected')}
+                                                                    disabled={processingConfirmation}
+                                                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                                    title="Tolak Pembayaran"
+                                                                >
+                                                                    <X className="h-4 w-4" />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        <button
+                                                            onClick={() => setDeleteModal({ isOpen: true, order })}
+                                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                )}
-            </div>
+                </>
+            )}
 
             {/* Order Detail Modal */}
             <AnimatePresence>

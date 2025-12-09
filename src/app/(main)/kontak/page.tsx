@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -150,7 +152,7 @@ export default function KontakPage() {
                             transition={{ duration: 0.5 }}
                         >
                             <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/fdxqrdfe.json"
                                     trigger="loop"
                                     delay="2000"
@@ -202,7 +204,7 @@ export default function KontakPage() {
                             >
                                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                                     <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/nzixoeyk.json"
                                             trigger="loop"
                                             delay="2000"
@@ -221,7 +223,7 @@ export default function KontakPage() {
 
                                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/surcxhka.json"
                                             trigger="loop"
                                             delay="2500"
@@ -235,7 +237,7 @@ export default function KontakPage() {
 
                                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                                     <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/aycieyht.json"
                                             trigger="loop"
                                             delay="3000"
@@ -257,7 +259,7 @@ export default function KontakPage() {
                             >
                                 <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
                                     <div className="flex items-center gap-2 mb-6">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/hvueufdo.json"
                                             trigger="loop"
                                             delay="2000"
@@ -338,7 +340,7 @@ export default function KontakPage() {
                                             <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                                             {formStatus === 'sending' ? (
                                                 <>
-                                                    <lord-icon
+                                                    <ClientLordIcon
                                                         src="https://cdn.lordicon.com/xjovhxra.json"
                                                         trigger="loop"
                                                         colors="primary:#ffffff"
@@ -348,7 +350,7 @@ export default function KontakPage() {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <lord-icon
+                                                    <ClientLordIcon
                                                         src="https://cdn.lordicon.com/ternnbni.json"
                                                         trigger="loop-on-hover"
                                                         colors="primary:#ffffff"
@@ -398,7 +400,7 @@ export default function KontakPage() {
                                         : 'bg-gradient-to-br from-red-500 to-rose-500 shadow-lg shadow-red-200'
                                         }`}
                                 >
-                                    <lord-icon
+                                    <ClientLordIcon
                                         src={dialog.type === 'success'
                                             ? "https://cdn.lordicon.com/oqdmuxru.json"
                                             : "https://cdn.lordicon.com/usownftb.json"

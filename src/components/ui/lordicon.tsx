@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
 // Icon JSON imports - We'll use CDN URLs for simplicity
 const ICON_URLS: Record<string, string> = {
     // Navigation & Actions
@@ -101,6 +103,12 @@ export function LordIcon({
     className = '',
     delay = 0
 }: LordIconProps) {
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
     const iconUrl = src || (icon ? (ICON_URLS[icon] || icon) : '')
 
     const colorString = typeof colors === 'string'
@@ -108,6 +116,11 @@ export function LordIcon({
         : colors
             ? Object.entries(colors).map(([k, v]) => `${k}:${v}`).join(',')
             : 'primary:#f97316,secondary:#fbbf24'
+
+    // Don't render on server to avoid hydration mismatch
+    if (!mounted) {
+        return <span style={{ display: 'inline-block', width: size, height: size }} className={className} />
+    }
 
     return (
         <lord-icon
@@ -120,6 +133,39 @@ export function LordIcon({
                 width: `${size}px`,
                 height: `${size}px`,
             }}
+            className={className}
+        />
+    )
+}
+
+// Client-only wrapper for inline lord-icon usage
+interface ClientLordIconProps {
+    src: string
+    trigger?: string
+    delay?: string | number
+    colors?: string
+    style?: React.CSSProperties
+    className?: string
+}
+
+export function ClientLordIcon({ src, trigger = 'hover', delay = 0, colors, style, className }: ClientLordIconProps) {
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    if (!mounted) {
+        return <span style={{ display: 'inline-block', ...style }} className={className} />
+    }
+
+    return (
+        <lord-icon
+            src={src}
+            trigger={trigger}
+            delay={delay}
+            colors={colors}
+            style={style}
             className={className}
         />
     )

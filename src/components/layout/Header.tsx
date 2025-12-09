@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
@@ -65,14 +67,14 @@ export function Header() {
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     >
                         {mobileMenuOpen ? (
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/nqtddedc.json"
                                 trigger="hover"
                                 colors="primary:#374151"
                                 style={{ width: '24px', height: '24px' }}
                             />
                         ) : (
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/eouimtlu.json"
                                 trigger="hover"
                                 colors="primary:#374151"

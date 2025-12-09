@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
+import { ClientLordIcon } from '@/components/ui/lordicon'
 
 export function Hero() {
     return (
@@ -71,33 +73,49 @@ export function Hero() {
                     <div className="absolute inset-0 -z-10 bg-orange-500/15 blur-[80px] rounded-full transform scale-75 hidden md:block" />
 
                     {/* Floating Elements - only on desktop */}
-                    <div className="absolute -right-4 top-10 md:-right-8 md:top-16 bg-white p-3 md:p-4 rounded-xl shadow-lg border border-gray-200 hidden lg:block z-20">
+                    <motion.div 
+                        className="absolute -right-4 top-10 md:-right-8 md:top-16 bg-white p-3 md:p-4 rounded-xl shadow-lg border border-gray-200 hidden lg:block z-20"
+                        animate={{ y: [0, -10, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    >
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-green-100 rounded-lg">
-                                <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                </svg>
+                                <ClientLordIcon
+                                    src="https://cdn.lordicon.com/ghhwiltn.json"
+                                    trigger="loop"
+                                    delay="2000"
+                                    colors="primary:#16a34a,secondary:#4ade80"
+                                    style={{ width: '24px', height: '24px' }}
+                                />
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 font-medium">Fitur Pintar</p>
                                 <p className="text-base font-bold text-gray-900">Rumus Otomatis</p>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="absolute -left-4 bottom-10 md:-left-8 md:bottom-16 bg-white p-3 md:p-4 rounded-xl shadow-lg border border-gray-200 hidden lg:block z-20">
+                    <motion.div 
+                        className="absolute -left-4 bottom-10 md:-left-8 md:bottom-16 bg-white p-3 md:p-4 rounded-xl shadow-lg border border-gray-200 hidden lg:block z-20"
+                        animate={{ y: [0, 10, 0] }}
+                        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    >
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-blue-100 rounded-lg">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
+                                <ClientLordIcon
+                                    src="https://cdn.lordicon.com/gqdnbnwt.json"
+                                    trigger="loop"
+                                    delay="2000"
+                                    colors="primary:#2563eb,secondary:#60a5fa"
+                                    style={{ width: '24px', height: '24px' }}
+                                />
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 font-medium">Visualisasi</p>
                                 <p className="text-base font-bold text-gray-900">Dashboard Rapi</p>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
 

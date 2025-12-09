@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ClientLordIcon } from '@/components/ui/lordicon'
 
 interface Product {
     id: number
@@ -165,7 +166,7 @@ export default function FeedbackPage() {
                             transition={{ duration: 0.5 }}
                         >
                             <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/ohfmmfhn.json"
                                     trigger="loop"
                                     delay="2000"
@@ -228,7 +229,7 @@ export default function FeedbackPage() {
                                     {/* Name */}
                                     <div>
                                         <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/dxjqoygy.json"
                                                 trigger="hover"
                                                 colors="primary:#6b7280"
@@ -250,7 +251,7 @@ export default function FeedbackPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
                                             <label htmlFor="social" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                                <lord-icon
+                                                <ClientLordIcon
                                                     src="https://cdn.lordicon.com/uvqnvwbl.json"
                                                     trigger="hover"
                                                     colors="primary:#6b7280"
@@ -268,7 +269,7 @@ export default function FeedbackPage() {
                                         </div>
                                         <div>
                                             <label htmlFor="socialUrl" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                                <lord-icon
+                                                <ClientLordIcon
                                                     src="https://cdn.lordicon.com/nduddlov.json"
                                                     trigger="hover"
                                                     colors="primary:#6b7280"
@@ -289,7 +290,7 @@ export default function FeedbackPage() {
                                     {/* Template Selection */}
                                     <div>
                                         <label htmlFor="template" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/ghhwiltn.json"
                                                 trigger="hover"
                                                 colors="primary:#6b7280"
@@ -313,7 +314,7 @@ export default function FeedbackPage() {
                                     {/* Rating */}
                                     <div>
                                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/hvueufdo.json"
                                                 trigger="hover"
                                                 colors="primary:#6b7280"
@@ -346,7 +347,7 @@ export default function FeedbackPage() {
                                     {/* What do you like */}
                                     <div>
                                         <label htmlFor="likes" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/egiwmiit.json"
                                                 trigger="hover"
                                                 colors="primary:#6b7280"
@@ -366,7 +367,7 @@ export default function FeedbackPage() {
                                     {/* What needs improvement */}
                                     <div>
                                         <label htmlFor="improvements" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/wloilxuq.json"
                                                 trigger="hover"
                                                 colors="primary:#6b7280"
@@ -386,7 +387,7 @@ export default function FeedbackPage() {
                                     {/* Testimonial Permission */}
                                     <div>
                                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/ujxzdfjx.json"
                                                 trigger="hover"
                                                 colors="primary:#6b7280"
@@ -430,7 +431,7 @@ export default function FeedbackPage() {
                                         <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                                         {formStatus === 'sending' ? (
                                             <>
-                                                <lord-icon
+                                                <ClientLordIcon
                                                     src="https://cdn.lordicon.com/xjovhxra.json"
                                                     trigger="loop"
                                                     colors="primary:#ffffff"
@@ -440,7 +441,7 @@ export default function FeedbackPage() {
                                             </>
                                         ) : (
                                             <>
-                                                <lord-icon
+                                                <ClientLordIcon
                                                     src="https://cdn.lordicon.com/ternnbni.json"
                                                     trigger="loop-on-hover"
                                                     colors="primary:#ffffff"
@@ -493,7 +494,7 @@ export default function FeedbackPage() {
                                             : 'bg-gradient-to-br from-red-500 to-rose-500 shadow-lg shadow-red-200'
                                         }`}
                                 >
-                                    <lord-icon
+                                    <ClientLordIcon
                                         src={dialog.type === 'success'
                                             ? "https://cdn.lordicon.com/oqdmuxru.json"
                                             : "https://cdn.lordicon.com/usownftb.json"
@@ -526,7 +527,7 @@ export default function FeedbackPage() {
                                         }`}
                                 >
                                     <span className="flex items-center justify-center gap-2">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src={dialog.type === 'success'
                                                 ? "https://cdn.lordicon.com/egiwmiit.json"
                                                 : "https://cdn.lordicon.com/akuwjdzh.json"

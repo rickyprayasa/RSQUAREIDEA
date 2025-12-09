@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TemplateCard } from '@/components/templates/TemplateCard'
@@ -74,7 +76,7 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
             >
                 {/* Search Input */}
                 <div className="relative mb-6">
-                    <lord-icon
+                    <ClientLordIcon
                         src="https://cdn.lordicon.com/kkvxgpti.json"
                         trigger="hover"
                         colors="primary:#9ca3af"
@@ -103,7 +105,7 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                         >
-                            <lord-icon
+                            <ClientLordIcon
                                 src={category.iconSrc}
                                 trigger="hover"
                                 colors={activeCategory === category.id ? "primary:#ffffff" : "primary:#4b5563"}
@@ -124,7 +126,7 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                             onClick={() => setViewMode('grid')}
                             className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-100'}`}
                         >
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/jeuxydnh.json"
                                 trigger="hover"
                                 colors={viewMode === 'grid' ? "primary:#ea580c" : "primary:#9ca3af"}
@@ -135,7 +137,7 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                             onClick={() => setViewMode('compact')}
                             className={`p-2 rounded-lg transition-colors ${viewMode === 'compact' ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-100'}`}
                         >
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/qqkwcnqq.json"
                                 trigger="hover"
                                 colors={viewMode === 'compact' ? "primary:#ea580c" : "primary:#9ca3af"}
@@ -191,7 +193,7 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                     className="text-center py-16"
                 >
                     <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <lord-icon
+                        <ClientLordIcon
                             src="https://cdn.lordicon.com/kkvxgpti.json"
                             trigger="loop"
                             colors="primary:#9ca3af"

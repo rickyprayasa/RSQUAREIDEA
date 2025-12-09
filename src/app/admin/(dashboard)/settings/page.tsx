@@ -310,20 +310,23 @@ export default function SettingsPage() {
         pink: 'from-pink-500 to-rose-500',
     }
 
+    const activeTabData = tabs.find(t => t.id === activeTab)
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6 pb-20 md:pb-0">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Pengaturan</h1>
-                    <p className="text-gray-500 mt-1">Konfigurasi website</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900">Pengaturan</h1>
+                    <p className="text-gray-500 text-sm md:text-base mt-0.5 md:mt-1">Konfigurasi website</p>
                 </div>
+                {/* Desktop Save Button */}
                 <motion.button
                     onClick={handleSave}
                     disabled={saving}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium shadow-lg transition-all duration-200 ${saved
+                    className={`hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium shadow-lg transition-all duration-200 ${saved
                         ? 'bg-green-500 text-white shadow-green-200'
                         : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-orange-200 hover:shadow-xl'
                         } disabled:opacity-70`}
@@ -333,8 +336,30 @@ export default function SettingsPage() {
                 </motion.button>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-1 p-1 bg-gray-100 rounded-2xl overflow-x-auto">
+            {/* Mobile: Dropdown Tab Selector */}
+            <div className="md:hidden">
+                <div className="relative">
+                    <select
+                        value={activeTab}
+                        onChange={(e) => setActiveTab(e.target.value)}
+                        className={`w-full appearance-none px-4 py-3 pr-10 bg-gradient-to-r ${tabColors[activeTabData?.color || 'orange']} text-white font-medium rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-300`}
+                    >
+                        {tabs.map((tab) => (
+                            <option key={tab.id} value={tab.id} className="text-gray-900 bg-white">
+                                {tab.label}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop: Horizontal Tabs */}
+            <div className="hidden md:flex gap-1 p-1 bg-gray-100 rounded-2xl overflow-x-auto">
                 {tabs.map((tab) => {
                     const isActive = activeTab === tab.id
                     return (
@@ -362,24 +387,40 @@ export default function SettingsPage() {
                 })}
             </div>
 
+            {/* Mobile: Floating Save Button */}
+            <div className="md:hidden fixed bottom-4 left-4 right-4 z-30">
+                <motion.button
+                    onClick={handleSave}
+                    disabled={saving}
+                    whileTap={{ scale: 0.98 }}
+                    className={`w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-medium shadow-xl transition-all duration-200 ${saved
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
+                        } disabled:opacity-70`}
+                >
+                    {saved ? <Check className="h-5 w-5" /> : <Save className="h-5 w-5" />}
+                    {saving ? 'Menyimpan...' : saved ? 'Tersimpan!' : 'Simpan Pengaturan'}
+                </motion.button>
+            </div>
+
             {/* Content */}
             <motion.div
                 key={activeTab}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.15 }}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6"
             >
                 {/* General Tab */}
                 {activeTab === 'general' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                         <SectionHeader
                             icon={Settings}
                             title="Pengaturan Umum"
                             subtitle="Informasi dasar website"
                             color="orange"
                         />
-                        <div className="grid gap-5">
+                        <div className="grid gap-4 md:gap-5">
                             <InputField
                                 label="Nama Website"
                                 icon={Type}
@@ -404,7 +445,7 @@ export default function SettingsPage() {
                                 onChange={(v) => handleChange('contact_email', v)}
                                 iconColor="text-green-500"
                             />
-                            <div className="grid md:grid-cols-2 gap-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                                 <InputField
                                     label="Jumlah Pengguna Aktif"
                                     icon={Users}
@@ -425,7 +466,7 @@ export default function SettingsPage() {
                                 />
                             </div>
                         </div>
-                        <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div className="mt-3 md:mt-4 p-2.5 md:p-3 bg-gray-50 border border-gray-200 rounded-lg">
                             <p className="text-xs text-gray-600">
                                 <strong>Info:</strong> Data ini ditampilkan di halaman Tentang Kami. Total penjualan adalah gabungan dari penjualan di platform lain (Lynk.ID, Karyakarsa, Mayar.id, dll) + orders completed dari website ini.
                             </p>
@@ -435,7 +476,7 @@ export default function SettingsPage() {
 
                 {/* Voucher Tab */}
                 {activeTab === 'voucher' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                         <SectionHeader
                             icon={Ticket}
                             title="Kode Voucher"
@@ -450,7 +491,7 @@ export default function SettingsPage() {
                             onToggle={() => handleChange('voucher_active', settings.voucher_active === 'true' ? 'false' : 'true')}
                             color="purple"
                         />
-                        <div className="grid md:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                             <InputField
                                 label="Kode Voucher"
                                 icon={Ticket}
@@ -473,14 +514,14 @@ export default function SettingsPage() {
                         </div>
                         
                         {/* Masa Aktif Voucher */}
-                        <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
-                            <h4 className="font-medium text-purple-900 mb-3 flex items-center gap-2">
+                        <div className="p-3 md:p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                            <h4 className="font-medium text-purple-900 mb-3 flex items-center gap-2 text-sm md:text-base">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 Masa Aktif Voucher
                             </h4>
-                            <div className="grid md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                 <div>
                                     <label className="text-sm font-medium text-purple-700 mb-2 block">Berlaku Dari</label>
                                     <input
@@ -517,7 +558,7 @@ export default function SettingsPage() {
 
                 {/* Homepage Tab */}
                 {activeTab === 'homepage' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                         <SectionHeader
                             icon={Layout}
                             title="Pengaturan Beranda"
@@ -525,7 +566,7 @@ export default function SettingsPage() {
                             color="blue"
                         />
 
-                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <div className="p-3 md:p-4 bg-blue-50 border border-blue-200 rounded-xl">
                             <div className="flex gap-3">
                                 <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                                 <div className="text-sm text-blue-800">
@@ -538,15 +579,15 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div className="p-5 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                            <div className="p-4 md:p-5 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className="p-2 bg-green-500 rounded-lg">
                                         <Ticket className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-green-900">Template Gratis</h4>
-                                        <p className="text-sm text-green-700">{stats.freeCount} produk tersedia</p>
+                                        <h4 className="font-semibold text-green-900 text-sm md:text-base">Template Gratis</h4>
+                                        <p className="text-xs md:text-sm text-green-700">{stats.freeCount} produk tersedia</p>
                                     </div>
                                 </div>
                                 <div>
@@ -565,14 +606,14 @@ export default function SettingsPage() {
                                 </div>
                             </div>
 
-                            <div className="p-5 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border-2 border-orange-200">
+                            <div className="p-4 md:p-5 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border-2 border-orange-200">
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className="p-2 bg-orange-500 rounded-lg">
                                         <Ticket className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-orange-900">Template Unggulan</h4>
-                                        <p className="text-sm text-orange-700">{stats.featuredCount} produk tersedia</p>
+                                        <h4 className="font-semibold text-orange-900 text-sm md:text-base">Template Unggulan</h4>
+                                        <p className="text-xs md:text-sm text-orange-700">{stats.featuredCount} produk tersedia</p>
                                     </div>
                                 </div>
                                 <div>
@@ -604,7 +645,7 @@ export default function SettingsPage() {
 
                 {/* Payment Tab */}
                 {activeTab === 'payment' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                         <SectionHeader
                             icon={CreditCard}
                             title="Pengaturan Pembayaran"
@@ -768,7 +809,7 @@ export default function SettingsPage() {
 
                 {/* Email Tab */}
                 {activeTab === 'email' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                         <SectionHeader
                             icon={Mail}
                             title="Pengaturan Email"
@@ -777,18 +818,18 @@ export default function SettingsPage() {
                         />
 
                         {/* SMTP Settings */}
-                        <div className="p-5 bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl border-2 border-pink-200">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center">
-                                    <Mail className="w-5 h-5 text-white" />
+                        <div className="p-4 md:p-5 bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl border-2 border-pink-200">
+                            <div className="flex items-center gap-2 md:gap-3 mb-4">
+                                <div className="w-9 h-9 md:w-10 md:h-10 bg-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <Mail className="w-4 h-4 md:w-5 md:h-5 text-white" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-900">Konfigurasi SMTP</h4>
-                                    <p className="text-sm text-gray-600">Pengaturan server email untuk pengiriman otomatis</p>
+                                    <h4 className="font-semibold text-gray-900 text-sm md:text-base">Konfigurasi SMTP</h4>
+                                    <p className="text-xs md:text-sm text-gray-600">Pengaturan server email</p>
                                 </div>
                             </div>
 
-                            <div className="grid md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                 <InputField
                                     label="SMTP Host"
                                     value={settings.smtp_host}
@@ -868,14 +909,14 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Email Template */}
-                        <div className="p-5 bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl border-2 border-rose-200">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-rose-500 rounded-lg flex items-center justify-center">
-                                    <FileText className="w-5 h-5 text-white" />
+                        <div className="p-4 md:p-5 bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl border-2 border-rose-200">
+                            <div className="flex items-center gap-2 md:gap-3 mb-4">
+                                <div className="w-9 h-9 md:w-10 md:h-10 bg-rose-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <FileText className="w-4 h-4 md:w-5 md:h-5 text-white" />
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-gray-900">Template Email</h4>
-                                    <p className="text-sm text-gray-600">Email yang dikirim saat pembayaran dikonfirmasi</p>
+                                    <h4 className="font-semibold text-gray-900 text-sm md:text-base">Template Email</h4>
+                                    <p className="text-xs md:text-sm text-gray-600">Email saat pembayaran dikonfirmasi</p>
                                 </div>
                             </div>
 
@@ -913,7 +954,7 @@ export default function SettingsPage() {
 
                 {/* Tracking Tab */}
                 {activeTab === 'tracking' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                         <SectionHeader
                             icon={BarChart3}
                             title="Tracking & Analytics"
@@ -921,7 +962,7 @@ export default function SettingsPage() {
                             color="cyan"
                         />
 
-                        <div className="p-4 bg-cyan-50 border border-cyan-200 rounded-xl">
+                        <div className="p-3 md:p-4 bg-cyan-50 border border-cyan-200 rounded-xl">
                             <div className="flex gap-3">
                                 <Info className="h-5 w-5 text-cyan-600 flex-shrink-0 mt-0.5" />
                                 <div className="text-sm text-cyan-800">
@@ -936,11 +977,11 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                             {/* Meta Pixel */}
-                            <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <div className="p-4 md:p-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
+                                <div className="flex items-center gap-2 md:gap-3 mb-4">
+                                    <div className="w-9 h-9 md:w-10 md:h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                                         </svg>
@@ -1071,13 +1112,13 @@ function SectionHeader({ icon: Icon, title, subtitle, color }: { icon: React.Ele
     const c = colors[color] || colors.orange
 
     return (
-        <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-            <div className={`p-2.5 ${c.bg} rounded-xl`}>
-                <Icon className={`h-5 w-5 ${c.text}`} />
+        <div className="flex items-center gap-2 md:gap-3 pb-3 md:pb-4 border-b border-gray-100">
+            <div className={`p-2 md:p-2.5 ${c.bg} rounded-lg md:rounded-xl`}>
+                <Icon className={`h-4 w-4 md:h-5 md:w-5 ${c.text}`} />
             </div>
             <div>
-                <h3 className="font-semibold text-gray-900">{title}</h3>
-                <p className="text-sm text-gray-500">{subtitle}</p>
+                <h3 className="font-semibold text-gray-900 text-sm md:text-base">{title}</h3>
+                <p className="text-xs md:text-sm text-gray-500">{subtitle}</p>
             </div>
         </div>
     )
@@ -1114,8 +1155,8 @@ function InputField({
 
     return (
         <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                {Icon && <Icon className={`h-4 w-4 ${iconColor}`} />}
+            <label className="text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2 flex items-center gap-1.5 md:gap-2">
+                {Icon && <Icon className={`h-3.5 w-3.5 md:h-4 md:w-4 ${iconColor}`} />}
                 {label}
             </label>
             <InputComponent
@@ -1126,7 +1167,7 @@ function InputField({
                 min={min}
                 max={max}
                 rows={isTextarea ? rows : undefined}
-                className={`w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all mt-1 ${isTextarea ? 'resize-none' : ''} ${className}`}
+                className={`w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all ${isTextarea ? 'resize-none' : ''} ${className}`}
             />
         </div>
     )
@@ -1147,21 +1188,20 @@ function ToggleCard({ icon: Icon, label, description, active, onToggle, color }:
     const c = colors[color] || colors.green
 
     return (
-        <div className={`p-4 ${c.bg} rounded-xl border flex items-center justify-between`}>
-            <div className="flex items-center gap-3">
-                <Icon className={`h-5 w-5 ${c.icon}`} />
-                <div>
-                    <p className="font-medium text-gray-900">{label}</p>
-                    <p className="text-sm text-gray-500">{description}</p>
+        <div className={`p-3 md:p-4 ${c.bg} rounded-xl border flex items-start md:items-center justify-between gap-3`}>
+            <div className="flex items-start md:items-center gap-2 md:gap-3 flex-1 min-w-0">
+                <Icon className={`h-5 w-5 ${c.icon} flex-shrink-0 mt-0.5 md:mt-0`} />
+                <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-sm md:text-base">{label}</p>
+                    <p className="text-xs md:text-sm text-gray-500 line-clamp-2">{description}</p>
                 </div>
             </div>
             <button
                 onClick={onToggle}
-                className={`relative w-14 h-8 rounded-full transition-colors ${active ? 'bg-green-500' : 'bg-gray-300'}`}
+                className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${active ? 'bg-green-500' : 'bg-gray-300'}`}
             >
                 <div
-                    className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all"
-                    style={{ left: active ? 30 : 4 }}
+                    className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all ${active ? 'left-6' : 'left-1'}`}
                 />
             </button>
         </div>

@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import Link from 'next/link'
@@ -347,7 +349,7 @@ export default function JasaKustomPage() {
                             transition={{ duration: 0.5 }}
                         >
                             <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-100 to-purple-100 px-4 py-1.5 text-sm font-medium text-gray-700 mb-6">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/lupuorrc.json"
                                     trigger="loop"
                                     delay="2000"
@@ -555,7 +557,7 @@ export default function JasaKustomPage() {
                                                 service.color === 'blue' ? 'bg-blue-100' :
                                                 'bg-purple-100'
                                             }`}>
-                                                <lord-icon
+                                                <ClientLordIcon
                                                     src="https://cdn.lordicon.com/ssvybplt.json"
                                                     trigger="hover"
                                                     colors={
@@ -684,7 +686,7 @@ export default function JasaKustomPage() {
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-amber-100">
-                                                        <lord-icon
+                                                        <ClientLordIcon
                                                             src="https://cdn.lordicon.com/ghhwiltn.json"
                                                             trigger="loop"
                                                             delay="2000"
@@ -836,7 +838,7 @@ export default function JasaKustomPage() {
                                                     animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.1, 0.2] }}
                                                     transition={{ duration: 3, repeat: Infinity, delay: idx * 0.2 }}
                                                 />
-                                                <lord-icon
+                                                <ClientLordIcon
                                                     src={step.lordicon}
                                                     trigger="loop"
                                                     delay="2000"
@@ -914,7 +916,7 @@ export default function JasaKustomPage() {
                                         }`}
                                         whileHover={{ scale: 1.1, rotate: 5 }}
                                     >
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src={step.lordicon}
                                             trigger="loop"
                                             delay="2000"
@@ -1092,7 +1094,7 @@ export default function JasaKustomPage() {
                                     whileHover={{ backgroundColor: 'rgba(249, 115, 22, 0.02)' }}
                                 >
                                     <span className="font-medium text-gray-900 flex items-center gap-3">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/ujxzdfjx.json"
                                             trigger="hover"
                                             colors="primary:#ea580c,secondary:#fbbf24"
@@ -1206,7 +1208,7 @@ export default function JasaKustomPage() {
                                                         : 'border-gray-200 hover:border-gray-300 text-gray-600'
                                                 }`}
                                             >
-                                                <lord-icon
+                                                <ClientLordIcon
                                                     src={opt.lordicon}
                                                     trigger="hover"
                                                     colors={serviceType === opt.id ? 'primary:#ea580c,secondary:#fbbf24' : 'primary:#6b7280,secondary:#9ca3af'}
@@ -1326,7 +1328,7 @@ export default function JasaKustomPage() {
                                         </>
                                     ) : (
                                         <>
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/aklfruoc.json"
                                                 trigger="hover"
                                                 colors="primary:#ffffff,secondary:#ffffff"
@@ -1362,7 +1364,7 @@ export default function JasaKustomPage() {
                             <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${
                                 dialog.type === 'success' ? 'bg-green-100' : 'bg-red-100'
                             }`}>
-                                <lord-icon
+                                <ClientLordIcon
                                     src={dialog.type === 'success' 
                                         ? 'https://cdn.lordicon.com/lupuorrc.json'
                                         : 'https://cdn.lordicon.com/usownftb.json'

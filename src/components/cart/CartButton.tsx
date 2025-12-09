@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -135,7 +137,7 @@ export function CartButton() {
                 onClick={() => setIsOpen(!isOpen)}
                 className="relative p-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors group"
             >
-                <lord-icon
+                <ClientLordIcon
                     src="https://cdn.lordicon.com/pbrgppbb.json"
                     trigger="hover"
                     colors="primary:#ea580c"
@@ -185,7 +187,7 @@ export function CartButton() {
                                     onClick={() => setIsOpen(false)}
                                     className="p-1 hover:bg-gray-200 rounded-lg transition-colors"
                                 >
-                                    <lord-icon
+                                    <ClientLordIcon
                                         src="https://cdn.lordicon.com/nqtddedc.json"
                                         trigger="hover"
                                         colors="primary:#6b7280"
@@ -200,7 +202,7 @@ export function CartButton() {
                             <div className="max-h-80 overflow-y-auto">
                                 {items.length === 0 ? (
                                     <div className="text-center py-8 px-4">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/pbrgppbb.json"
                                             trigger="loop"
                                             delay="2000"
@@ -233,7 +235,7 @@ export function CartButton() {
                                                             />
                                                         ) : (
                                                             <div className="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-                                                                <lord-icon
+                                                                <ClientLordIcon
                                                                     src="https://cdn.lordicon.com/ghhwiltn.json"
                                                                     trigger="loop"
                                                                     colors="primary:#f97316"
@@ -270,7 +272,7 @@ export function CartButton() {
                                                     }}
                                                     className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors self-start flex-shrink-0"
                                                 >
-                                                    <lord-icon
+                                                    <ClientLordIcon
                                                         src="https://cdn.lordicon.com/skkahier.json"
                                                         trigger="hover"
                                                         colors="primary:#ef4444"
@@ -301,7 +303,7 @@ export function CartButton() {
                                     >
                                         <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-500 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                                         <span className="relative z-10">Checkout</span>
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/whtfgdfm.json"
                                             trigger="loop-on-hover"
                                             colors="primary:#ffffff"
@@ -316,7 +318,7 @@ export function CartButton() {
                                         }}
                                         className="w-full py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 font-medium rounded-lg transition-colors text-xs flex items-center justify-center gap-1"
                                     >
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/skkahier.json"
                                             trigger="hover"
                                             colors="primary:#6b7280"

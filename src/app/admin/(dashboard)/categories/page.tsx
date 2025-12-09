@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, FolderOpen, Pencil, Trash2, Loader2, X, Save, AlertTriangle, Sparkles } from 'lucide-react'
@@ -191,7 +193,7 @@ export default function CategoriesPage() {
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-orange-100 rounded-xl">
                                         {category.icon ? (
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src={category.icon}
                                                 trigger="hover"
                                                 colors="primary:#ea580c"
@@ -310,7 +312,7 @@ export default function CategoriesPage() {
                                     {formData.icon && (
                                         <div className="mt-2 flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
                                             <span className="text-sm text-gray-500">Preview:</span>
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src={formData.icon}
                                                 trigger="loop"
                                                 colors="primary:#ea580c"

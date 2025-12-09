@@ -135,63 +135,63 @@ export default function CustomersPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Pelanggan</h1>
-                    <p className="text-gray-500 mt-1">Database pelanggan ({customers.length} total)</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900">Pelanggan</h1>
+                    <p className="text-sm text-gray-500 mt-0.5">Database pelanggan ({customers.length} total)</p>
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={() => handleExport('csv')}
                         disabled={exporting}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 disabled:opacity-50 transition-colors"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 disabled:opacity-50 transition-colors"
                     >
                         <Download className="h-4 w-4" />
-                        Export CSV
+                        <span className="hidden sm:inline">Export</span> CSV
                     </button>
                     <button
                         onClick={() => handleExport('excel')}
                         disabled={exporting}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
                     >
                         <Download className="h-4 w-4" />
-                        Export Excel
+                        <span className="hidden sm:inline">Export</span> Excel
                     </button>
                 </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                            <Users className="h-5 w-5 text-blue-600" />
+            {/* Stats - horizontal scroll on mobile */}
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+                <div className="bg-white rounded-xl p-4 border border-gray-100 min-w-[140px] flex-shrink-0 md:min-w-0">
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg md:rounded-xl flex items-center justify-center">
+                            <Users className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Total Pelanggan</p>
-                            <p className="text-2xl font-bold text-gray-900">{customers.length}</p>
+                            <p className="text-xs md:text-sm text-gray-500">Pelanggan</p>
+                            <p className="text-lg md:text-2xl font-bold text-gray-900">{customers.length}</p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white rounded-xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                            <DollarSign className="h-5 w-5 text-green-600" />
+                <div className="bg-white rounded-xl p-4 border border-gray-100 min-w-[160px] flex-shrink-0 md:min-w-0">
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg md:rounded-xl flex items-center justify-center">
+                            <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Total Pendapatan</p>
-                            <p className="text-2xl font-bold text-gray-900">Rp {totalRevenue.toLocaleString('id-ID')}</p>
+                            <p className="text-xs md:text-sm text-gray-500">Pendapatan</p>
+                            <p className="text-lg md:text-2xl font-bold text-gray-900">Rp {(totalRevenue / 1000).toFixed(0)}k</p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white rounded-xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
-                            <ShoppingCart className="h-5 w-5 text-orange-600" />
+                <div className="bg-white rounded-xl p-4 border border-gray-100 min-w-[140px] flex-shrink-0 md:min-w-0">
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-100 rounded-lg md:rounded-xl flex items-center justify-center">
+                            <ShoppingCart className="h-4 w-4 md:h-5 md:w-5 text-orange-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500">Total Pesanan</p>
-                            <p className="text-2xl font-bold text-gray-900">{customers.reduce((sum, c) => sum + (c.total_orders || 0), 0)}</p>
+                            <p className="text-xs md:text-sm text-gray-500">Pesanan</p>
+                            <p className="text-lg md:text-2xl font-bold text-gray-900">{customers.reduce((sum, c) => sum + (c.total_orders || 0), 0)}</p>
                         </div>
                     </div>
                 </div>
@@ -209,109 +209,158 @@ export default function CustomersPage() {
                 />
             </div>
 
-            {/* Table */}
+            {/* Empty state */}
             {filteredCustomers.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
-                    <Users className="h-16 w-16 text-gray-200 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada Pelanggan</h3>
-                    <p className="text-gray-500">Data pelanggan akan muncul setelah ada pembelian</p>
+                <div className="text-center py-12 md:py-16 bg-white rounded-2xl border border-gray-100">
+                    <Users className="h-12 w-12 md:h-16 md:w-16 text-gray-200 mx-auto mb-4" />
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">Belum Ada Pelanggan</h3>
+                    <p className="text-sm text-gray-500">Data pelanggan akan muncul setelah ada pembelian</p>
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-50 border-b border-gray-100">
-                                <tr>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Pelanggan</th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Kontak</th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Produk Dibeli</th>
-                                    <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Pesanan</th>
-                                    <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Total Belanja</th>
-                                    <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {filteredCustomers.map((customer) => (
-                                    <motion.tr
-                                        key={customer.id}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="hover:bg-gray-50 transition-colors"
+                <>
+                    {/* Mobile: Card layout */}
+                    <div className="md:hidden space-y-3">
+                        {filteredCustomers.map((customer) => (
+                            <div key={customer.id} className="bg-white rounded-xl p-4 border border-gray-100">
+                                <div className="flex items-start gap-3 mb-3">
+                                    <div className="w-9 h-9 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                        {customer.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-gray-900 truncate">{customer.name}</p>
+                                        <p className="text-xs text-gray-500 truncate">{customer.email}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setDeleteModal({ isOpen: true, customer })}
+                                        className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg"
                                     >
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold">
-                                                    {customer.name.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-900">{customer.name}</p>
-                                                    <p className="text-xs text-gray-500">
-                                                        Bergabung {new Date(customer.created_at).toLocaleDateString('id-ID')}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                    <Mail className="h-3.5 w-3.5" />
-                                                    {customer.email}
-                                                </div>
-                                                {customer.phone && (
-                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                        <Phone className="h-3.5 w-3.5" />
-                                                        {customer.phone}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-wrap gap-1 max-w-xs">
-                                                {customer.products?.length > 0 ? (
-                                                    customer.products.slice(0, 3).map((product, idx) => (
-                                                        <span 
-                                                            key={idx}
-                                                            className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium truncate max-w-[150px]"
-                                                            title={product}
-                                                        >
-                                                            {product}
-                                                        </span>
-                                                    ))
-                                                ) : (
-                                                    <span className="text-gray-400 text-sm">-</span>
-                                                )}
-                                                {customer.products?.length > 3 && (
-                                                    <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
-                                                        +{customer.products.length - 3}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-                                                <ShoppingCart className="h-3.5 w-3.5" />
-                                                {customer.total_orders || 0}
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                                {customer.products?.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mb-3">
+                                        {customer.products.slice(0, 2).map((product, idx) => (
+                                            <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs truncate max-w-[120px]">
+                                                {product}
                                             </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <span className="font-semibold text-green-600">
-                                                Rp {(customer.total_spent || 0).toLocaleString('id-ID')}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <button
-                                                onClick={() => setDeleteModal({ isOpen: true, customer })}
-                                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
-                                        </td>
-                                    </motion.tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                        ))}
+                                        {customer.products.length > 2 && (
+                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">+{customer.products.length - 2}</span>
+                                        )}
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                                    <div className="flex items-center gap-3">
+                                        <span className="inline-flex items-center gap-1 text-xs text-orange-600">
+                                            <ShoppingCart className="h-3 w-3" />
+                                            {customer.total_orders || 0} pesanan
+                                        </span>
+                                    </div>
+                                    <span className="font-semibold text-green-600 text-sm">
+                                        Rp {(customer.total_spent || 0).toLocaleString('id-ID')}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </div>
+
+                    {/* Desktop: Table layout */}
+                    <div className="hidden md:block bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-50 border-b border-gray-100">
+                                    <tr>
+                                        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Pelanggan</th>
+                                        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Kontak</th>
+                                        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Produk Dibeli</th>
+                                        <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Pesanan</th>
+                                        <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Total Belanja</th>
+                                        <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {filteredCustomers.map((customer) => (
+                                        <motion.tr
+                                            key={customer.id}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="hover:bg-gray-50 transition-colors"
+                                        >
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold">
+                                                        {customer.name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900">{customer.name}</p>
+                                                        <p className="text-xs text-gray-500">
+                                                            Bergabung {new Date(customer.created_at).toLocaleDateString('id-ID')}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                        <Mail className="h-3.5 w-3.5" />
+                                                        {customer.email}
+                                                    </div>
+                                                    {customer.phone && (
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <Phone className="h-3.5 w-3.5" />
+                                                            {customer.phone}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-wrap gap-1 max-w-xs">
+                                                    {customer.products?.length > 0 ? (
+                                                        customer.products.slice(0, 3).map((product, idx) => (
+                                                            <span 
+                                                                key={idx}
+                                                                className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium truncate max-w-[150px]"
+                                                                title={product}
+                                                            >
+                                                                {product}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-gray-400 text-sm">-</span>
+                                                    )}
+                                                    {customer.products?.length > 3 && (
+                                                        <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
+                                                            +{customer.products.length - 3}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+                                                    <ShoppingCart className="h-3.5 w-3.5" />
+                                                    {customer.total_orders || 0}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <span className="font-semibold text-green-600">
+                                                    Rp {(customer.total_spent || 0).toLocaleString('id-ID')}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <button
+                                                    onClick={() => setDeleteModal({ isOpen: true, customer })}
+                                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </td>
+                                        </motion.tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
             )}
 
             {/* Delete Confirm Modal */}

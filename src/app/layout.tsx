@@ -102,7 +102,7 @@ export default function RootLayout({
         {/* Tracking pixels - load early for proper detection */}
         <Script src="/api/tracking-script" strategy="beforeInteractive" />
       </head>
-      <body className={`${poppins.variable} font-sans antialiased bg-gray-50 text-gray-900`}>
+      <body className={`${poppins.variable} font-sans antialiased bg-gray-50 text-gray-900`} suppressHydrationWarning>
         <TrackingScripts />
         <CartProvider>
           <AnalyticsProvider>

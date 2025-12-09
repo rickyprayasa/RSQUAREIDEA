@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
@@ -95,7 +97,7 @@ export default function KebijakanPrivasiPage() {
                             transition={{ duration: 0.5 }}
                         >
                             <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/jgnvfzqg.json"
                                     trigger="loop"
                                     delay="2000"
@@ -205,7 +207,7 @@ export default function KebijakanPrivasiPage() {
                                 >
                                     <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                                         <div className="flex items-center gap-3">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/fdxqrdfe.json"
                                                 trigger="loop"
                                                 delay="2000"
@@ -219,7 +221,7 @@ export default function KebijakanPrivasiPage() {
                                             className="group inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-orange-200 transition-all hover:-translate-y-0.5"
                                         >
                                             <span>Hubungi Kami</span>
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/vduvxizq.json"
                                                 trigger="loop-on-hover"
                                                 colors="primary:#ffffff"

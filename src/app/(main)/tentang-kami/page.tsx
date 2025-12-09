@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { motion, useInView } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -113,7 +115,7 @@ export default function TentangKamiPage() {
                             className="text-center mb-12"
                         >
                             <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/xzalkbkz.json"
                                     trigger="loop"
                                     delay="2000"
@@ -198,7 +200,7 @@ export default function TentangKamiPage() {
                                         className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 text-center"
                                     >
                                         <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src={stat.iconSrc}
                                                 trigger="loop"
                                                 delay="2000"
@@ -230,7 +232,7 @@ export default function TentangKamiPage() {
                                 transition={{ duration: 0.6 }}
                             >
                                 <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                                    <lord-icon
+                                    <ClientLordIcon
                                         src="https://cdn.lordicon.com/wloilxuq.json"
                                         trigger="loop"
                                         delay="2000"
@@ -278,7 +280,7 @@ export default function TentangKamiPage() {
                                             className="flex items-center gap-3"
                                         >
                                             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${feature.color}15` }}>
-                                                <lord-icon
+                                                <ClientLordIcon
                                                     src={feature.icon}
                                                     trigger="loop"
                                                     delay="2000"
@@ -325,7 +327,7 @@ export default function TentangKamiPage() {
                             className="text-center mb-14"
                         >
                             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-5">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/ohfmmfhn.json"
                                     trigger="loop"
                                     delay="2000"
@@ -371,7 +373,7 @@ export default function TentangKamiPage() {
                                     className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                                 >
                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${value.color}`}>
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src={value.iconSrc}
                                             trigger="loop"
                                             delay="2000"
@@ -417,7 +419,7 @@ export default function TentangKamiPage() {
                                         className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
                                     >
                                         <span>Lihat Template</span>
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/vduvxizq.json"
                                             trigger="loop-on-hover"
                                             colors="primary:#ea580c"
@@ -429,7 +431,7 @@ export default function TentangKamiPage() {
                                         className="group inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-xl transition-all duration-300 hover:bg-white/10 hover:-translate-y-0.5"
                                     >
                                         <span>Hubungi Kami</span>
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/fdxqrdfe.json"
                                             trigger="loop-on-hover"
                                             colors="primary:#ffffff"

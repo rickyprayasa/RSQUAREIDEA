@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
@@ -96,7 +98,7 @@ export function Testimonials() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
-                        <lord-icon
+                        <ClientLordIcon
                             src="https://cdn.lordicon.com/mdgrhyca.json"
                             trigger="loop"
                             delay="2000"
@@ -157,7 +159,7 @@ export function Testimonials() {
                                     <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 hover:shadow-2xl transition-shadow relative overflow-hidden">
                                         {/* Quote Icon */}
                                         <div className="absolute top-4 right-4 w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/puvaffet.json"
                                                 trigger="loop"
                                                 delay="3000"
@@ -169,7 +171,7 @@ export function Testimonials() {
                                         {/* Rating */}
                                         <div className="flex gap-0.5 mb-4">
                                             {[1, 2, 3, 4, 5].map((star) => (
-                                                <lord-icon
+                                                <ClientLordIcon
                                                     key={star}
                                                     src="https://cdn.lordicon.com/mdgrhyca.json"
                                                     trigger="hover"
@@ -204,7 +206,7 @@ export function Testimonials() {
                                                                 onClick={(e) => e.stopPropagation()}
                                                                 className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full text-white text-xs font-medium hover:shadow-md transition-shadow"
                                                             >
-                                                                <lord-icon
+                                                                <ClientLordIcon
                                                                     src="https://cdn.lordicon.com/uvqnvwbl.json"
                                                                     trigger="hover"
                                                                     colors="primary:#ffffff"
@@ -230,7 +232,7 @@ export function Testimonials() {
                                 onClick={handlePrev}
                                 className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-orange-500 hover:shadow-xl transition-all"
                             >
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/vduvxizq.json"
                                     trigger="hover"
                                     colors="primary:#ea580c"
@@ -241,7 +243,7 @@ export function Testimonials() {
                                 onClick={handleNext}
                                 className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-orange-500 hover:shadow-xl transition-all"
                             >
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/vduvxizq.json"
                                     trigger="hover"
                                     colors="primary:#ea580c"
@@ -281,7 +283,7 @@ export function Testimonials() {
                         className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-orange-200 transition-all overflow-hidden"
                     >
                         <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                        <lord-icon
+                        <ClientLordIcon
                             src="https://cdn.lordicon.com/mdgrhyca.json"
                             trigger="loop"
                             colors="primary:#ffffff"

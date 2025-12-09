@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { useState, useRef } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -48,7 +50,7 @@ export function FAQ() {
                         animate={isInView ? { opacity: 1, scale: 1 } : {}}
                         transition={{ duration: 0.5, delay: 0.1 }}
                     >
-                        <lord-icon
+                        <ClientLordIcon
                             src="https://cdn.lordicon.com/ujxzdfjx.json"
                             trigger="loop"
                             delay="2000"
@@ -123,7 +125,7 @@ export function FAQ() {
                                         animate={{ rotate: openIndex === index ? 180 : 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/xcrjfuzb.json"
                                             trigger="hover"
                                             colors={openIndex === index ? "primary:#ffffff" : "primary:#6b7280"}
@@ -164,7 +166,7 @@ export function FAQ() {
                     transition={{ duration: 0.5, delay: 0.6 }}
                 >
                     <p className="text-gray-600 mb-4 flex items-center justify-center gap-2">
-                        <lord-icon
+                        <ClientLordIcon
                             src="https://cdn.lordicon.com/fdxqrdfe.json"
                             trigger="loop"
                             delay="2000"
@@ -178,7 +180,7 @@ export function FAQ() {
                         className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-orange-300/50 hover:-translate-y-0.5 active:translate-y-0"
                     >
                         <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-                        <lord-icon
+                        <ClientLordIcon
                             src="https://cdn.lordicon.com/fdxqrdfe.json"
                             trigger="loop-on-hover"
                             colors="primary:#ffffff"

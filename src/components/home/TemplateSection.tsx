@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { CardStack } from '@/components/home/CardStack'
+import { ClientLordIcon } from '@/components/ui/lordicon'
 
 interface Template {
     _id: string
@@ -84,7 +85,7 @@ export function TemplateSection({
                             }}
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                         >
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/ghhwiltn.json"
                                 trigger="loop"
                                 delay="1000"
@@ -97,7 +98,7 @@ export function TemplateSection({
                             {emptyDescription}
                         </p>
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full text-orange-600 text-sm font-medium">
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/hvueufdo.json"
                                 trigger="loop"
                                 colors="primary:#ea580c"
@@ -119,7 +120,7 @@ export function TemplateSection({
                             >
                                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-orange-100/50 to-transparent" />
                                 <span className="relative z-10">Lihat Semua Template</span>
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/whtfgdfm.json"
                                     trigger="loop-on-hover"
                                     colors="primary:#ea580c"

@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
@@ -84,7 +86,7 @@ export default function SyaratKetentuanPage() {
                             transition={{ duration: 0.5 }}
                         >
                             <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/nocovwne.json"
                                     trigger="loop"
                                     delay="2000"
@@ -182,7 +184,7 @@ export default function SyaratKetentuanPage() {
                                                 {section.warning && (
                                                     <div className="mt-6 p-5 bg-red-50 border border-red-100 rounded-xl">
                                                         <div className="flex items-start gap-3">
-                                                            <lord-icon
+                                                            <ClientLordIcon
                                                                 src="https://cdn.lordicon.com/usownftb.json"
                                                                 trigger="loop"
                                                                 delay="2000"
@@ -208,7 +210,7 @@ export default function SyaratKetentuanPage() {
                                     className="mt-12 p-6 bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl border border-orange-100"
                                 >
                                     <div className="flex items-start gap-4">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src="https://cdn.lordicon.com/egiwmiit.json"
                                             trigger="loop"
                                             delay="2000"
@@ -230,7 +232,7 @@ export default function SyaratKetentuanPage() {
                                 >
                                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                                         <p className="text-gray-600 flex items-center gap-2">
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/ujxzdfjx.json"
                                                 trigger="loop"
                                                 delay="2000"
@@ -244,7 +246,7 @@ export default function SyaratKetentuanPage() {
                                             className="group inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-orange-200 transition-all hover:-translate-y-0.5"
                                         >
                                             <span>Hubungi Kami</span>
-                                            <lord-icon
+                                            <ClientLordIcon
                                                 src="https://cdn.lordicon.com/vduvxizq.json"
                                                 trigger="loop-on-hover"
                                                 colors="primary:#ffffff"

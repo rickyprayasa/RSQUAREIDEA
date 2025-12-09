@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, useInView } from 'framer-motion'
@@ -49,7 +51,7 @@ export function RequestTemplate() {
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                                    <lord-icon
+                                    <ClientLordIcon
                                         src="https://cdn.lordicon.com/egiwmiit.json"
                                         trigger="loop"
                                         delay="2000"
@@ -79,7 +81,7 @@ export function RequestTemplate() {
                             transition={{ duration: 0.5, delay: 0.2 }}
                             className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-6"
                         >
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/hvueufdo.json"
                                 trigger="loop"
                                 delay="2000"
@@ -130,7 +132,7 @@ export function RequestTemplate() {
                                     className="flex items-center gap-3 text-gray-700"
                                 >
                                     <div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <lord-icon
+                                        <ClientLordIcon
                                             src={feature.iconSrc}
                                             trigger="loop"
                                             delay="3000"
@@ -156,7 +158,7 @@ export function RequestTemplate() {
                             >
                                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                                 <span className="relative z-10">Request Template</span>
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/vduvxizq.json"
                                     trigger="loop-on-hover"
                                     colors="primary:#ffffff"
@@ -168,7 +170,7 @@ export function RequestTemplate() {
                                 className="group h-12 px-6 border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 font-medium rounded-xl transition-all duration-300 inline-flex items-center justify-center gap-2 hover:-translate-y-0.5"
                             >
                                 <span>Konsultasi Gratis</span>
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/fdxqrdfe.json"
                                     trigger="loop-on-hover"
                                     colors="primary:#374151"
@@ -184,7 +186,7 @@ export function RequestTemplate() {
                             transition={{ duration: 0.5, delay: 0.8 }}
                             className="mt-6 text-sm text-gray-500 flex items-center gap-2"
                         >
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/egiwmiit.json"
                                 trigger="loop"
                                 delay="3000"

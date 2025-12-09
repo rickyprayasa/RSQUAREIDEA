@@ -3,21 +3,21 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Mail, MapPin, ExternalLink } from 'lucide-react'
-import { LordIcon } from '@/components/ui/lordicon'
+
+import { LordIcon, ClientLordIcon } from '@/components/ui/lordicon'
 
 const footerLinks = {
     products: [
-        { name: 'Semua Template', href: '/templates' },
-        { name: 'Template Gratis', href: '/templates?filter=free' },
-        { name: 'Template Premium', href: '/templates?filter=premium' },
-        { name: 'Jasa Kustom', href: '/jasa-kustom' },
+        { name: 'Semua Template', href: '/templates', lordicon: 'https://cdn.lordicon.com/pflszboa.json' },
+        { name: 'Template Gratis', href: '/templates?filter=free', lordicon: 'https://cdn.lordicon.com/wcjauznf.json' },
+        { name: 'Template Premium', href: '/templates?filter=premium', lordicon: 'https://cdn.lordicon.com/mdgrhyca.json' },
+        { name: 'Jasa Kustom', href: '/jasa-kustom', lordicon: 'https://cdn.lordicon.com/wloilxuq.json' },
     ],
     company: [
-        { name: 'Tentang Kami', href: '/tentang-kami' },
-        { name: 'Kirim Masukan', href: '/feedback' },
-        { name: 'Kebijakan Privasi', href: '/kebijakan-privasi' },
-        { name: 'Syarat & Ketentuan', href: '/syarat-ketentuan' },
+        { name: 'Tentang Kami', href: '/tentang-kami', lordicon: 'https://cdn.lordicon.com/bhfjfgqz.json' },
+        { name: 'Kirim Masukan', href: '/feedback', lordicon: 'https://cdn.lordicon.com/fdxqrdfe.json' },
+        { name: 'Kebijakan Privasi', href: '/kebijakan-privasi', lordicon: 'https://cdn.lordicon.com/jgnvfzqg.json' },
+        { name: 'Syarat & Ketentuan', href: '/syarat-ketentuan', lordicon: 'https://cdn.lordicon.com/foxhetpf.json' },
     ],
     social: [
         {
@@ -125,9 +125,18 @@ export function Footer() {
                                             <li key={item.name}>
                                                 <Link
                                                     href={item.href}
-                                                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
+                                                    className="group inline-flex items-center gap-2 text-gray-400 hover:text-orange-400 transition-colors duration-200"
                                                 >
-                                                    {item.name}
+                                                    <ClientLordIcon
+                                                        src={item.lordicon}
+                                                        trigger="hover"
+                                                        colors="primary:#fb923c,secondary:#fbbf24"
+                                                        style={{ width: '18px', height: '18px' }}
+                                                    />
+                                                    <span className="relative">
+                                                        {item.name}
+                                                        <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-full" />
+                                                    </span>
                                                 </Link>
                                             </li>
                                         ))}
@@ -145,9 +154,18 @@ export function Footer() {
                                             <li key={item.name}>
                                                 <Link
                                                     href={item.href}
-                                                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200"
+                                                    className="group inline-flex items-center gap-2 text-gray-400 hover:text-orange-400 transition-colors duration-200"
                                                 >
-                                                    {item.name}
+                                                    <ClientLordIcon
+                                                        src={item.lordicon}
+                                                        trigger="hover"
+                                                        colors="primary:#fb923c,secondary:#fbbf24"
+                                                        style={{ width: '18px', height: '18px' }}
+                                                    />
+                                                    <span className="relative">
+                                                        {item.name}
+                                                        <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-full" />
+                                                    </span>
                                                 </Link>
                                             </li>
                                         ))}
@@ -164,14 +182,28 @@ export function Footer() {
                                         <li>
                                             <a
                                                 href={`mailto:${contactEmail}`}
-                                                className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-start gap-3"
+                                                className="group text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-start gap-2"
                                             >
-                                                <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                                                <span className="text-sm break-all">{contactEmail}</span>
+                                                <ClientLordIcon
+                                                    src="https://cdn.lordicon.com/diihvcfp.json"
+                                                    trigger="hover"
+                                                    colors="primary:#fb923c,secondary:#fbbf24"
+                                                    style={{ width: '18px', height: '18px', marginTop: '2px', flexShrink: 0 }}
+                                                />
+                                                <span className="relative text-sm break-all">
+                                                    {contactEmail}
+                                                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-full" />
+                                                </span>
                                             </a>
                                         </li>
-                                        <li className="flex items-start gap-3 text-gray-400">
-                                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                        <li className="flex items-start gap-2 text-gray-400">
+                                            <ClientLordIcon
+                                                src="https://cdn.lordicon.com/surcxhka.json"
+                                                trigger="loop"
+                                                delay="3000"
+                                                colors="primary:#fb923c,secondary:#fbbf24"
+                                                style={{ width: '18px', height: '18px', marginTop: '2px', flexShrink: 0 }}
+                                            />
                                             <span className="text-sm">Indonesia</span>
                                         </li>
                                     </ul>
@@ -188,12 +220,20 @@ export function Footer() {
                                                     href={item.href}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-center gap-2 group"
+                                                    className="group text-gray-400 hover:text-orange-400 transition-colors duration-200 inline-flex items-center gap-2"
                                                 >
-                                                    <span>{item.name}</span>
-                                                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    <ClientLordIcon
+                                                        src="https://cdn.lordicon.com/ercyvufy.json"
+                                                        trigger="hover"
+                                                        colors="primary:#fb923c,secondary:#fbbf24"
+                                                        style={{ width: '18px', height: '18px' }}
+                                                    />
+                                                    <span className="relative">
+                                                        {item.name}
+                                                        <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-full" />
+                                                    </span>
                                                 </a>
-                                                <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                                                <p className="text-xs text-gray-500 mt-1 ml-6">{item.description}</p>
                                             </li>
                                         ))}
                                     </ul>
@@ -210,11 +250,29 @@ export function Footer() {
                             &copy; {currentYear} RSQUARE. All rights reserved.
                         </p>
                         <div className="flex items-center gap-6 text-sm text-gray-500">
-                            <Link href="/kebijakan-privasi" className="hover:text-orange-400 transition-colors">
-                                Privasi
+                            <Link href="/kebijakan-privasi" className="group inline-flex items-center gap-1.5 hover:text-orange-400 transition-colors">
+                                <ClientLordIcon
+                                    src="https://cdn.lordicon.com/jgnvfzqg.json"
+                                    trigger="hover"
+                                    colors="primary:#fb923c,secondary:#fbbf24"
+                                    style={{ width: '16px', height: '16px' }}
+                                />
+                                <span className="relative">
+                                    Privasi
+                                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-full" />
+                                </span>
                             </Link>
-                            <Link href="/syarat-ketentuan" className="hover:text-orange-400 transition-colors">
-                                Syarat
+                            <Link href="/syarat-ketentuan" className="group inline-flex items-center gap-1.5 hover:text-orange-400 transition-colors">
+                                <ClientLordIcon
+                                    src="https://cdn.lordicon.com/foxhetpf.json"
+                                    trigger="hover"
+                                    colors="primary:#fb923c,secondary:#fbbf24"
+                                    style={{ width: '16px', height: '16px' }}
+                                />
+                                <span className="relative">
+                                    Syarat
+                                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-full" />
+                                </span>
                             </Link>
                         </div>
                     </div>

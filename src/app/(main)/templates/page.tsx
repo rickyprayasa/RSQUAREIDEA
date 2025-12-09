@@ -1,5 +1,7 @@
 'use client'
 
+import { ClientLordIcon } from '@/components/ui/lordicon'
+
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { TemplatesList } from '@/components/templates/TemplatesList'
@@ -121,7 +123,7 @@ export default function TemplatesPage() {
                             transition={{ duration: 0.5 }}
                         >
                             <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-medium text-orange-600 mb-6">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/ghhwiltn.json"
                                     trigger="loop"
                                     delay="2000"
@@ -179,7 +181,7 @@ export default function TemplatesPage() {
                 <div className="container mx-auto px-6">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20">
-                            <lord-icon
+                            <ClientLordIcon
                                 src="https://cdn.lordicon.com/xjovhxra.json"
                                 trigger="loop"
                                 colors="primary:#f97316"
@@ -194,7 +196,7 @@ export default function TemplatesPage() {
                             animate={{ opacity: 1, y: 0 }}
                         >
                             <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/kkvxgpti.json"
                                     trigger="loop"
                                     colors="primary:#f97316"
@@ -206,7 +208,7 @@ export default function TemplatesPage() {
                                 Template sedang dalam proses persiapan. Segera hadir koleksi template premium untuk kebutuhan Kamu!
                             </p>
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full text-orange-600 text-sm font-medium">
-                                <lord-icon
+                                <ClientLordIcon
                                     src="https://cdn.lordicon.com/hvueufdo.json"
                                     trigger="loop"
                                     colors="primary:#ea580c"

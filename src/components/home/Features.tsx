@@ -1,39 +1,39 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Palette, Zap, Sparkles, PlayCircle } from 'lucide-react'
+import { ClientLordIcon } from '@/components/ui/lordicon'
 
 const features = [
   {
     title: 'Desain Intuitif & Estetis',
     description: 'Tampilan visual yang bersih memanjakan mata, membuat pengelolaan data jadi menyenangkan.',
-    icon: Palette,
+    lordicon: 'https://cdn.lordicon.com/wloilxuq.json', // edit/design icon
     color: 'bg-orange-100',
-    iconColor: 'text-orange-600',
+    lordiconColor: 'primary:#ea580c,secondary:#fbbf24',
     image: '/images/restorer-pana.png'
   },
   {
     title: 'Langsung Siap Pakai',
     description: 'Hemat puluhan jam. Download, buka, dan langsung gunakan tanpa setup rumit.',
-    icon: Zap,
+    lordicon: 'https://cdn.lordicon.com/akqsdstj.json', // bolt/zap icon
     color: 'bg-blue-100',
-    iconColor: 'text-blue-600',
+    lordiconColor: 'primary:#2563eb,secondary:#60a5fa',
     image: '/images/rocket-pana.png'
   },
   {
     title: 'Otomatisasi Canggih',
     description: 'Ditenagai Google Apps Script untuk fitur ajaib yang tidak bisa dilakukan spreadsheet biasa.',
-    icon: Sparkles,
+    lordicon: 'https://cdn.lordicon.com/nocovwne.json', // magic wand/automation icon
     color: 'bg-purple-100',
-    iconColor: 'text-purple-600',
+    lordiconColor: 'primary:#9333ea,secondary:#c084fc',
     image: '/images/ai-pana.png'
   },
   {
     title: 'Panduan Video Lengkap',
     description: 'Setiap template dilengkapi dengan video tutorial langkah demi langkah agar Kamu tidak bingung.',
-    icon: PlayCircle,
+    lordicon: 'https://cdn.lordicon.com/aklfruoc.json', // video/play icon
     color: 'bg-green-100',
-    iconColor: 'text-green-600',
+    lordiconColor: 'primary:#16a34a,secondary:#4ade80',
     image: '/images/video-rafiki.png'
   },
 ]
@@ -84,7 +84,13 @@ export function Features() {
               <div className="flex-1 space-y-6">
                 {/* Icon Box */}
                 <div className={cn("w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-lg", feature.color)}>
-                  <feature.icon className={cn("w-8 h-8 md:w-10 md:h-10", feature.iconColor)} />
+                  <ClientLordIcon
+                    src={feature.lordicon}
+                    trigger="loop"
+                    delay="2000"
+                    colors={feature.lordiconColor}
+                    style={{ width: '40px', height: '40px' }}
+                  />
                 </div>
 
                 <div>
