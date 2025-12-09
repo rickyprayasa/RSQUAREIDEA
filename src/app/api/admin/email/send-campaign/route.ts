@@ -151,6 +151,8 @@ export async function POST(request: NextRequest) {
 
         for (const customer of customers as Customer[]) {
             try {
+                console.log('Sending email to:', customer.name, 'Products:', customer.products)
+                
                 // Generate unique voucher code
                 const voucherCode = generateVoucherCode()
 

@@ -73,11 +73,32 @@ export default function FeedbackPage() {
                 setFormStatus('idle')
                 form.reset()
                 setRating(5)
+                
+                // Different message based on voucher status
+                let message = 'Feedback Kamu sangat berarti bagi kami untuk terus berkembang dan memberikan template terbaik.'
+                
+                if (data.voucherSent) {
+                    message += '\n\n🎁 Kode voucher template gratis sudah dikirim ke email Kamu! Cek inbox atau folder spam.'
+                } else if (rating >= 4) {
+                    // Good rating but no voucher sent - explain why
+                    if (data.voucherDebug === 'customer_not_found') {
+                        message += '\n\nJika Kamu adalah pelanggan yang diundang untuk feedback, pastikan menggunakan email yang sama saat menerima undangan.'
+                    } else if (data.voucherDebug === 'no_voucher_code') {
+                        message += '\n\nTerima kasih atas rating baiknya!'
+                    } else if (data.voucherDebug === 'already_sent') {
+                        message += '\n\n📧 Kode voucher sudah pernah dikirim ke email Kamu sebelumnya.'
+                    }
+                }
+                
+                if (formData.get('permission') === 'yes') {
+                    message += '\n\nJika Kamu mengizinkan, testimoni Kamu mungkin akan ditampilkan di halaman utama.'
+                }
+                
                 setDialog({
                     isOpen: true,
                     type: 'success',
-                    title: 'Terima Kasih!',
-                    message: 'Feedback Kamu sangat berarti bagi kami untuk terus berkembang dan memberikan template terbaik. Jika Kamu mengizinkan, testimoni Kamu mungkin akan ditampilkan di halaman utama.'
+                    title: data.voucherSent ? 'Terima Kasih! 🎁' : 'Terima Kasih!',
+                    message
                 })
             } else {
                 setFormStatus('idle')
@@ -534,9 +555,11 @@ export default function FeedbackPage() {
                                 </h3>
 
                                 {/* Message */}
-                                <p className="text-gray-600 leading-relaxed mb-8">
-                                    {dialog.message}
-                                </p>
+                                <div className="text-gray-600 leading-relaxed mb-8 text-center">
+                                    {dialog.message.split('\n').map((line, i) => (
+                                        <p key={i} className={line ? '' : 'h-2'}>{line}</p>
+                                    ))}
+                                </div>
 
                                 {/* Button */}
                                 <motion.button

@@ -148,25 +148,29 @@ export async function POST(request: NextRequest) {
 
         // Check if customer has pending voucher and rating is good (4-5)
         let voucherSent = false
+        let voucherDebug = ''
+        
         if (data.email && data.rating >= 4) {
-            const { data: customer } = await supabase
+            console.log('Checking voucher for email:', data.email, 'Rating:', data.rating)
+            
+            const { data: customer, error: customerError } = await supabase
                 .from('customers')
-                .select('id, name, feedback_voucher_code, feedback_email_sent_at')
+                .select('id, name, feedback_voucher_code, voucher_sent_at')
                 .eq('email', data.email)
-                .not('feedback_voucher_code', 'is', null)
                 .single()
 
-            if (customer?.feedback_voucher_code) {
-                // Check if voucher email already sent (voucher_sent_at field)
-                const { data: existingVoucher } = await supabase
-                    .from('customers')
-                    .select('id')
-                    .eq('email', data.email)
-                    .not('voucher_sent_at', 'is', null)
-                    .single()
+            console.log('Customer found:', customer, 'Error:', customerError)
 
-                if (!existingVoucher) {
+            if (customer) {
+                if (!customer.feedback_voucher_code) {
+                    voucherDebug = 'no_voucher_code'
+                    console.log('No voucher code for this customer')
+                } else if (customer.voucher_sent_at) {
+                    voucherDebug = 'already_sent'
+                    console.log('Voucher already sent at:', customer.voucher_sent_at)
+                } else {
                     // Send voucher email
+                    console.log('Sending voucher email with code:', customer.feedback_voucher_code)
                     const sent = await sendVoucherEmail(
                         data.email,
                         data.name || customer.name,
@@ -180,9 +184,21 @@ export async function POST(request: NextRequest) {
                             .update({ voucher_sent_at: new Date().toISOString() })
                             .eq('id', customer.id)
                         voucherSent = true
+                        voucherDebug = 'sent'
+                        console.log('Voucher email sent successfully!')
+                    } else {
+                        voucherDebug = 'send_failed'
+                        console.log('Failed to send voucher email')
                     }
                 }
+            } else {
+                voucherDebug = 'customer_not_found'
+                console.log('Customer not found with email:', data.email)
             }
+        } else {
+            if (!data.email) voucherDebug = 'no_email'
+            else if (data.rating < 4) voucherDebug = 'low_rating'
+            console.log('Skipping voucher check - email:', data.email, 'rating:', data.rating)
         }
 
         // Create notification (ignore errors)
@@ -197,7 +213,7 @@ export async function POST(request: NextRequest) {
             // Ignore notification errors
         }
 
-        return NextResponse.json({ feedback, success: true, voucherSent })
+        return NextResponse.json({ feedback, success: true, voucherSent, voucherDebug })
     } catch (error) {
         console.error('Error:', error)
         return NextResponse.json({ error: 'Gagal mengirim feedback. Silakan coba lagi.', success: false }, { status: 500 })

@@ -20,6 +20,7 @@ import {
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal'
 import AddCustomerModal from '@/components/admin/AddCustomerModal'
 import EmailCampaignModal from '@/components/admin/EmailCampaignModal'
+import CustomerDetailModal from '@/components/admin/CustomerDetailModal'
 
 interface Customer {
     id: number
@@ -28,8 +29,10 @@ interface Customer {
     phone: string | null
     source?: string
     notes?: string
+    purchased_products?: string[]
     feedback_email_sent_at?: string | null
     feedback_voucher_code?: string | null
+    voucher_sent_at?: string | null
     total_orders: number
     total_spent: number
     last_order_at: string | null
@@ -57,6 +60,7 @@ export default function CustomersPage() {
     const [addModal, setAddModal] = useState(false)
     const [emailModal, setEmailModal] = useState(false)
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+    const [detailModal, setDetailModal] = useState<{ isOpen: boolean; customer: Customer | null }>({ isOpen: false, customer: null })
 
     useEffect(() => {
         fetchCustomers()
@@ -305,11 +309,12 @@ export default function CustomersPage() {
                         {filteredCustomers.map((customer) => (
                             <div 
                                 key={customer.id} 
-                                className={`bg-white rounded-xl p-4 border-2 transition-colors ${selectedIds.has(customer.id) ? 'border-blue-400 bg-blue-50/30' : 'border-gray-100'}`}
+                                onClick={() => setDetailModal({ isOpen: true, customer })}
+                                className={`bg-white rounded-xl p-4 border-2 transition-colors cursor-pointer ${selectedIds.has(customer.id) ? 'border-blue-400 bg-blue-50/30' : 'border-gray-100'}`}
                             >
                                 <div className="flex items-start gap-3 mb-3">
                                     <button
-                                        onClick={() => toggleSelect(customer.id)}
+                                        onClick={(e) => { e.stopPropagation(); toggleSelect(customer.id); }}
                                         className="mt-0.5 text-gray-400 hover:text-blue-600"
                                     >
                                         {selectedIds.has(customer.id) ? (
@@ -326,7 +331,7 @@ export default function CustomersPage() {
                                         <p className="text-xs text-gray-500 truncate">{customer.email}</p>
                                     </div>
                                     <button
-                                        onClick={() => setDeleteModal({ isOpen: true, customer })}
+                                        onClick={(e) => { e.stopPropagation(); setDeleteModal({ isOpen: true, customer }); }}
                                         className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg"
                                     >
                                         <Trash2 className="h-4 w-4" />
@@ -400,10 +405,11 @@ export default function CustomersPage() {
                                             key={customer.id}
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
-                                            className={`transition-colors ${selectedIds.has(customer.id) ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
+                                            onClick={() => setDetailModal({ isOpen: true, customer })}
+                                            className={`transition-colors cursor-pointer ${selectedIds.has(customer.id) ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                                         >
                                             <td className="text-center px-4 py-4">
-                                                <button onClick={() => toggleSelect(customer.id)} className="text-gray-400 hover:text-blue-600">
+                                                <button onClick={(e) => { e.stopPropagation(); toggleSelect(customer.id); }} className="text-gray-400 hover:text-blue-600">
                                                     {selectedIds.has(customer.id) ? (
                                                         <CheckSquare className="h-5 w-5 text-blue-600" />
                                                     ) : (
@@ -465,7 +471,7 @@ export default function CustomersPage() {
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <button
-                                                    onClick={() => setDeleteModal({ isOpen: true, customer })}
+                                                    onClick={(e) => { e.stopPropagation(); setDeleteModal({ isOpen: true, customer }); }}
                                                     className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -507,6 +513,14 @@ export default function CustomersPage() {
                     setSelectedIds(new Set())
                 }}
                 selectedCustomers={selectedCustomers}
+            />
+
+            {/* Customer Detail Modal */}
+            <CustomerDetailModal
+                isOpen={detailModal.isOpen}
+                onClose={() => setDetailModal({ isOpen: false, customer: null })}
+                onUpdate={fetchCustomers}
+                customer={detailModal.customer}
             />
         </div>
     )
