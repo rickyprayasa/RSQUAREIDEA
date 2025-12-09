@@ -27,7 +27,11 @@ import {
     Code,
     Users,
     Loader2,
-    CheckCircle2
+    CheckCircle2,
+    Gift,
+    Coffee,
+    Link as LinkIcon,
+    Copy
 } from 'lucide-react'
 import jsQR from 'jsqr'
 
@@ -65,6 +69,11 @@ interface SettingsData {
     smtp_from_email: string
     email_subject_template: string
     email_body_template: string
+    // Saweria reward settings
+    saweria_reward_enabled: string
+    saweria_reward_product_id: string
+    saweria_min_donation: string
+    saweria_reward_message: string
 }
 
 const defaultSettings: SettingsData = {
@@ -116,6 +125,11 @@ Jika ada pertanyaan, silakan hubungi kami melalui email atau WhatsApp.
 
 Salam hangat,
 Tim RSQUARE`,
+    // Saweria reward settings
+    saweria_reward_enabled: 'false',
+    saweria_reward_product_id: '',
+    saweria_min_donation: '50000',
+    saweria_reward_message: 'Terima kasih atas dukungannya! Sebagai apresiasi, silakan download template gratis berikut:',
 }
 
 const tabs = [
@@ -125,6 +139,7 @@ const tabs = [
     { id: 'payment', label: 'Pembayaran', icon: CreditCard, color: 'green' },
     { id: 'email', label: 'Email', icon: Mail, color: 'pink' },
     { id: 'tracking', label: 'Tracking', icon: BarChart3, color: 'cyan' },
+    { id: 'saweria', label: 'Saweria', icon: Coffee, color: 'yellow' },
 ]
 
 export default function SettingsPage() {
@@ -138,6 +153,8 @@ export default function SettingsPage() {
     const [qrisDecoded, setQrisDecoded] = useState(false)
     const [testingEmail, setTestingEmail] = useState(false)
     const [testEmailResult, setTestEmailResult] = useState<{ success: boolean; message: string } | null>(null)
+    const [products, setProducts] = useState<{ id: number; title: string; slug: string }[]>([])
+    const [copiedUrl, setCopiedUrl] = useState(false)
 
     // Function to decode QR code from image
     const decodeQRFromImage = async (imageUrl: string): Promise<string | null> => {
@@ -187,6 +204,12 @@ export default function SettingsPage() {
                     const freeCount = data.products.filter((p: { is_free: boolean, is_active: boolean }) => p.is_free && p.is_active).length
                     const featuredCount = data.products.filter((p: { is_featured: boolean, is_active: boolean }) => p.is_featured && p.is_active).length
                     setStats({ freeCount, featuredCount })
+                    // Store products for Saweria dropdown
+                    setProducts(data.products.filter((p: { is_active: boolean }) => p.is_active).map((p: { id: number; title: string; slug: string }) => ({
+                        id: p.id,
+                        title: p.title,
+                        slug: p.slug
+                    })))
                 }
             })
             .catch(console.error)
@@ -308,6 +331,7 @@ export default function SettingsPage() {
         green: 'from-green-500 to-emerald-500',
         cyan: 'from-cyan-500 to-blue-500',
         pink: 'from-pink-500 to-rose-500',
+        yellow: 'from-yellow-500 to-orange-500',
     }
 
     const activeTabData = tabs.find(t => t.id === activeTab)
@@ -1095,6 +1119,122 @@ export default function SettingsPage() {
                         </div>
                     </div>
                 )}
+                {/* Saweria Tab */}
+                {activeTab === 'saweria' && (
+                    <div className="space-y-4 md:space-y-6">
+                        <SectionHeader
+                            icon={Coffee}
+                            title="Saweria Reward"
+                            subtitle="Berikan hadiah template gratis untuk donatur"
+                            color="yellow"
+                        />
+
+                        <ToggleCard
+                            icon={Gift}
+                            label="Aktifkan Saweria Reward"
+                            description="Tampilkan halaman download khusus untuk donatur Saweria"
+                            active={settings.saweria_reward_enabled === 'true'}
+                            onToggle={() => handleChange('saweria_reward_enabled', settings.saweria_reward_enabled === 'true' ? 'false' : 'true')}
+                            color="yellow"
+                        />
+
+                        {settings.saweria_reward_enabled === 'true' && (
+                            <div className="space-y-4">
+                                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                        <Gift className="h-4 w-4 text-yellow-600" />
+                                        Pilih Produk Reward
+                                    </label>
+                                    <select
+                                        value={settings.saweria_reward_product_id}
+                                        onChange={(e) => handleChange('saweria_reward_product_id', e.target.value)}
+                                        className="w-full px-4 py-3 bg-white border-2 border-yellow-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                                    >
+                                        <option value="">-- Pilih Template --</option>
+                                        {products.map(product => (
+                                            <option key={product.id} value={product.id}>
+                                                {product.title}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <p className="text-xs text-yellow-700 mt-2">
+                                        Template ini akan bisa didownload gratis oleh donatur
+                                    </p>
+                                </div>
+
+                                <InputField
+                                    label="Minimum Donasi (Rp)"
+                                    icon={CreditCard}
+                                    value={settings.saweria_min_donation}
+                                    onChange={(v) => handleChange('saweria_min_donation', v)}
+                                    type="number"
+                                    placeholder="50000"
+                                    iconColor="text-yellow-500"
+                                />
+
+                                <InputField
+                                    label="Pesan untuk Donatur"
+                                    icon={FileText}
+                                    value={settings.saweria_reward_message}
+                                    onChange={(v) => handleChange('saweria_reward_message', v)}
+                                    placeholder="Terima kasih atas dukungannya!"
+                                    iconColor="text-yellow-500"
+                                    isTextarea
+                                    rows={3}
+                                />
+
+                                {/* Generated URL */}
+                                <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl">
+                                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                        <LinkIcon className="h-4 w-4 text-yellow-600" />
+                                        Link untuk Saweria
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={`${typeof window !== 'undefined' ? window.location.origin : 'https://rsquareidea.my.id'}/reward/saweria`}
+                                            readOnly
+                                            className="flex-1 px-4 py-3 bg-white border-2 border-yellow-300 rounded-xl text-sm font-mono text-gray-600"
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(`${window.location.origin}/reward/saweria`)
+                                                setCopiedUrl(true)
+                                                setTimeout(() => setCopiedUrl(false), 2000)
+                                            }}
+                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                                                copiedUrl 
+                                                    ? 'bg-green-500 text-white' 
+                                                    : 'bg-yellow-500 text-white hover:bg-yellow-600'
+                                            }`}
+                                        >
+                                            {copiedUrl ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-yellow-700 mt-2">
+                                        Masukkan link ini ke &quot;Isi Kiriman&quot; di Saweria untuk donasi di atas Rp {parseInt(settings.saweria_min_donation || '50000').toLocaleString('id-ID')}
+                                    </p>
+                                </div>
+
+                                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                                    <div className="flex items-start gap-3">
+                                        <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                                        <div className="text-sm text-blue-700">
+                                            <p className="font-medium mb-1">Cara Setup di Saweria:</p>
+                                            <ol className="list-decimal list-inside space-y-1 text-blue-600">
+                                                <li>Buka saweria.co/appreciation</li>
+                                                <li>Klik &quot;Buat Kiriman&quot;</li>
+                                                <li>Isi pesan dan masukkan link di atas ke &quot;Isi Kiriman&quot;</li>
+                                                <li>Set nominal minimum Rp {parseInt(settings.saweria_min_donation || '50000').toLocaleString('id-ID')}</li>
+                                                <li>Klik Simpan</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </motion.div>
         </div>
     )
@@ -1108,6 +1248,7 @@ function SectionHeader({ icon: Icon, title, subtitle, color }: { icon: React.Ele
         green: { bg: 'bg-green-100', text: 'text-green-600' },
         cyan: { bg: 'bg-cyan-100', text: 'text-cyan-600' },
         pink: { bg: 'bg-pink-100', text: 'text-pink-600' },
+        yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
     }
     const c = colors[color] || colors.orange
 
@@ -1184,6 +1325,7 @@ function ToggleCard({ icon: Icon, label, description, active, onToggle, color }:
     const colors: Record<string, { bg: string, icon: string }> = {
         purple: { bg: 'bg-purple-50 border-purple-200', icon: 'text-purple-500' },
         green: { bg: 'bg-green-50 border-green-200', icon: 'text-green-500' },
+        yellow: { bg: 'bg-yellow-50 border-yellow-200', icon: 'text-yellow-500' },
     }
     const c = colors[color] || colors.green
 
