@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { createPortal } from 'react-dom'
 import { useCart } from '@/contexts/CartContext'
 import { trackInitiateCheckout, trackPurchase, trackButtonClick } from '@/hooks/useAnalytics'
 
@@ -1215,7 +1216,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* QRIS Confirmation Modal */}
-            {showQrisConfirm && (
+            {showQrisConfirm && createPortal(
                 <div 
                     className="fixed inset-0 bg-black/60 z-[1000] flex items-end md:items-center justify-center"
                     onClick={() => setShowQrisConfirm(false)}
@@ -1342,7 +1343,7 @@ export default function CheckoutPage() {
                         </div>
                     </motion.div>
                 </div>
-            )}
+            , document.body)}
             {/* Error Dialog */}
             <AnimatePresence>
                 {errorDialog.isOpen && (
