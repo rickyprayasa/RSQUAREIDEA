@@ -182,6 +182,58 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                             />
                         </motion.div>
                     ))}
+                    
+                    {/* Coming Soon Card */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: filteredTemplates.length * 0.05 }}
+                        className={`${viewMode === 'compact' ? 'h-full' : 'h-full'}`}
+                    >
+                        <div className={`h-full bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 rounded-2xl border-2 border-dashed border-orange-200 overflow-hidden flex flex-col items-center justify-center ${viewMode === 'compact' ? 'p-4 min-h-[180px]' : 'p-6 min-h-[320px]'}`}>
+                            <motion.div
+                                animate={{ 
+                                    y: [0, -8, 0],
+                                    rotate: [0, 5, -5, 0]
+                                }}
+                                transition={{ 
+                                    duration: 3, 
+                                    repeat: Infinity, 
+                                    ease: "easeInOut" 
+                                }}
+                                className={`${viewMode === 'compact' ? 'mb-2' : 'mb-4'}`}
+                            >
+                                <ClientLordIcon
+                                    src="https://cdn.lordicon.com/fqhwldvk.json"
+                                    trigger="loop"
+                                    delay="1000"
+                                    colors="primary:#f97316,secondary:#fbbf24"
+                                    style={{ 
+                                        width: viewMode === 'compact' ? '48px' : '72px', 
+                                        height: viewMode === 'compact' ? '48px' : '72px' 
+                                    }}
+                                />
+                            </motion.div>
+                            <motion.h3 
+                                className={`font-bold text-gray-800 text-center ${viewMode === 'compact' ? 'text-sm' : 'text-lg'}`}
+                                animate={{ opacity: [0.7, 1, 0.7] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            >
+                                Segera Hadir
+                            </motion.h3>
+                            <p className={`text-gray-500 text-center mt-1 ${viewMode === 'compact' ? 'text-xs' : 'text-sm'}`}>
+                                Template baru sedang disiapkan
+                            </p>
+                            <motion.div 
+                                className={`flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-orange-100 rounded-full ${viewMode === 'compact' ? 'text-xs' : 'text-sm'}`}
+                                animate={{ scale: [1, 1.05, 1] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                            >
+                                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+                                <span className="text-orange-600 font-medium">Coming Soon</span>
+                            </motion.div>
+                        </div>
+                    </motion.div>
                 </motion.div>
             </AnimatePresence>
 

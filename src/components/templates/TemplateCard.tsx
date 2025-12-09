@@ -73,7 +73,12 @@ export function TemplateCard({
                         </div>
                         <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 group-hover:text-orange-600 transition-colors">{title}</h3>
                         <p className="text-sm font-bold text-gray-900 mt-1">
-                            {discountPrice ? `Rp ${discountPrice.toLocaleString('id-ID')}` : `Rp ${price.toLocaleString('id-ID')}`}
+                            {(discountPrice || price) === 0 
+                                ? <span className="text-green-600">Gratis</span>
+                                : discountPrice 
+                                    ? `Rp ${discountPrice.toLocaleString('id-ID')}` 
+                                    : `Rp ${price.toLocaleString('id-ID')}`
+                            }
                         </p>
                     </div>
                 </motion.div>
@@ -139,7 +144,11 @@ export function TemplateCard({
                     
                     <div className="flex items-center justify-between">
                         <div className="flex items-baseline gap-2">
-                            {discountPrice ? (
+                            {(discountPrice || price) === 0 ? (
+                                <span className="text-xl font-bold text-green-600">
+                                    Gratis
+                                </span>
+                            ) : discountPrice ? (
                                 <>
                                     <span className="text-xl font-bold text-gray-900">
                                         Rp {discountPrice.toLocaleString('id-ID')}
