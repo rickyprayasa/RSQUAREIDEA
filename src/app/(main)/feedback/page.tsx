@@ -129,6 +129,32 @@ function FeedbackContent() {
                         })
                         return
                     }
+                    
+                    // Send failed - SMTP issue
+                    if (data.voucherDebug === 'send_failed') {
+                        form.reset()
+                        setRating(5)
+                        setDialog({
+                            isOpen: true,
+                            type: 'success',
+                            title: 'Terima Kasih!',
+                            message: 'Feedback Kamu sangat berarti bagi kami!\n\n⚠️ Terjadi kendala saat mengirim kode voucher. Tim kami akan mengirimkan voucher ke email Kamu dalam 1x24 jam.'
+                        })
+                        return
+                    }
+                    
+                    // No voucher code for this customer
+                    if (data.voucherDebug === 'no_voucher_code') {
+                        form.reset()
+                        setRating(5)
+                        setDialog({
+                            isOpen: true,
+                            type: 'success',
+                            title: 'Terima Kasih!',
+                            message: 'Feedback Kamu sangat berarti bagi kami untuk terus berkembang dan memberikan template terbaik.'
+                        })
+                        return
+                    }
                 }
                 
                 // Regular visitor or other success cases - reset form
