@@ -11,15 +11,25 @@ import {
     Download,
     Loader2,
     Search,
-    Trash2
+    Trash2,
+    UserPlus,
+    Send,
+    CheckSquare,
+    Square
 } from 'lucide-react'
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal'
+import AddCustomerModal from '@/components/admin/AddCustomerModal'
+import EmailCampaignModal from '@/components/admin/EmailCampaignModal'
 
 interface Customer {
     id: number
     name: string
     email: string
     phone: string | null
+    source?: string
+    notes?: string
+    feedback_email_sent_at?: string | null
+    feedback_voucher_code?: string | null
     total_orders: number
     total_spent: number
     last_order_at: string | null
@@ -27,13 +37,26 @@ interface Customer {
     products: string[]
 }
 
+const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
+    website: { label: 'Website', color: 'bg-green-100 text-green-700' },
+    lynk_id: { label: 'Lynk.id', color: 'bg-purple-100 text-purple-700' },
+    karyakarsa: { label: 'Karyakarsa', color: 'bg-blue-100 text-blue-700' },
+    mayar: { label: 'Mayar', color: 'bg-orange-100 text-orange-700' },
+    other: { label: 'Lainnya', color: 'bg-gray-100 text-gray-700' },
+    manual: { label: 'Manual', color: 'bg-gray-100 text-gray-700' },
+}
+
 export default function CustomersPage() {
     const [customers, setCustomers] = useState<Customer[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
+    const [sourceFilter, setSourceFilter] = useState<string>('all')
     const [exporting, setExporting] = useState(false)
     const [deletingId, setDeletingId] = useState<number | null>(null)
     const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; customer: Customer | null }>({ isOpen: false, customer: null })
+    const [addModal, setAddModal] = useState(false)
+    const [emailModal, setEmailModal] = useState(false)
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
 
     useEffect(() => {
         fetchCustomers()
@@ -117,13 +140,35 @@ export default function CustomersPage() {
         }
     }
 
-    const filteredCustomers = customers.filter(c => 
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.email.toLowerCase().includes(search.toLowerCase()) ||
-        (c.phone && c.phone.includes(search))
-    )
+    const filteredCustomers = customers.filter(c => {
+        const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
+            c.email.toLowerCase().includes(search.toLowerCase()) ||
+            (c.phone && c.phone.includes(search))
+        const matchesSource = sourceFilter === 'all' || c.source === sourceFilter
+        return matchesSearch && matchesSource
+    })
 
     const totalRevenue = customers.reduce((sum, c) => sum + (c.total_spent || 0), 0)
+
+    const toggleSelect = (id: number) => {
+        const newSet = new Set(selectedIds)
+        if (newSet.has(id)) {
+            newSet.delete(id)
+        } else {
+            newSet.add(id)
+        }
+        setSelectedIds(newSet)
+    }
+
+    const toggleSelectAll = () => {
+        if (selectedIds.size === filteredCustomers.length) {
+            setSelectedIds(new Set())
+        } else {
+            setSelectedIds(new Set(filteredCustomers.map(c => c.id)))
+        }
+    }
+
+    const selectedCustomers = customers.filter(c => selectedIds.has(c.id))
 
     if (loading) {
         return (
@@ -140,22 +185,30 @@ export default function CustomersPage() {
                     <h1 className="text-xl md:text-2xl font-bold text-gray-900">Pelanggan</h1>
                     <p className="text-sm text-gray-500 mt-0.5">Database pelanggan ({customers.length} total)</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        onClick={() => setAddModal(true)}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition-colors"
+                    >
+                        <UserPlus className="h-4 w-4" />
+                        <span className="hidden sm:inline">Tambah</span>
+                    </button>
+                    <button
+                        onClick={() => setEmailModal(true)}
+                        disabled={selectedIds.size === 0}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <Send className="h-4 w-4" />
+                        <span className="hidden sm:inline">Email</span>
+                        {selectedIds.size > 0 && <span className="ml-1">({selectedIds.size})</span>}
+                    </button>
                     <button
                         onClick={() => handleExport('csv')}
                         disabled={exporting}
-                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 disabled:opacity-50 transition-colors"
                     >
                         <Download className="h-4 w-4" />
-                        <span className="hidden sm:inline">Export</span> CSV
-                    </button>
-                    <button
-                        onClick={() => handleExport('excel')}
-                        disabled={exporting}
-                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
-                    >
-                        <Download className="h-4 w-4" />
-                        <span className="hidden sm:inline">Export</span> Excel
+                        <span className="hidden sm:inline">CSV</span>
                     </button>
                 </div>
             </div>
@@ -197,17 +250,46 @@ export default function CustomersPage() {
                 </div>
             </div>
 
-            {/* Search */}
-            <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Cari pelanggan..."
-                    className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                />
+            {/* Search & Filter */}
+            <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Cari pelanggan..."
+                        className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                </div>
+                <select
+                    value={sourceFilter}
+                    onChange={(e) => setSourceFilter(e.target.value)}
+                    className="px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                >
+                    <option value="all">Semua Sumber</option>
+                    <option value="website">Website</option>
+                    <option value="lynk_id">Lynk.id</option>
+                    <option value="karyakarsa">Karyakarsa</option>
+                    <option value="mayar">Mayar</option>
+                    <option value="other">Lainnya</option>
+                </select>
             </div>
+
+            {/* Selection indicator */}
+            {selectedIds.size > 0 && (
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                    <span className="text-sm text-blue-700 font-medium">
+                        {selectedIds.size} pelanggan dipilih
+                    </span>
+                    <button
+                        onClick={() => setSelectedIds(new Set())}
+                        className="text-sm text-blue-600 hover:text-blue-800 underline"
+                    >
+                        Batal pilih
+                    </button>
+                </div>
+            )}
 
             {/* Empty state */}
             {filteredCustomers.length === 0 ? (
@@ -221,8 +303,21 @@ export default function CustomersPage() {
                     {/* Mobile: Card layout */}
                     <div className="md:hidden space-y-3">
                         {filteredCustomers.map((customer) => (
-                            <div key={customer.id} className="bg-white rounded-xl p-4 border border-gray-100">
+                            <div 
+                                key={customer.id} 
+                                className={`bg-white rounded-xl p-4 border-2 transition-colors ${selectedIds.has(customer.id) ? 'border-blue-400 bg-blue-50/30' : 'border-gray-100'}`}
+                            >
                                 <div className="flex items-start gap-3 mb-3">
+                                    <button
+                                        onClick={() => toggleSelect(customer.id)}
+                                        className="mt-0.5 text-gray-400 hover:text-blue-600"
+                                    >
+                                        {selectedIds.has(customer.id) ? (
+                                            <CheckSquare className="h-5 w-5 text-blue-600" />
+                                        ) : (
+                                            <Square className="h-5 w-5" />
+                                        )}
+                                    </button>
                                     <div className="w-9 h-9 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                                         {customer.name.charAt(0).toUpperCase()}
                                     </div>
@@ -236,6 +331,18 @@ export default function CustomersPage() {
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </button>
+                                </div>
+                                <div className="flex flex-wrap gap-1 mb-3">
+                                    {customer.source && (
+                                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${SOURCE_LABELS[customer.source]?.color || 'bg-gray-100 text-gray-700'}`}>
+                                            {SOURCE_LABELS[customer.source]?.label || customer.source}
+                                        </span>
+                                    )}
+                                    {customer.feedback_email_sent_at && (
+                                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">
+                                            Email terkirim
+                                        </span>
+                                    )}
                                 </div>
                                 {customer.products?.length > 0 && (
                                     <div className="flex flex-wrap gap-1 mb-3">
@@ -270,9 +377,18 @@ export default function CustomersPage() {
                             <table className="w-full">
                                 <thead className="bg-gray-50 border-b border-gray-100">
                                     <tr>
+                                        <th className="text-center px-4 py-4 w-12">
+                                            <button onClick={toggleSelectAll} className="text-gray-400 hover:text-blue-600">
+                                                {selectedIds.size === filteredCustomers.length && filteredCustomers.length > 0 ? (
+                                                    <CheckSquare className="h-5 w-5 text-blue-600" />
+                                                ) : (
+                                                    <Square className="h-5 w-5" />
+                                                )}
+                                            </button>
+                                        </th>
                                         <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Pelanggan</th>
                                         <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Kontak</th>
-                                        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Produk Dibeli</th>
+                                        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Sumber</th>
                                         <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Pesanan</th>
                                         <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Total Belanja</th>
                                         <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Aksi</th>
@@ -284,8 +400,17 @@ export default function CustomersPage() {
                                             key={customer.id}
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
-                                            className="hover:bg-gray-50 transition-colors"
+                                            className={`transition-colors ${selectedIds.has(customer.id) ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
                                         >
+                                            <td className="text-center px-4 py-4">
+                                                <button onClick={() => toggleSelect(customer.id)} className="text-gray-400 hover:text-blue-600">
+                                                    {selectedIds.has(customer.id) ? (
+                                                        <CheckSquare className="h-5 w-5 text-blue-600" />
+                                                    ) : (
+                                                        <Square className="h-5 w-5" />
+                                                    )}
+                                                </button>
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold">
@@ -314,23 +439,15 @@ export default function CustomersPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex flex-wrap gap-1 max-w-xs">
-                                                    {customer.products?.length > 0 ? (
-                                                        customer.products.slice(0, 3).map((product, idx) => (
-                                                            <span 
-                                                                key={idx}
-                                                                className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium truncate max-w-[150px]"
-                                                                title={product}
-                                                            >
-                                                                {product}
-                                                            </span>
-                                                        ))
-                                                    ) : (
-                                                        <span className="text-gray-400 text-sm">-</span>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {customer.source && (
+                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${SOURCE_LABELS[customer.source]?.color || 'bg-gray-100 text-gray-700'}`}>
+                                                            {SOURCE_LABELS[customer.source]?.label || customer.source}
+                                                        </span>
                                                     )}
-                                                    {customer.products?.length > 3 && (
-                                                        <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
-                                                            +{customer.products.length - 3}
+                                                    {customer.feedback_email_sent_at && (
+                                                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                                                            Email terkirim
                                                         </span>
                                                     )}
                                                 </div>
@@ -372,6 +489,24 @@ export default function CustomersPage() {
                 message="Apakah Anda yakin ingin menghapus pelanggan ini? Riwayat pesanan pelanggan ini akan tetap tersimpan."
                 itemName={deleteModal.customer?.name}
                 isDeleting={deletingId !== null}
+            />
+
+            {/* Add Customer Modal */}
+            <AddCustomerModal
+                isOpen={addModal}
+                onClose={() => setAddModal(false)}
+                onSuccess={fetchCustomers}
+            />
+
+            {/* Email Campaign Modal */}
+            <EmailCampaignModal
+                isOpen={emailModal}
+                onClose={() => setEmailModal(false)}
+                onSuccess={() => {
+                    fetchCustomers()
+                    setSelectedIds(new Set())
+                }}
+                selectedCustomers={selectedCustomers}
             />
         </div>
     )

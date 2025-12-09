@@ -56,6 +56,7 @@ export default function FeedbackPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: formData.get('name'),
+                    email: formData.get('email'),
                     socialMedia: formData.get('social'),
                     socialMediaUrl: formData.get('socialUrl'),
                     templateName: formData.get('template'),
@@ -226,25 +227,46 @@ export default function FeedbackPage() {
 
                             <div className="p-8 md:p-10">
                                 <form onSubmit={handleSubmit} className="space-y-8">
-                                    {/* Name */}
-                                    <div>
-                                        <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                            <ClientLordIcon
-                                                src="https://cdn.lordicon.com/dxjqoygy.json"
-                                                trigger="hover"
-                                                colors="primary:#6b7280"
-                                                style={{ width: '18px', height: '18px' }}
+                                    {/* Name & Email */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+                                                <ClientLordIcon
+                                                    src="https://cdn.lordicon.com/dxjqoygy.json"
+                                                    trigger="hover"
+                                                    colors="primary:#6b7280"
+                                                    style={{ width: '18px', height: '18px' }}
+                                                />
+                                                Nama Kamu
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="name"
+                                                name="name"
+                                                required
+                                                placeholder="Nama lengkap atau panggilan"
+                                                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
                                             />
-                                            Nama Kamu
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="name"
-                                            name="name"
-                                            required
-                                            placeholder="Nama lengkap atau panggilan"
-                                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
-                                        />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="email" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+                                                <ClientLordIcon
+                                                    src="https://cdn.lordicon.com/diihvcfp.json"
+                                                    trigger="hover"
+                                                    colors="primary:#6b7280"
+                                                    style={{ width: '18px', height: '18px' }}
+                                                />
+                                                Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                id="email"
+                                                name="email"
+                                                required
+                                                placeholder="email@example.com"
+                                                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Social Media */}
