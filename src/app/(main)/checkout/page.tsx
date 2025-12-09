@@ -1212,27 +1212,33 @@ export default function CheckoutPage() {
                             {/* QRIS Confirmation Modal */}
                             {showQrisConfirm && (
                                 <div 
-                                    className="fixed inset-0 bg-black/50 flex items-start md:items-center justify-center z-[100] p-4 pt-20 md:pt-4 overflow-y-auto"
+                                    className="fixed inset-0 bg-black/60 z-[100] flex items-end md:items-center justify-center"
                                     onClick={() => setShowQrisConfirm(false)}
                                 >
                                     <motion.div
-                                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        className="bg-white rounded-2xl max-w-md w-full shadow-2xl my-4"
+                                        initial={{ opacity: 0, y: 100 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 100 }}
+                                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                                        className="bg-white w-full md:w-auto md:min-w-[500px] md:max-w-2xl md:rounded-2xl rounded-t-3xl shadow-2xl max-h-[85vh] md:max-h-[80vh] flex flex-col"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <div className="sticky top-0 bg-white p-4 border-b border-gray-100 z-10 rounded-t-2xl">
+                                        {/* Header - Always visible */}
+                                        <div className="flex-shrink-0 bg-white p-4 border-b border-gray-100 rounded-t-3xl md:rounded-t-2xl">
+                                            {/* Mobile drag indicator */}
+                                            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3 md:hidden" />
                                             <div className="flex items-center justify-between">
                                                 <h2 className="text-base md:text-lg font-bold text-gray-900">Upload Bukti Pembayaran</h2>
                                                 <button
                                                     onClick={() => setShowQrisConfirm(false)}
-                                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                                                 >
                                                     <X className="h-5 w-5" />
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="p-4 max-h-[60vh] md:max-h-[70vh] overflow-y-auto">
+                                        {/* Content - Scrollable */}
+                                        <div className="flex-1 overflow-y-auto p-4">
                                             {/* Order Info */}
                                             <div className="p-4 bg-gray-50 rounded-xl mb-4">
                                                 <div className="grid grid-cols-2 gap-3 text-sm">
@@ -1271,9 +1277,9 @@ export default function CheckoutPage() {
                                                     </div>
                                                 ) : (
                                                     <label className="block cursor-pointer">
-                                                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-purple-400 hover:bg-purple-50 transition-all">
-                                                            <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-                                                            <p className="text-sm text-gray-500">Klik untuk upload screenshot bukti transfer</p>
+                                                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 md:p-8 text-center hover:border-orange-400 hover:bg-orange-50 transition-all">
+                                                            <Upload className="h-8 w-8 md:h-10 md:w-10 text-gray-400 mx-auto mb-2 md:mb-3" />
+                                                            <p className="text-xs md:text-sm text-gray-500">Klik untuk upload screenshot bukti transfer</p>
                                                             <p className="text-xs text-gray-400 mt-1">JPG, PNG max 5MB</p>
                                                         </div>
                                                         <input
