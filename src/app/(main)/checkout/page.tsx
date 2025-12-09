@@ -63,6 +63,7 @@ export default function CheckoutPage() {
     const [uploadingProof, setUploadingProof] = useState(false)
     const [confirmationSent, setConfirmationSent] = useState(false)
     const [paymentConfirmed, setPaymentConfirmed] = useState(false)
+    const [paymentRejected, setPaymentRejected] = useState(false)
     const [errorDialog, setErrorDialog] = useState({ isOpen: false, title: '', message: '' })
 
     const [formData, setFormData] = useState({
@@ -229,7 +230,7 @@ export default function CheckoutPage() {
 
     // Poll payment confirmation status
     useEffect(() => {
-        if (!confirmationSent || !orderNumber || paymentConfirmed) return
+        if (!confirmationSent || !orderNumber || paymentConfirmed || paymentRejected) return
 
         const checkPaymentStatus = async () => {
             try {
@@ -239,6 +240,8 @@ export default function CheckoutPage() {
                     const confirmation = data.confirmations[0]
                     if (confirmation.status === 'approved') {
                         setPaymentConfirmed(true)
+                    } else if (confirmation.status === 'rejected') {
+                        setPaymentRejected(true)
                     }
                 }
             } catch (error) {
@@ -252,7 +255,7 @@ export default function CheckoutPage() {
         // Then poll every 10 seconds
         const interval = setInterval(checkPaymentStatus, 10000)
         return () => clearInterval(interval)
-    }, [confirmationSent, orderNumber, paymentConfirmed])
+    }, [confirmationSent, orderNumber, paymentConfirmed, paymentRejected])
 
     const handleProofUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -1130,7 +1133,7 @@ export default function CheckoutPage() {
                                 </div>
                             )}
                             {/* Confirmation Sent - Waiting */}
-                            {confirmationSent && !paymentConfirmed && (
+                            {confirmationSent && !paymentConfirmed && !paymentRejected && (
                                 <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl p-6 mb-6 max-w-lg mx-auto">
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-200">
@@ -1146,6 +1149,26 @@ export default function CheckoutPage() {
                                                 <Clock className="h-4 w-4" />
                                                 <span>Estimasi verifikasi: 1x24 jam kerja</span>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {/* Payment Rejected */}
+                            {paymentRejected && (
+                                <div className="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 rounded-2xl p-6 mb-6 max-w-lg mx-auto">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-200">
+                                            <X className="h-6 w-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-red-800 text-lg mb-1">Pembayaran Ditolak</h3>
+                                            <p className="text-sm text-red-700 mb-3">
+                                                Maaf, konfirmasi pembayaran Kamu tidak dapat diverifikasi. 
+                                                Hal ini bisa terjadi karena bukti pembayaran tidak valid atau nominal tidak sesuai.
+                                            </p>
+                                            <p className="text-sm text-red-600">
+                                                Silakan hubungi kami melalui WhatsApp atau email jika ada pertanyaan.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
