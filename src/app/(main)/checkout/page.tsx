@@ -1226,7 +1226,7 @@ export default function CheckoutPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 100 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="bg-white w-full md:w-auto md:min-w-[500px] md:max-w-4xl md:rounded-2xl rounded-t-3xl shadow-2xl max-h-[85vh] md:max-h-[80vh] flex flex-col"
+                        className="bg-white w-full md:w-auto md:min-w-[500px] md:max-w-4xl md:rounded-2xl rounded-t-3xl shadow-2xl max-h-[90dvh] md:max-h-[80vh] flex flex-col"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header - Always visible */}
@@ -1244,7 +1244,7 @@ export default function CheckoutPage() {
                             </div>
                         </div>
                         {/* Content - Scrollable */}
-                        <div className="flex-1 overflow-y-auto p-4">
+                        <div className="flex-1 overflow-y-auto p-4 pb-8 md:pb-4">
                             <div className="flex flex-col md:flex-row gap-6">
                                 {/* Left Column - Upload Proof */}
                                 <div className="md:w-1/2">
