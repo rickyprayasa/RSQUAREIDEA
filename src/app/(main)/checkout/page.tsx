@@ -527,7 +527,7 @@ export default function CheckoutPage() {
     }
 
     return (
-        <div className="min-h-screen relative py-8">
+        <div className="min-h-screen relative py-6 md:py-8 overflow-x-hidden">
             {/* Background with Grid and Shapes */}
             <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
                 <div className="absolute inset-0 bg-gradient-to-b from-orange-50/30 to-white" />
@@ -561,24 +561,24 @@ export default function CheckoutPage() {
                     className="absolute bottom-20 right-[8%] w-24 h-24 rounded-full bg-gradient-to-bl from-amber-400/20 to-orange-500/20 blur-xl"
                 />
             </div>
-            <div className="container mx-auto px-6 relative z-10">
+            <div className="container mx-auto px-4 md:px-6 relative z-10">
                 {/* Header */}
-                <div className="mb-8">
-                    <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4">
+                <div className="mb-6 md:mb-8">
+                    <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-3 md:mb-4 text-sm md:text-base">
                         <ArrowLeft className="h-4 w-4" /> Kembali
                     </Link>
-                    <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900">Checkout</h1>
                 </div>
 
                 {/* Progress Steps */}
-                <div className="flex items-center justify-center gap-4 mb-8">
+                <div className="flex items-center justify-center gap-2 md:gap-4 mb-6 md:mb-8">
                     {[1, 2, 3].map((s) => (
                         <div key={s} className="flex items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'
+                            <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-medium text-sm md:text-base ${step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'
                                 }`}>
-                                {step > s ? <Check className="h-4 w-4" /> : s}
+                                {step > s ? <Check className="h-3.5 w-3.5 md:h-4 md:w-4" /> : s}
                             </div>
-                            {s < 3 && <div className={`w-16 h-1 mx-2 ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />}
+                            {s < 3 && <div className={`w-8 md:w-16 h-0.5 md:h-1 mx-1 md:mx-2 ${step > s ? 'bg-orange-500' : 'bg-gray-200'}`} />}
                         </div>
                     ))}
                 </div>
