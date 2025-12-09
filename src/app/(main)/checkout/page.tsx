@@ -595,13 +595,13 @@ export default function CheckoutPage() {
                     ))}
                 </div>
 
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-4xl mx-auto overflow-hidden">
                     {/* Step 1: Customer Info */}
                     {step === 1 && (
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                            <div className="grid md:grid-cols-2 gap-4 md:gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                                 {/* Form */}
-                                <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200">
+                                <div className="bg-white rounded-2xl p-3 md:p-6 shadow-lg border border-gray-200 overflow-hidden">
                                     <h2 className="text-base md:text-lg font-bold text-gray-900 mb-4 md:mb-6 flex items-center gap-2">
                                         <User className="h-4 w-4 md:h-5 md:w-5 text-orange-500" /> Data Pembeli
                                     </h2>
@@ -646,13 +646,13 @@ export default function CheckoutPage() {
                                 </div>
 
                                 {/* Order Summary */}
-                                <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200">
+                                <div className="bg-white rounded-2xl p-3 md:p-6 shadow-lg border border-gray-200 overflow-hidden">
                                     <h2 className="text-base md:text-lg font-bold text-gray-900 mb-4 md:mb-6 flex items-center gap-2">
                                         <ShoppingCart className="h-4 w-4 md:h-5 md:w-5 text-orange-500" /> Ringkasan Pesanan
                                     </h2>
                                     <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
                                         {items.map((item) => (
-                                            <div key={item.id} className="flex items-center gap-2 md:gap-3 p-2 md:p-3 bg-gray-50 rounded-xl">
+                                            <div key={item.id} className="flex items-center gap-2 md:gap-3 p-2 md:p-3 bg-gray-50 rounded-xl overflow-hidden">
                                                 <div className="w-10 h-10 md:w-14 md:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                                                     {item.image ? (
                                                         <Image
