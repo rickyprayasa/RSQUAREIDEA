@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isLocalhost } from '@/lib/isLocalhost'
 
 export async function POST(request: NextRequest) {
     try {
         const data = await request.json()
+        
+        // Check if running on localhost - don't save to database
+        const localhost = await isLocalhost()
+        if (localhost) {
+            console.log('[LOCALHOST] Order creation skipped - test mode')
+            return NextResponse.json({ 
+                order: {
+                    id: 'test-' + Date.now(),
+                    order_number: data.orderNumber,
+                    status: data.status || 'pending',
+                },
+                success: true,
+                testMode: true,
+                message: 'Localhost mode - data tidak disimpan ke database'
+            })
+        }
+
         const supabase = await createClient()
 
         // Create order (use provided status or default to 'pending')
@@ -20,6 +38,8 @@ export async function POST(request: NextRequest) {
                 payment_method: data.paymentMethod,
                 status: data.status || 'pending',
                 notes: JSON.stringify(data.items),
+                voucher_code: data.voucherCode || null,
+                discount_amount: data.discountAmount || 0,
             })
             .select()
             .single()
@@ -44,7 +64,26 @@ export async function POST(request: NextRequest) {
 
             if (itemsError) {
                 console.error('Error creating order items:', itemsError)
-                // Don't fail the order creation if items fail
+            }
+        }
+
+        // Update voucher usage count if voucher was used
+        if (data.voucherCode) {
+            try {
+                const { data: voucher } = await supabase
+                    .from('vouchers')
+                    .select('used_count')
+                    .eq('code', data.voucherCode)
+                    .single()
+
+                if (voucher) {
+                    await supabase
+                        .from('vouchers')
+                        .update({ used_count: (voucher.used_count || 0) + 1 })
+                        .eq('code', data.voucherCode)
+                }
+            } catch (voucherError) {
+                console.error('Error updating voucher count:', voucherError)
             }
         }
 

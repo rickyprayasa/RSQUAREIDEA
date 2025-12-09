@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isLocalhost } from '@/lib/isLocalhost'
 
 export async function POST(request: NextRequest) {
     try {
         const data = await request.json()
+        
+        // Check if running on localhost - don't save to database
+        const localhost = await isLocalhost()
+        if (localhost) {
+            console.log('[LOCALHOST] QRIS confirmation skipped - test mode')
+            return NextResponse.json({ 
+                confirmation: { id: 'test-' + Date.now(), status: 'pending' }, 
+                success: true, 
+                testMode: true 
+            })
+        }
+
         const supabase = await createClient()
 
         // Find order_id from orders table if not provided

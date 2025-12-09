@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth'
+import { isLocalhost } from '@/lib/isLocalhost'
 
 export async function GET() {
     try {
@@ -65,6 +66,14 @@ export async function GET() {
 export async function POST(request: NextRequest) {
     try {
         const data = await request.json()
+        
+        // Check if running on localhost - don't save to database
+        const localhost = await isLocalhost()
+        if (localhost) {
+            console.log('[LOCALHOST] Customer creation skipped - test mode')
+            return NextResponse.json({ customerId: 'test-' + Date.now(), success: true, testMode: true })
+        }
+
         const supabase = await createClient()
 
         // Check if customer exists

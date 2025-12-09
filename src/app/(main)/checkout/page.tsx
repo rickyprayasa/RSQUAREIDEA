@@ -22,7 +22,9 @@ import {
     Camera,
     Clock,
     AlertCircle,
-    X
+    X,
+    Ticket,
+    Tag
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -69,6 +71,29 @@ export default function CheckoutPage() {
         phone: '',
     })
 
+    // Voucher state
+    const [voucherCode, setVoucherCode] = useState('')
+    const [voucherLoading, setVoucherLoading] = useState(false)
+    const [voucherError, setVoucherError] = useState('')
+    const [appliedVoucher, setAppliedVoucher] = useState<{
+        code: string
+        discountAmount: number
+        finalAmount: number
+    } | null>(null)
+
+    // Check if running on localhost
+    const [isLocalhost, setIsLocalhost] = useState(false)
+    
+    useEffect(() => {
+        const hostname = window.location.hostname
+        setIsLocalhost(
+            hostname === 'localhost' || 
+            hostname === '127.0.0.1' || 
+            hostname.startsWith('192.168.') ||
+            hostname.startsWith('10.')
+        )
+    }, [])
+
     useEffect(() => {
         // Fetch payment methods and QRIS settings
         Promise.all([
@@ -114,6 +139,57 @@ export default function CheckoutPage() {
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
+
+    // Voucher validation
+    const handleApplyVoucher = async () => {
+        if (!voucherCode.trim()) {
+            setVoucherError('Masukkan kode voucher')
+            return
+        }
+
+        setVoucherLoading(true)
+        setVoucherError('')
+
+        try {
+            const res = await fetch('/api/vouchers/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: voucherCode,
+                    totalAmount: totalPrice,
+                }),
+            })
+
+            const data = await res.json()
+
+            if (data.valid) {
+                setAppliedVoucher({
+                    code: data.voucher.code,
+                    discountAmount: data.discountAmount,
+                    finalAmount: data.finalAmount,
+                })
+                setVoucherError('')
+            } else {
+                setVoucherError(data.error || 'Voucher tidak valid')
+                setAppliedVoucher(null)
+            }
+        } catch (error) {
+            console.error('Error validating voucher:', error)
+            setVoucherError('Gagal memvalidasi voucher')
+            setAppliedVoucher(null)
+        } finally {
+            setVoucherLoading(false)
+        }
+    }
+
+    const handleRemoveVoucher = () => {
+        setAppliedVoucher(null)
+        setVoucherCode('')
+        setVoucherError('')
+    }
+
+    // Calculate final price with voucher
+    const finalPrice = appliedVoucher ? appliedVoucher.finalAmount : totalPrice
 
 
 
@@ -327,7 +403,7 @@ export default function CheckoutPage() {
         const newOrderNumber = generateOrderNumber()
 
         // Track checkout initiation
-        trackInitiateCheckout(totalPrice)
+        trackInitiateCheckout(finalPrice)
         trackButtonClick('Lanjut ke Pembayaran', 'Checkout')
 
         try {
@@ -345,8 +421,10 @@ export default function CheckoutPage() {
                         productTitle: item.title,
                         price: item.discountPrice || item.price,
                     })),
-                    totalAmount: totalPrice,
+                    totalAmount: finalPrice,
                     paymentMethod: selectedPayment.name,
+                    voucherCode: appliedVoucher?.code || null,
+                    discountAmount: appliedVoucher?.discountAmount || 0,
                 }),
             })
 
@@ -565,10 +643,79 @@ export default function CheckoutPage() {
                                             </div>
                                         ))}
                                     </div>
+
+                                    {/* Voucher Input - Only show for non-free products */}
+                                    {totalPrice > 0 && (
+                                        <div className="border-t pt-4 mb-4">
+                                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+                                                <Ticket className="h-4 w-4 text-gray-400" /> Kode Voucher
+                                            </label>
+                                            {appliedVoucher ? (
+                                                <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
+                                                    <div className="flex items-center gap-2">
+                                                        <Tag className="h-4 w-4 text-green-600" />
+                                                        <span className="font-medium text-green-700">{appliedVoucher.code}</span>
+                                                        <span className="text-sm text-green-600">
+                                                            (-Rp {appliedVoucher.discountAmount.toLocaleString('id-ID')})
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        onClick={handleRemoveVoucher}
+                                                        className="p-1 text-gray-400 hover:text-red-500"
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={voucherCode}
+                                                        onChange={(e) => {
+                                                            setVoucherCode(e.target.value.toUpperCase())
+                                                            setVoucherError('')
+                                                        }}
+                                                        placeholder="Masukkan kode voucher"
+                                                        className="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm uppercase"
+                                                    />
+                                                    <button
+                                                        onClick={handleApplyVoucher}
+                                                        disabled={voucherLoading || !voucherCode.trim()}
+                                                        className="px-4 py-2.5 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm flex items-center gap-2"
+                                                    >
+                                                        {voucherLoading ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            'Pakai'
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {voucherError && (
+                                                <p className="text-sm text-red-500 mt-2 flex items-center gap-1">
+                                                    <AlertCircle className="h-3 w-3" />
+                                                    {voucherError}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <div className="border-t pt-4">
+                                        {appliedVoucher && (
+                                            <>
+                                                <div className="flex justify-between text-sm text-gray-500 mb-1">
+                                                    <span>Subtotal</span>
+                                                    <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm text-green-600 mb-2">
+                                                    <span>Diskon Voucher</span>
+                                                    <span>-Rp {appliedVoucher.discountAmount.toLocaleString('id-ID')}</span>
+                                                </div>
+                                            </>
+                                        )}
                                         <div className="flex justify-between text-lg font-bold">
                                             <span>Total</span>
-                                            <span className="text-orange-600">{totalPrice === 0 ? 'Gratis' : `Rp ${totalPrice.toLocaleString('id-ID')}`}</span>
+                                            <span className="text-orange-600">{finalPrice === 0 ? 'Gratis' : `Rp ${finalPrice.toLocaleString('id-ID')}`}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -577,7 +724,7 @@ export default function CheckoutPage() {
                             <div className="mt-6 flex justify-end">
                                 <button
                                     onClick={() => {
-                                        if (totalPrice === 0) {
+                                        if (finalPrice === 0) {
                                             handleFreeCheckout()
                                         } else {
                                             setStep(2)
@@ -587,7 +734,7 @@ export default function CheckoutPage() {
                                     className="px-8 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                 >
                                     {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                                    {totalPrice === 0 ? 'Download Gratis' : 'Lanjut ke Pembayaran'}
+                                    {finalPrice === 0 ? 'Download Gratis' : 'Lanjut ke Pembayaran'}
                                 </button>
                             </div>
                         </motion.div>
