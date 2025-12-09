@@ -42,11 +42,18 @@ export async function GET() {
         const externalSales = parseInt(externalSalesData?.value || '0') || 0
         const totalSales = (ordersCount || 0) + externalSales
 
+        // Count active templates/products
+        const { count: templateCount } = await supabase
+            .from('products')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_active', true)
+
         return NextResponse.json({
             activeUsers: settingsData?.value || '0',
             averageRating: averageRating > 0 ? averageRating.toFixed(1) : '0',
             totalFeedback: feedbackData?.length || 0,
             totalSales: totalSales,
+            templateCount: templateCount || 0,
         })
     } catch (error) {
         console.error('Error fetching stats:', error)
@@ -55,6 +62,7 @@ export async function GET() {
             averageRating: '0',
             totalFeedback: 0,
             totalSales: 0,
+            templateCount: 0,
         })
     }
 }

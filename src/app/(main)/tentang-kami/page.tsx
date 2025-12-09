@@ -12,6 +12,7 @@ interface Stats {
     averageRating: string
     totalFeedback: number
     totalSales: number
+    templateCount: number
 }
 
 const values = [
@@ -42,7 +43,7 @@ const values = [
 ]
 
 const defaultStats = [
-    { iconSrc: 'https://cdn.lordicon.com/hrjifpbq.json', key: 'activeUsers', label: 'Pengguna Aktif', suffix: '+' },
+    { iconSrc: 'https://cdn.lordicon.com/pflszboa.json', key: 'templateCount', label: 'Template Tersedia', suffix: '+' },
     { iconSrc: 'https://cdn.lordicon.com/mqdkoaef.json', key: 'totalSales', label: 'Total Penjualan', suffix: '+' },
     { iconSrc: 'https://cdn.lordicon.com/cvwrvyjv.json', key: 'averageRating', label: 'Rating Rata-rata', suffix: '' },
 ]
@@ -67,7 +68,7 @@ export default function TentangKamiPage() {
     const valuesInView = useInView(valuesRef, { once: true, margin: "-100px" })
     const statsInView = useInView(statsRef, { once: true, margin: "-100px" })
 
-    const [stats, setStats] = useState<Stats>({ activeUsers: '0', averageRating: '0', totalFeedback: 0, totalSales: 0 })
+    const [stats, setStats] = useState<Stats>({ activeUsers: '0', averageRating: '0', totalFeedback: 0, totalSales: 0, templateCount: 0 })
 
     useEffect(() => {
         fetch('/api/stats')
@@ -183,8 +184,8 @@ export default function TentangKamiPage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                             {defaultStats.map((stat, index) => {
                                 let displayValue = '0'
-                                if (stat.key === 'activeUsers') {
-                                    displayValue = stats.activeUsers !== '0' ? `${stats.activeUsers}${stat.suffix}` : '0'
+                                if (stat.key === 'templateCount') {
+                                    displayValue = stats.templateCount > 0 ? `${stats.templateCount}${stat.suffix}` : '0'
                                 } else if (stat.key === 'totalSales') {
                                     displayValue = stats.totalSales > 0 ? `${stats.totalSales}${stat.suffix}` : '0'
                                 } else if (stat.key === 'averageRating') {
