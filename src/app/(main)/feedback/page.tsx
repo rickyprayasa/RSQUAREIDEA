@@ -11,7 +11,7 @@ interface Product {
 
 interface DialogState {
     isOpen: boolean
-    type: 'success' | 'error'
+    type: 'success' | 'error' | 'low_rating' | 'wrong_email'
     title: string
     message: string
 }
@@ -71,6 +71,32 @@ export default function FeedbackPage() {
 
             if (res.ok && data.success) {
                 setFormStatus('idle')
+                
+                // Check for low rating first (rating < 4)
+                if (rating < 4 && data.voucherDebug === 'low_rating') {
+                    // Don't reset form - let user retry with higher rating
+                    setDialog({
+                        isOpen: true,
+                        type: 'low_rating',
+                        title: 'Yah, Sayang Sekali... 😢',
+                        message: 'Feedback Kamu sudah terkirim, terima kasih!\n\nNamun, kode voucher template gratis hanya diberikan untuk rating 4 atau 5.\n\nKami sangat menghargai masukan Kamu! Jika Kamu bersedia memberikan rating yang lebih baik, silakan kirim feedback lagi dan dapatkan template gratis sebagai apresiasi dari kami. 💝'
+                    })
+                    return
+                }
+                
+                // Check for wrong email (rating >= 4 but customer not found)
+                if (rating >= 4 && data.voucherDebug === 'customer_not_found') {
+                    // Don't reset form - let user retry with correct email
+                    setDialog({
+                        isOpen: true,
+                        type: 'wrong_email',
+                        title: 'Hampir Berhasil! ✨',
+                        message: 'Feedback Kamu sudah terkirim, terima kasih!\n\nSayangnya, email yang Kamu masukkan tidak terdaftar sebagai pelanggan yang diundang untuk feedback.\n\nJika Kamu menerima undangan feedback via email, pastikan menggunakan email yang sama untuk mendapatkan kode voucher template gratis. Silakan coba kirim feedback lagi dengan email yang benar! 📧'
+                    })
+                    return
+                }
+                
+                // Success cases - reset form
                 form.reset()
                 setRating(5)
                 
@@ -81,9 +107,7 @@ export default function FeedbackPage() {
                     message += '\n\n🎁 Kode voucher template gratis sudah dikirim ke email Kamu! Cek inbox atau folder spam.'
                 } else if (rating >= 4) {
                     // Good rating but no voucher sent - explain why
-                    if (data.voucherDebug === 'customer_not_found') {
-                        message += '\n\nJika Kamu adalah pelanggan yang diundang untuk feedback, pastikan menggunakan email yang sama saat menerima undangan.'
-                    } else if (data.voucherDebug === 'no_voucher_code') {
+                    if (data.voucherDebug === 'no_voucher_code') {
                         message += '\n\nTerima kasih atas rating baiknya!'
                     } else if (data.voucherDebug === 'already_sent') {
                         message += '\n\n📧 Kode voucher sudah pernah dikirim ke email Kamu sebelumnya.'
@@ -524,7 +548,12 @@ export default function FeedbackPage() {
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Header decoration */}
-                            <div className={`h-2 ${dialog.type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-rose-500'}`} />
+                            <div className={`h-2 ${
+                                dialog.type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 
+                                dialog.type === 'low_rating' ? 'bg-gradient-to-r from-amber-500 to-orange-500' :
+                                dialog.type === 'wrong_email' ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
+                                'bg-gradient-to-r from-red-500 to-rose-500'
+                            }`} />
 
                             <div className="p-8 text-center">
                                 {/* Icon */}
@@ -532,15 +561,19 @@ export default function FeedbackPage() {
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
                                     transition={{ type: 'spring', damping: 15, stiffness: 300, delay: 0.1 }}
-                                    className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${dialog.type === 'success'
-                                            ? 'bg-gradient-to-br from-green-500 to-emerald-500 shadow-lg shadow-green-200'
-                                            : 'bg-gradient-to-br from-red-500 to-rose-500 shadow-lg shadow-red-200'
-                                        }`}
+                                    className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${
+                                        dialog.type === 'success' ? 'bg-gradient-to-br from-green-500 to-emerald-500 shadow-lg shadow-green-200' :
+                                        dialog.type === 'low_rating' ? 'bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-200' :
+                                        dialog.type === 'wrong_email' ? 'bg-gradient-to-br from-blue-500 to-indigo-500 shadow-lg shadow-blue-200' :
+                                        'bg-gradient-to-br from-red-500 to-rose-500 shadow-lg shadow-red-200'
+                                    }`}
                                 >
                                     <ClientLordIcon
-                                        src={dialog.type === 'success'
-                                            ? "https://cdn.lordicon.com/oqdmuxru.json"
-                                            : "https://cdn.lordicon.com/usownftb.json"
+                                        src={
+                                            dialog.type === 'success' ? "https://cdn.lordicon.com/oqdmuxru.json" :
+                                            dialog.type === 'low_rating' ? "https://cdn.lordicon.com/drxwpfop.json" :
+                                            dialog.type === 'wrong_email' ? "https://cdn.lordicon.com/diihvcfp.json" :
+                                            "https://cdn.lordicon.com/usownftb.json"
                                         }
                                         trigger="loop"
                                         delay="300"
@@ -550,7 +583,12 @@ export default function FeedbackPage() {
                                 </motion.div>
 
                                 {/* Title */}
-                                <h3 className={`text-2xl font-bold mb-3 ${dialog.type === 'success' ? 'text-green-800' : 'text-red-800'}`}>
+                                <h3 className={`text-2xl font-bold mb-3 ${
+                                    dialog.type === 'success' ? 'text-green-800' : 
+                                    dialog.type === 'low_rating' ? 'text-amber-800' :
+                                    dialog.type === 'wrong_email' ? 'text-blue-800' :
+                                    'text-red-800'
+                                }`}>
                                     {dialog.title}
                                 </h3>
 
@@ -566,22 +604,29 @@ export default function FeedbackPage() {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={closeDialog}
-                                    className={`w-full py-4 rounded-xl font-semibold text-white transition-all ${dialog.type === 'success'
-                                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-lg hover:shadow-green-200'
-                                            : 'bg-gradient-to-r from-red-500 to-rose-500 hover:shadow-lg hover:shadow-red-200'
-                                        }`}
+                                    className={`w-full py-4 rounded-xl font-semibold text-white transition-all ${
+                                        dialog.type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-lg hover:shadow-green-200' :
+                                        dialog.type === 'low_rating' ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:shadow-lg hover:shadow-amber-200' :
+                                        dialog.type === 'wrong_email' ? 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:shadow-lg hover:shadow-blue-200' :
+                                        'bg-gradient-to-r from-red-500 to-rose-500 hover:shadow-lg hover:shadow-red-200'
+                                    }`}
                                 >
                                     <span className="flex items-center justify-center gap-2">
                                         <ClientLordIcon
-                                            src={dialog.type === 'success'
-                                                ? "https://cdn.lordicon.com/egiwmiit.json"
-                                                : "https://cdn.lordicon.com/akuwjdzh.json"
+                                            src={
+                                                dialog.type === 'success' ? "https://cdn.lordicon.com/egiwmiit.json" :
+                                                dialog.type === 'low_rating' ? "https://cdn.lordicon.com/lomfljuq.json" :
+                                                dialog.type === 'wrong_email' ? "https://cdn.lordicon.com/akuwjdzh.json" :
+                                                "https://cdn.lordicon.com/akuwjdzh.json"
                                             }
                                             trigger="hover"
                                             colors="primary:#ffffff"
                                             style={{ width: '20px', height: '20px' }}
                                         />
-                                        {dialog.type === 'success' ? 'Tutup' : 'Coba Lagi'}
+                                        {dialog.type === 'success' ? 'Tutup' : 
+                                         dialog.type === 'low_rating' ? 'Coba Rating Lebih Tinggi' :
+                                         dialog.type === 'wrong_email' ? 'Perbaiki Email' :
+                                         'Coba Lagi'}
                                     </span>
                                 </motion.button>
                             </div>
