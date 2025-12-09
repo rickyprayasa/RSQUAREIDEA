@@ -228,6 +228,18 @@ export default function CheckoutPage() {
         }
     }, [qrisSettings.merchantString, finalPrice])
 
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (showQrisConfirm) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => {
+            document.body.style.overflow = ''
+        }
+    }, [showQrisConfirm])
+
     // Poll payment confirmation status
     useEffect(() => {
         if (!confirmationSent || !orderNumber || paymentConfirmed || paymentRejected) return
@@ -1199,15 +1211,19 @@ export default function CheckoutPage() {
 
                             {/* QRIS Confirmation Modal */}
                             {showQrisConfirm && (
-                                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
+                                <div 
+                                    className="fixed inset-0 bg-black/50 flex items-start md:items-center justify-center z-[100] p-4 pt-20 md:pt-4 overflow-y-auto"
+                                    onClick={() => setShowQrisConfirm(false)}
+                                >
                                     <motion.div
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        className="bg-white rounded-2xl max-w-md w-full max-h-[85vh] overflow-y-auto shadow-2xl"
+                                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        className="bg-white rounded-2xl max-w-md w-full shadow-2xl my-4"
+                                        onClick={(e) => e.stopPropagation()}
                                     >
-                                        <div className="sticky top-0 bg-white p-4 border-b border-gray-100 z-10">
+                                        <div className="sticky top-0 bg-white p-4 border-b border-gray-100 z-10 rounded-t-2xl">
                                             <div className="flex items-center justify-between">
-                                                <h2 className="text-lg font-bold text-gray-900">Upload Bukti Pembayaran</h2>
+                                                <h2 className="text-base md:text-lg font-bold text-gray-900">Upload Bukti Pembayaran</h2>
                                                 <button
                                                     onClick={() => setShowQrisConfirm(false)}
                                                     className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -1216,7 +1232,7 @@ export default function CheckoutPage() {
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="p-4">
+                                        <div className="p-4 max-h-[60vh] md:max-h-[70vh] overflow-y-auto">
                                             {/* Order Info */}
                                             <div className="p-4 bg-gray-50 rounded-xl mb-4">
                                                 <div className="grid grid-cols-2 gap-3 text-sm">
