@@ -587,61 +587,61 @@ export default function CheckoutPage() {
                     {/* Step 1: Customer Info */}
                     {step === 1 && (
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                            <div className="grid md:grid-cols-2 gap-8">
+                            <div className="grid md:grid-cols-2 gap-4 md:gap-8">
                                 {/* Form */}
-                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-                                    <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                        <User className="h-5 w-5 text-orange-500" /> Data Pembeli
+                                <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200">
+                                    <h2 className="text-base md:text-lg font-bold text-gray-900 mb-4 md:mb-6 flex items-center gap-2">
+                                        <User className="h-4 w-4 md:h-5 md:w-5 text-orange-500" /> Data Pembeli
                                     </h2>
-                                    <div className="space-y-4">
+                                    <div className="space-y-3 md:space-y-4">
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
-                                                <User className="h-4 w-4 text-gray-400" /> Nama Lengkap
+                                            <label className="text-xs md:text-sm font-medium text-gray-700 flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
+                                                <User className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-400" /> Nama Lengkap
                                             </label>
                                             <input
                                                 type="text"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
                                                 placeholder="Nama lengkap Anda"
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                                className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
-                                                <Mail className="h-4 w-4 text-gray-400" /> Email
+                                            <label className="text-xs md:text-sm font-medium text-gray-700 flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
+                                                <Mail className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-400" /> Email
                                             </label>
                                             <input
                                                 type="email"
                                                 value={formData.email}
                                                 onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
                                                 placeholder="email@domain.com"
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                                className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
-                                                <Phone className="h-4 w-4 text-gray-400" /> No. WhatsApp
+                                            <label className="text-xs md:text-sm font-medium text-gray-700 flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
+                                                <Phone className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-400" /> No. WhatsApp
                                             </label>
                                             <input
                                                 type="tel"
                                                 value={formData.phone}
                                                 onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
                                                 placeholder="08xxxxxxxxxx"
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                                className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             />
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Order Summary */}
-                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-                                    <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                        <ShoppingCart className="h-5 w-5 text-orange-500" /> Ringkasan Pesanan
+                                <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200">
+                                    <h2 className="text-base md:text-lg font-bold text-gray-900 mb-4 md:mb-6 flex items-center gap-2">
+                                        <ShoppingCart className="h-4 w-4 md:h-5 md:w-5 text-orange-500" /> Ringkasan Pesanan
                                     </h2>
-                                    <div className="space-y-3 mb-6">
+                                    <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
                                         {items.map((item) => (
-                                            <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                                <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                                            <div key={item.id} className="flex items-center gap-2 md:gap-3 p-2 md:p-3 bg-gray-50 rounded-xl">
+                                                <div className="w-10 h-10 md:w-14 md:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                                                     {item.image ? (
                                                         <Image
                                                             src={item.image}
@@ -657,13 +657,13 @@ export default function CheckoutPage() {
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="font-medium text-gray-900 text-sm truncate">{item.title}</h4>
-                                                    <p className="text-sm font-bold text-orange-600">
+                                                    <h4 className="font-medium text-gray-900 text-xs md:text-sm truncate">{item.title}</h4>
+                                                    <p className="text-xs md:text-sm font-bold text-orange-600">
                                                         {(item.discountPrice || item.price) === 0 ? 'Gratis' : `Rp ${(item.discountPrice || item.price).toLocaleString('id-ID')}`}
                                                     </p>
                                                 </div>
-                                                <button onClick={() => removeItem(item.id)} className="p-2 text-gray-400 hover:text-red-500">
-                                                    <Trash2 className="h-4 w-4" />
+                                                <button onClick={() => removeItem(item.id)} className="p-1.5 md:p-2 text-gray-400 hover:text-red-500">
+                                                    <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
                                                 </button>
                                             </div>
                                         ))}
@@ -746,7 +746,7 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            <div className="mt-6 flex justify-end">
+                            <div className="mt-4 md:mt-6 flex justify-end">
                                 <button
                                     onClick={() => {
                                         if (finalPrice === 0) {
@@ -756,7 +756,7 @@ export default function CheckoutPage() {
                                         }
                                     }}
                                     disabled={!formData.name || !formData.email || loading}
-                                    className="px-8 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                    className="w-full md:w-auto px-6 md:px-8 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
                                 >
                                     {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                                     {finalPrice === 0 ? 'Download Gratis' : 'Lanjut ke Pembayaran'}
@@ -1199,23 +1199,24 @@ export default function CheckoutPage() {
 
                             {/* QRIS Confirmation Modal */}
                             {showQrisConfirm && (
-                                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+                                        className="bg-white rounded-2xl max-w-md w-full max-h-[85vh] overflow-y-auto shadow-2xl"
                                     >
-                                        <div className="p-6">
-                                            <div className="flex items-center justify-between mb-6">
-                                                <h2 className="text-xl font-bold text-gray-900">Konfirmasi Pembayaran QRIS</h2>
+                                        <div className="sticky top-0 bg-white p-4 border-b border-gray-100 z-10">
+                                            <div className="flex items-center justify-between">
+                                                <h2 className="text-lg font-bold text-gray-900">Upload Bukti Pembayaran</h2>
                                                 <button
                                                     onClick={() => setShowQrisConfirm(false)}
-                                                    className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                                 >
-                                                    ×
+                                                    <X className="h-5 w-5" />
                                                 </button>
                                             </div>
-
+                                        </div>
+                                        <div className="p-4">
                                             {/* Order Info */}
                                             <div className="p-4 bg-gray-50 rounded-xl mb-4">
                                                 <div className="grid grid-cols-2 gap-3 text-sm">
