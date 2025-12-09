@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail, X, Loader2, Send, Eye, ChevronLeft } from 'lucide-react'
+import { Mail, X, Loader2, Send, Eye, ChevronLeft, CheckCircle, PartyPopper } from 'lucide-react'
 
 interface Customer {
     id: number
@@ -37,8 +37,9 @@ Tim RSQUARE`
 export default function EmailCampaignModal({ isOpen, onClose, onSuccess, selectedCustomers }: EmailCampaignModalProps) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const [success, setSuccess] = useState('')
     const [showPreview, setShowPreview] = useState(false)
+    const [showSuccess, setShowSuccess] = useState(false)
+    const [sentCount, setSentCount] = useState(0)
     const [subject, setSubject] = useState(DEFAULT_SUBJECT)
     const [template, setTemplate] = useState(DEFAULT_TEMPLATE)
 
@@ -50,7 +51,6 @@ export default function EmailCampaignModal({ isOpen, onClose, onSuccess, selecte
 
         setLoading(true)
         setError('')
-        setSuccess('')
 
         try {
             const res = await fetch('/api/admin/email/send-campaign', {
@@ -66,16 +66,22 @@ export default function EmailCampaignModal({ isOpen, onClose, onSuccess, selecte
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Gagal mengirim email')
 
-            setSuccess(`Berhasil mengirim ${data.sent} email!`)
-            setTimeout(() => {
-                onSuccess()
-                onClose()
-            }, 2000)
+            setSentCount(data.sent)
+            setShowSuccess(true)
+            onSuccess()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
         } finally {
             setLoading(false)
         }
+    }
+
+    const handleClose = () => {
+        setShowSuccess(false)
+        setSentCount(0)
+        setError('')
+        setShowPreview(false)
+        onClose()
     }
 
     const getPreviewContent = () => {
@@ -96,7 +102,7 @@ export default function EmailCampaignModal({ isOpen, onClose, onSuccess, selecte
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                        onClick={onClose}
+                        onClick={handleClose}
                     />
 
                     <motion.div
@@ -129,7 +135,7 @@ export default function EmailCampaignModal({ isOpen, onClose, onSuccess, selecte
                                 </div>
                             </div>
                             <button
-                                onClick={onClose}
+                                onClick={handleClose}
                                 disabled={loading}
                                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
@@ -143,13 +149,47 @@ export default function EmailCampaignModal({ isOpen, onClose, onSuccess, selecte
                                     {error}
                                 </div>
                             )}
-                            {success && (
-                                <div className="mb-4 p-3 bg-green-50 text-green-600 text-sm rounded-lg">
-                                    {success}
-                                </div>
-                            )}
 
-                            {showPreview ? (
+                            {/* Success UI */}
+                            {showSuccess ? (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="text-center py-8"
+                                >
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ type: 'spring', damping: 15, stiffness: 300, delay: 0.1 }}
+                                        className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200"
+                                    >
+                                        <CheckCircle className="h-10 w-10 text-white" />
+                                    </motion.div>
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.2 }}
+                                    >
+                                        <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
+                                            Email Terkirim! <PartyPopper className="h-6 w-6 text-amber-500" />
+                                        </h3>
+                                        <p className="text-gray-600 mb-6">
+                                            Berhasil mengirim <span className="font-bold text-green-600">{sentCount}</span> email campaign
+                                        </p>
+                                        <div className="p-4 bg-green-50 rounded-xl border border-green-100 mb-6">
+                                            <p className="text-sm text-green-700">
+                                                ✨ Setiap pelanggan mendapat link feedback unik. Kode voucher akan terkirim otomatis setelah mereka submit feedback dengan rating 4-5.
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={handleClose}
+                                            className="px-8 py-3 bg-green-500 text-white font-medium rounded-xl hover:bg-green-600 transition-colors"
+                                        >
+                                            Tutup
+                                        </button>
+                                    </motion.div>
+                                </motion.div>
+                            ) : showPreview ? (
                                 <div className="space-y-4">
                                     <div className="p-4 bg-gray-50 rounded-xl">
                                         <p className="text-sm text-gray-500 mb-1">Subject:</p>
@@ -213,43 +253,45 @@ export default function EmailCampaignModal({ isOpen, onClose, onSuccess, selecte
                             )}
                         </div>
 
-                        <div className="flex gap-3 p-6 bg-gray-50 border-t border-gray-100">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                disabled={loading}
-                                className="flex-1 px-4 py-3 text-gray-700 font-medium bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-                            >
-                                Batal
-                            </button>
-                            {showPreview ? (
+                        {!showSuccess && (
+                            <div className="flex gap-3 p-6 bg-gray-50 border-t border-gray-100">
                                 <button
-                                    onClick={handleSend}
-                                    disabled={loading || selectedCustomers.length === 0}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50"
+                                    type="button"
+                                    onClick={handleClose}
+                                    disabled={loading}
+                                    className="flex-1 px-4 py-3 text-gray-700 font-medium bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
                                 >
-                                    {loading ? (
-                                        <>
-                                            <Loader2 className="h-5 w-5 animate-spin" />
-                                            Mengirim...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Send className="h-5 w-5" />
-                                            Kirim Email
-                                        </>
-                                    )}
+                                    Batal
                                 </button>
-                            ) : (
-                                <button
-                                    onClick={() => setShowPreview(true)}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-colors"
-                                >
-                                    <Eye className="h-5 w-5" />
-                                    Preview
-                                </button>
-                            )}
-                        </div>
+                                {showPreview ? (
+                                    <button
+                                        onClick={handleSend}
+                                        disabled={loading || selectedCustomers.length === 0}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                                Mengirim...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Send className="h-5 w-5" />
+                                                Kirim Email
+                                            </>
+                                        )}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowPreview(true)}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-colors"
+                                    >
+                                        <Eye className="h-5 w-5" />
+                                        Preview
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </motion.div>
                 </div>
             )}
