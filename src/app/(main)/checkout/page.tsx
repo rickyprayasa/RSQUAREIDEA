@@ -208,7 +208,7 @@ export default function CheckoutPage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         staticQRIS: qrisSettings.merchantString,
-                        amount: totalPrice,
+                        amount: finalPrice,
                     }),
                 })
                 const data = await res.json()
@@ -222,10 +222,10 @@ export default function CheckoutPage() {
             }
         }
 
-        if (qrisSettings.merchantString && totalPrice > 0) {
+        if (qrisSettings.merchantString && finalPrice > 0) {
             generateQris()
         }
-    }, [qrisSettings.merchantString, totalPrice])
+    }, [qrisSettings.merchantString, finalPrice])
 
     // Poll payment confirmation status
     useEffect(() => {
@@ -296,7 +296,7 @@ export default function CheckoutPage() {
                     customerName: formData.name,
                     customerEmail: formData.email,
                     customerPhone: formData.phone,
-                    amount: totalPrice,
+                    amount: finalPrice,
                     proofImage: uploadData.url,
                     notes: qrisNotes,
                     paymentMethod: selectedPayment?.name || 'Transfer',
@@ -437,14 +437,14 @@ export default function CheckoutPage() {
                         name: formData.name,
                         email: formData.email,
                         phone: formData.phone,
-                        amount: totalPrice,
+                        amount: finalPrice,
                     }),
                 })
 
                 // Track purchase conversion
                 trackPurchase({
                     orderId: newOrderNumber,
-                    value: totalPrice,
+                    value: finalPrice,
                     items: items.map(item => ({
                         name: item.title,
                         price: item.discountPrice || item.price,
@@ -887,10 +887,10 @@ export default function CheckoutPage() {
                                                 <span className="font-medium text-orange-800">Total Bayar</span>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-xl font-bold text-orange-600">
-                                                        Rp {totalPrice.toLocaleString('id-ID')}
+                                                        Rp {finalPrice.toLocaleString('id-ID')}
                                                     </span>
                                                     <button
-                                                        onClick={() => handleCopy(totalPrice.toString())}
+                                                        onClick={() => handleCopy(finalPrice.toString())}
                                                         className="p-1.5 text-orange-500 hover:bg-orange-200 rounded"
                                                     >
                                                         <Copy className="h-4 w-4" />
@@ -1059,7 +1059,7 @@ export default function CheckoutPage() {
                                             <div className="flex items-center justify-between">
                                                 <span className="font-medium opacity-90">Total Pembayaran</span>
                                                 <span className="text-2xl font-bold">
-                                                    Rp {totalPrice.toLocaleString('id-ID')}
+                                                    Rp {finalPrice.toLocaleString('id-ID')}
                                                 </span>
                                             </div>
                                         </div>
@@ -1180,7 +1180,7 @@ export default function CheckoutPage() {
                                                     </div>
                                                     <div>
                                                         <p className="text-gray-500">Total</p>
-                                                        <p className="font-bold text-orange-600">Rp {totalPrice.toLocaleString('id-ID')}</p>
+                                                        <p className="font-bold text-orange-600">Rp {finalPrice.toLocaleString('id-ID')}</p>
                                                     </div>
                                                 </div>
                                             </div>
