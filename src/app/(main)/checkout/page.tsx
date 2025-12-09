@@ -375,6 +375,26 @@ export default function CheckoutPage() {
                     }),
                 })
 
+                // Send order confirmation email for free products
+                try {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: formData.email,
+                            customerName: formData.name,
+                            orderNumber: newOrderNumber,
+                            totalAmount: 0,
+                            downloadLinks: items.map(item => ({
+                                title: item.title,
+                                url: item.downloadUrl || '#',
+                            })),
+                        }),
+                    })
+                } catch (emailError) {
+                    console.error('Failed to send confirmation email:', emailError)
+                }
+
                 trackPurchase({
                     orderId: newOrderNumber,
                     value: 0,
