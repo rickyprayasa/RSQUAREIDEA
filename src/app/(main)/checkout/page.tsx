@@ -360,6 +360,8 @@ export default function CheckoutPage() {
                     totalAmount: 0,
                     paymentMethod: 'Gratis',
                     status: 'completed', // Auto complete for free products
+                    voucherCode: appliedVoucher?.code || null,
+                    discountAmount: appliedVoucher?.discountAmount || 0,
                 }),
             })
 
