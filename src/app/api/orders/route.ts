@@ -72,14 +72,24 @@ export async function POST(request: NextRequest) {
             try {
                 const { data: voucher } = await supabase
                     .from('vouchers')
-                    .select('used_count')
+                    .select('used_count, usage_limit')
                     .eq('code', data.voucherCode)
                     .single()
 
                 if (voucher) {
+                    const newUsedCount = (voucher.used_count || 0) + 1
+                    const updateData: { used_count: number; is_active?: boolean } = { 
+                        used_count: newUsedCount 
+                    }
+                    
+                    // Deactivate voucher if usage limit reached
+                    if (voucher.usage_limit && newUsedCount >= voucher.usage_limit) {
+                        updateData.is_active = false
+                    }
+                    
                     await supabase
                         .from('vouchers')
-                        .update({ used_count: (voucher.used_count || 0) + 1 })
+                        .update(updateData)
                         .eq('code', data.voucherCode)
                 }
             } catch (voucherError) {

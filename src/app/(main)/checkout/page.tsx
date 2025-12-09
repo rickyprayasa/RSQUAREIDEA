@@ -972,8 +972,8 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {/* Payment Confirmation Section - RSQUARE Theme (Hide for free products) */}
-                            {!confirmationSent && totalPrice > 0 && (
+                            {/* Payment Confirmation Section - RSQUARE Theme (Hide for free products or 100% voucher) */}
+                            {!confirmationSent && finalPrice > 0 && (
                                 <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-6 shadow-lg border border-orange-200 mb-6 max-w-lg mx-auto overflow-hidden relative">
                                     {/* RSQUARE Branding */}
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-200/30 to-amber-200/30 rounded-full -translate-y-1/2 translate-x-1/2" />

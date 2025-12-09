@@ -80,14 +80,21 @@ function getVoucherEmailHtml(name: string, voucherCode: string): string {
 }
 
 async function sendVoucherEmail(email: string, name: string, voucherCode: string) {
+    console.log('=== SENDING VOUCHER EMAIL ===')
+    console.log('To:', email)
+    console.log('Name:', name)
+    console.log('Voucher:', voucherCode)
+    
     const smtpHost = process.env.SMTP_HOST
     const smtpPort = parseInt(process.env.SMTP_PORT || '465')
     const smtpUser = process.env.SMTP_USER
     const smtpPass = process.env.SMTP_PASS
     const smtpFrom = process.env.SMTP_FROM || smtpUser
 
+    console.log('SMTP Config - Host:', smtpHost, 'Port:', smtpPort, 'User:', smtpUser, 'From:', smtpFrom)
+
     if (!smtpHost || !smtpUser || !smtpPass) {
-        console.error('SMTP not configured')
+        console.error('SMTP not configured - missing:', { host: !smtpHost, user: !smtpUser, pass: !smtpPass })
         return false
     }
 
@@ -102,16 +109,22 @@ async function sendVoucherEmail(email: string, name: string, voucherCode: string
     const textEmail = `Halo ${name},\n\nTerima kasih sudah memberikan feedback untuk RSQUARE!\n\nSebagai apresiasi, berikut adalah kode voucher untuk mendapatkan 1 Template Google Sheets GRATIS:\n\n🎁 Kode Voucher: ${voucherCode}\n\nCara menggunakan:\n1. Pilih template di https://www.rsquareidea.my.id/templates\n2. Klik "Beli Sekarang"\n3. Masukkan kode voucher di halaman checkout\n\nVoucher berlaku untuk 1 template dan hanya bisa digunakan 1 kali.\n\nTerima kasih!\nTim RSQUARE`
 
     try {
-        await transporter.sendMail({
+        console.log('Attempting to send email...')
+        const result = await transporter.sendMail({
             from: smtpFrom,
             to: email,
             subject: 'Kode Voucher Template Gratis dari RSQUARE 🎁',
             text: textEmail,
             html: htmlEmail,
         })
+        console.log('Email sent successfully! MessageId:', result.messageId)
         return true
     } catch (err) {
         console.error('Failed to send voucher email:', err)
+        if (err instanceof Error) {
+            console.error('Error message:', err.message)
+            console.error('Error stack:', err.stack)
+        }
         return false
     }
 }
@@ -151,15 +164,25 @@ export async function POST(request: NextRequest) {
         let voucherDebug = ''
         
         if (data.email && data.rating >= 4) {
-            console.log('Checking voucher for email:', data.email, 'Rating:', data.rating)
+            console.log('=== VOUCHER CHECK START ===')
+            console.log('Email from form:', data.email)
+            console.log('Rating:', data.rating)
+            
+            // First check all customers to debug
+            const { data: allCustomers } = await supabase
+                .from('customers')
+                .select('id, email, feedback_voucher_code, voucher_sent_at')
+                .limit(10)
+            console.log('Sample customers in DB:', allCustomers)
             
             const { data: customer, error: customerError } = await supabase
                 .from('customers')
-                .select('id, name, feedback_voucher_code, voucher_sent_at')
-                .eq('email', data.email)
-                .single()
+                .select('id, name, email, feedback_voucher_code, voucher_sent_at')
+                .ilike('email', data.email.trim())
+                .maybeSingle()
 
-            console.log('Customer found:', customer, 'Error:', customerError)
+            console.log('Customer lookup result:', customer)
+            console.log('Customer lookup error:', customerError)
 
             if (customer) {
                 if (!customer.feedback_voucher_code) {
@@ -193,8 +216,9 @@ export async function POST(request: NextRequest) {
                 }
             } else {
                 voucherDebug = 'customer_not_found'
-                console.log('Customer not found with email:', data.email)
+                console.log('Customer NOT found with email:', data.email.trim().toLowerCase())
             }
+            console.log('=== VOUCHER CHECK END === Result:', voucherDebug || 'sent')
         } else {
             if (!data.email) voucherDebug = 'no_email'
             else if (data.rating < 4) voucherDebug = 'low_rating'
