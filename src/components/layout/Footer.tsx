@@ -95,7 +95,7 @@ export function Footer() {
                             </p>
 
                             {/* Social Links */}
-                            <div className="flex gap-4">
+                            <div className="flex gap-4 mb-8">
                                 {footerLinks.social.map((item) => (
                                     <a
                                         key={item.name}
@@ -109,6 +109,37 @@ export function Footer() {
                                     </a>
                                 ))}
                             </div>
+
+                            {/* Saweria Support */}
+                            <a
+                                href="https://saweria.co/rsquareidea"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group inline-flex items-center gap-4 px-5 py-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 border border-amber-500/30 hover:border-amber-500/50 rounded-2xl transition-all duration-300"
+                            >
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-lg group-hover:blur-xl transition-all" />
+                                    <ClientLordIcon
+                                        src="https://cdn.lordicon.com/yeallgsa.json"
+                                        trigger="loop"
+                                        delay="2000"
+                                        colors="primary:#fbbf24,secondary:#f97316"
+                                        style={{ width: '56px', height: '56px' }}
+                                    />
+                                </div>
+                                <div>
+                                    <p className="text-amber-400 font-semibold text-sm mb-0.5">Dukung Kami ☕</p>
+                                    <p className="text-gray-400 text-xs">Traktir kopi via Saweria</p>
+                                </div>
+                                <div className="ml-auto">
+                                    <ClientLordIcon
+                                        src="https://cdn.lordicon.com/vduvxizq.json"
+                                        trigger="hover"
+                                        colors="primary:#fbbf24"
+                                        style={{ width: '24px', height: '24px' }}
+                                    />
+                                </div>
+                            </a>
                         </div>
 
                         {/* Links Sections */}
