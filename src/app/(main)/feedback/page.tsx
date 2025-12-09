@@ -104,6 +104,18 @@ function FeedbackContent() {
                         return
                     }
                     
+                    // Check for email mismatch
+                    if (rating >= 4 && data.voucherDebug === 'email_mismatch') {
+                        // Don't reset form - let user fix email
+                        setDialog({
+                            isOpen: true,
+                            type: 'invalid_token',
+                            title: 'Email Tidak Cocok 📧',
+                            message: 'Feedback Kamu sudah terkirim, terima kasih!\n\nNamun, email yang Kamu masukkan tidak sesuai dengan data pelanggan yang diundang.\n\nPastikan menggunakan email yang sama saat menerima undangan feedback untuk mendapatkan kode voucher gratis. Silakan kirim feedback lagi dengan email yang benar!'
+                        })
+                        return
+                    }
+                    
                     // Voucher sent successfully
                     if (data.voucherSent) {
                         form.reset()

@@ -181,7 +181,14 @@ export async function POST(request: NextRequest) {
             console.log('Customer lookup error:', customerError)
 
             if (customer) {
-                if (!customer.feedback_voucher_code) {
+                // Check if email matches
+                const emailMatches = customer.email.toLowerCase() === data.email.trim().toLowerCase()
+                console.log('Email match check:', customer.email, 'vs', data.email, '=', emailMatches)
+                
+                if (!emailMatches) {
+                    voucherDebug = 'email_mismatch'
+                    console.log('Email does not match! Expected:', customer.email, 'Got:', data.email)
+                } else if (!customer.feedback_voucher_code) {
                     voucherDebug = 'no_voucher_code'
                     console.log('No voucher code for this customer')
                 } else if (customer.voucher_sent_at) {
