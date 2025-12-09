@@ -1218,7 +1218,7 @@ export default function CheckoutPage() {
             {/* QRIS Confirmation Modal */}
             {showQrisConfirm && createPortal(
                 <div 
-                    className="fixed inset-0 bg-black/60 z-[1000] flex items-end md:items-center justify-center"
+                    className="fixed inset-0 bg-black/60 z-[9999] flex items-end md:items-center justify-center"
                     onClick={() => setShowQrisConfirm(false)}
                 >
                     <motion.div
@@ -1226,7 +1226,7 @@ export default function CheckoutPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 100 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="bg-white w-full md:w-auto md:min-w-[500px] md:max-w-2xl md:rounded-2xl rounded-t-3xl shadow-2xl max-h-[85vh] md:max-h-[80vh] flex flex-col"
+                        className="bg-white w-full md:w-auto md:min-w-[500px] md:max-w-4xl md:rounded-2xl rounded-t-3xl shadow-2xl max-h-[85vh] md:max-h-[80vh] flex flex-col"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header - Always visible */}
@@ -1245,101 +1245,108 @@ export default function CheckoutPage() {
                         </div>
                         {/* Content - Scrollable */}
                         <div className="flex-1 overflow-y-auto p-4">
-                            {/* Order Info */}
-                            <div className="p-4 bg-gray-50 rounded-xl mb-4">
-                                <div className="grid grid-cols-2 gap-3 text-sm">
-                                    <div>
-                                        <p className="text-gray-500">No. Pesanan</p>
-                                        <p className="font-mono font-bold">{orderNumber}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-gray-500">Total</p>
-                                        <p className="font-bold text-orange-600">Rp {finalPrice.toLocaleString('id-ID')}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Upload Proof */}
-                            <div className="mb-4">
-                                <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                    Upload Bukti Pembayaran *
-                                </label>
-                                {qrisProof.preview ? (
-                                    <div className="relative">
-                                        <div className="aspect-video rounded-xl overflow-hidden bg-gray-100">
-                                            <Image
-                                                src={qrisProof.preview}
-                                                alt="Bukti Pembayaran"
-                                                fill
-                                                className="object-contain"
-                                            />
+                            <div className="flex flex-col md:flex-row gap-6">
+                                {/* Left Column - Upload Proof */}
+                                <div className="md:w-1/2">
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                        Upload Bukti Pembayaran *
+                                    </label>
+                                    {qrisProof.preview ? (
+                                        <div className="relative">
+                                            <div className="aspect-video md:aspect-[3/4] rounded-xl overflow-hidden bg-gray-100">
+                                                <Image
+                                                    src={qrisProof.preview}
+                                                    alt="Bukti Pembayaran"
+                                                    fill
+                                                    className="object-contain"
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => setQrisProof({ file: null, preview: '' })}
+                                                className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                            >
+                                                ×
+                                            </button>
                                         </div>
+                                    ) : (
+                                        <label className="block cursor-pointer h-full">
+                                            <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 md:p-8 text-center hover:border-orange-400 hover:bg-orange-50 transition-all h-full flex flex-col items-center justify-center min-h-[200px]">
+                                                <Upload className="h-8 w-8 md:h-10 md:w-10 text-gray-400 mx-auto mb-2 md:mb-3" />
+                                                <p className="text-xs md:text-sm text-gray-500">Klik untuk upload screenshot bukti transfer</p>
+                                                <p className="text-xs text-gray-400 mt-1">JPG, PNG max 5MB</p>
+                                            </div>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleProofUpload}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                    )}
+                                </div>
+
+                                {/* Right Column - Details */}
+                                <div className="md:w-1/2 flex flex-col gap-4">
+                                    {/* Order Info */}
+                                    <div className="p-4 bg-gray-50 rounded-xl">
+                                        <div className="grid grid-cols-2 gap-3 text-sm">
+                                            <div>
+                                                <p className="text-gray-500">No. Pesanan</p>
+                                                <p className="font-mono font-bold">{orderNumber}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-500">Total</p>
+                                                <p className="font-bold text-orange-600">Rp {finalPrice.toLocaleString('id-ID')}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Notes */}
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                                            Catatan (Opsional)
+                                        </label>
+                                        <textarea
+                                            value={qrisNotes}
+                                            onChange={(e) => setQrisNotes(e.target.value)}
+                                            placeholder="Tambahkan catatan jika perlu..."
+                                            rows={3}
+                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                                        />
+                                    </div>
+
+                                    {/* Warning */}
+                                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                                        <div className="flex gap-2">
+                                            <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                                            <p className="text-xs text-amber-700">
+                                                Pastikan bukti pembayaran jelas dan menunjukkan nominal yang sesuai. Konfirmasi palsu akan ditolak.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <div className="mt-auto">
                                         <button
-                                            onClick={() => setQrisProof({ file: null, preview: '' })}
-                                            className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                            onClick={handleSubmitQrisConfirmation}
+                                            disabled={!qrisProof.file || uploadingProof}
+                                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-500 text-white rounded-xl font-medium hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                         >
-                                            ×
+                                            {uploadingProof ? (
+                                                <>
+                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                    Mengirim...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Check className="h-5 w-5" />
+                                                    Kirim Konfirmasi
+                                                </>
+                                            )}
                                         </button>
                                     </div>
-                                ) : (
-                                    <label className="block cursor-pointer">
-                                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 md:p-8 text-center hover:border-orange-400 hover:bg-orange-50 transition-all">
-                                            <Upload className="h-8 w-8 md:h-10 md:w-10 text-gray-400 mx-auto mb-2 md:mb-3" />
-                                            <p className="text-xs md:text-sm text-gray-500">Klik untuk upload screenshot bukti transfer</p>
-                                            <p className="text-xs text-gray-400 mt-1">JPG, PNG max 5MB</p>
-                                        </div>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleProofUpload}
-                                            className="hidden"
-                                        />
-                                    </label>
-                                )}
-                            </div>
-
-                            {/* Notes */}
-                            <div className="mb-6">
-                                <label className="text-sm font-medium text-gray-700 mb-2 block">
-                                    Catatan (Opsional)
-                                </label>
-                                <textarea
-                                    value={qrisNotes}
-                                    onChange={(e) => setQrisNotes(e.target.value)}
-                                    placeholder="Tambahkan catatan jika perlu..."
-                                    rows={3}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
-                                />
-                            </div>
-
-                            {/* Warning */}
-                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl mb-6">
-                                <div className="flex gap-2">
-                                    <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                                    <p className="text-xs text-amber-700">
-                                        Pastikan bukti pembayaran jelas dan menunjukkan nominal yang sesuai. Konfirmasi palsu akan ditolak.
-                                    </p>
                                 </div>
                             </div>
-
-                            {/* Submit Button */}
-                            <button
-                                onClick={handleSubmitQrisConfirmation}
-                                disabled={!qrisProof.file || uploadingProof}
-                                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-500 text-white rounded-xl font-medium hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                {uploadingProof ? (
-                                    <>
-                                        <Loader2 className="h-5 w-5 animate-spin" />
-                                        Mengirim...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Check className="h-5 w-5" />
-                                        Kirim Konfirmasi
-                                    </>
-                                )}
-                            </button>
                         </div>
                     </motion.div>
                 </div>
