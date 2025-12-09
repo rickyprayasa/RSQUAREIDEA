@@ -18,6 +18,78 @@ function generateVoucherCode(): string {
     return code
 }
 
+function getCampaignEmailHtml(customerName: string, feedbackUrl: string): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Request</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; margin-top: 40px; margin-bottom: 40px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+        <!-- Header -->
+        <div style="background-color: #ffffff; padding: 30px 40px; text-align: center; border-bottom: 1px solid #f3f4f6;">
+            <img src="https://nagujrwbifmpcwhotzut.supabase.co/storage/v1/object/public/Logo%20RSQUARE/RSQUARE.png" alt="RSQUARE Logo" style="height: 100px; width: auto; display: block; margin: 0 auto;">
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 40px;">
+            <h1 style="color: #111827; font-size: 24px; font-weight: 700; margin-top: 0; margin-bottom: 24px; text-align: center;">Terima Kasih! 🎉</h1>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+                Halo <strong>${customerName}</strong>,
+            </p>
+            
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+                Terima kasih sudah mempercayai RSQUARE untuk kebutuhan template spreadsheet Kamu!
+            </p>
+
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+                Kami ingin mendengar pengalaman Kamu. Sebagai apresiasi, kami akan memberikan <strong style="color: #f97316;">1 Template Google Sheets GRATIS</strong> setelah Kamu memberikan feedback!
+            </p>
+
+            <div style="background-color: #fff7ed; border: 1px solid #ffedd5; border-radius: 12px; padding: 24px; margin-bottom: 32px; text-align: center;">
+                <h3 style="color: #9a3412; font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 16px;">🎁 Dapatkan Template Gratis!</h3>
+                <p style="color: #4b5563; font-size: 14px; margin-bottom: 20px;">
+                    Berikan feedback Kamu dan dapatkan kode voucher untuk 1 template gratis (berlaku untuk semua template berbayar)
+                </p>
+                <a href="${feedbackUrl}" style="display: inline-block; background-color: #f97316; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+                    Berikan Feedback Sekarang
+                </a>
+            </div>
+
+            <div style="background-color: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <h4 style="color: #374151; font-size: 14px; font-weight: 600; margin-top: 0; margin-bottom: 12px;">📝 Cara Mendapatkan Template Gratis:</h4>
+                <ol style="color: #4b5563; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
+                    <li>Klik tombol "Berikan Feedback Sekarang"</li>
+                    <li>Isi form feedback dengan rating dan ulasan Kamu</li>
+                    <li>Kode voucher akan dikirim ke email ini</li>
+                    <li>Gunakan kode voucher saat checkout</li>
+                </ol>
+            </div>
+
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 0;">
+                Terima kasih atas dukungan Kamu! 🙏
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f9fafb; padding: 30px 40px; text-align: center; border-top: 1px solid #f3f4f6;">
+            <p style="color: #9ca3af; font-size: 14px; margin-bottom: 12px;">
+                &copy; ${new Date().getFullYear()} RSQUARE. All rights reserved.
+            </p>
+            <div style="color: #9ca3af; font-size: 12px;">
+                <p style="margin: 4px 0;">RSQUARE Solusi Digital & Otomatisasi Bisnis</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+`
+}
+
 export async function POST(request: NextRequest) {
     try {
         const user = await getSession()
@@ -90,20 +162,19 @@ export async function POST(request: NextRequest) {
                     continue
                 }
 
-                // Replace template variables (voucher code NOT included - sent after feedback)
-                const emailBody = template
-                    .replace(/{nama}/g, customer.name)
-                    .replace(/{feedback_url}/g, feedbackUrl)
+                // Generate HTML email
+                const htmlEmail = getCampaignEmailHtml(customer.name, feedbackUrl)
+                
+                // Plain text fallback
+                const textEmail = `Halo ${customer.name},\n\nTerima kasih sudah mempercayai RSQUARE!\n\nKami ingin mendengar pengalaman Kamu. Sebagai apresiasi, kami akan memberikan 1 Template Google Sheets GRATIS setelah Kamu memberikan feedback!\n\nBerikan feedback di: ${feedbackUrl}\n\nSetelah mengisi feedback dengan rating bagus, kode voucher akan dikirim ke email Kamu.\n\nTerima kasih!\nTim RSQUARE`
 
                 // Send email
                 await transporter.sendMail({
                     from: smtpFrom,
                     to: customer.email,
                     subject: subject,
-                    text: emailBody,
-                    html: emailBody
-                        .replace(/\n/g, '<br>')
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                    text: textEmail,
+                    html: htmlEmail,
                 })
 
                 // Update customer record
