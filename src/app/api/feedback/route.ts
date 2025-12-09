@@ -110,6 +110,11 @@ async function sendVoucherEmail(email: string, name: string, voucherCode: string
 
     try {
         console.log('Attempting to send email...')
+        
+        // Verify SMTP connection first
+        await transporter.verify()
+        console.log('SMTP connection verified')
+        
         const result = await transporter.sendMail({
             from: smtpFrom,
             to: email,
@@ -122,8 +127,17 @@ async function sendVoucherEmail(email: string, name: string, voucherCode: string
     } catch (err) {
         console.error('Failed to send voucher email:', err)
         if (err instanceof Error) {
-            console.error('Error message:', err.message)
-            console.error('Error stack:', err.stack)
+            console.error('SMTP Error:', err.message)
+            // Log more details for debugging
+            const errorDetails = {
+                message: err.message,
+                name: err.name,
+                host: smtpHost,
+                port: smtpPort,
+                user: smtpUser,
+                from: smtpFrom,
+            }
+            console.error('Error details:', JSON.stringify(errorDetails))
         }
         return false
     }
