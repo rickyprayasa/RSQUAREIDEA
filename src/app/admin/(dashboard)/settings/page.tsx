@@ -40,6 +40,8 @@ interface SettingsData {
     voucher_code: string
     voucher_discount: string
     voucher_active: string
+    voucher_valid_from: string
+    voucher_valid_until: string
     homepage_free_limit: string
     homepage_featured_limit: string
     cart_enabled: string
@@ -74,6 +76,8 @@ const defaultSettings: SettingsData = {
     voucher_code: '',
     voucher_discount: '10',
     voucher_active: 'false',
+    voucher_valid_from: '',
+    voucher_valid_until: '',
     homepage_free_limit: '4',
     homepage_featured_limit: '4',
     cart_enabled: 'true',
@@ -467,6 +471,39 @@ export default function SettingsPage() {
                                 iconColor="text-pink-500"
                             />
                         </div>
+                        
+                        {/* Masa Aktif Voucher */}
+                        <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                            <h4 className="font-medium text-purple-900 mb-3 flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Masa Aktif Voucher
+                            </h4>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-purple-700 mb-2 block">Berlaku Dari</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={settings.voucher_valid_from}
+                                        onChange={(e) => handleChange('voucher_valid_from', e.target.value)}
+                                        className="w-full px-4 py-2.5 bg-white border-2 border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    />
+                                    <p className="text-xs text-purple-600 mt-1">Kosongkan jika berlaku mulai sekarang</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-purple-700 mb-2 block">Berlaku Sampai</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={settings.voucher_valid_until}
+                                        onChange={(e) => handleChange('voucher_valid_until', e.target.value)}
+                                        className="w-full px-4 py-2.5 bg-white border-2 border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    />
+                                    <p className="text-xs text-purple-600 mt-1">Kosongkan jika tidak ada batas waktu</p>
+                                </div>
+                            </div>
+                        </div>
+
                         {settings.voucher_code && (
                             <div className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl">
                                 <p className="text-sm opacity-80">Preview:</p>
