@@ -495,6 +495,21 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                         </motion.button>
                                     </Link>
+                                ) : template.isFree && template.downloadUrl ? (
+                                    /* Free product - Direct download link, always active */
+                                    <a href={template.downloadUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+                                        <motion.button
+                                            whileHover={{ scale: 1.02, y: -2 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="relative w-full h-14 rounded-xl font-semibold text-lg shadow-lg overflow-hidden group bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-200/50 cursor-pointer"
+                                        >
+                                            <span className="relative z-10 flex items-center justify-center gap-2">
+                                                <LordIcon src="https://cdn.lordicon.com/ternnbni.json" trigger="loop" size={22} colors={{ primary: '#ffffff' }} />
+                                                Download Gratis
+                                            </span>
+                                            <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                        </motion.button>
+                                    </a>
                                 ) : (
                                     <motion.button
                                         onClick={handleBuyNow}
@@ -507,7 +522,7 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                             }`}
                                     >
                                         <span className="relative z-10 flex items-center justify-center gap-2">
-                                            <LordIcon src="https://cdn.lordicon.com/medpcfcy.json" trigger="loop" size={22} colors={{ primary: '#ffffff' }} />
+                                            <LordIcon src="https://cdn.lordicon.com/medpcfcy.json" trigger="loop" size={22} colors={{ primary: cartEnabled ? '#ffffff' : '#9ca3af' }} />
                                             {cartEnabled
                                                 ? (template.isFree ? 'Dapatkan Gratis' : 'Beli Sekarang')
                                                 : 'Pembelian via Marketplace'
@@ -809,29 +824,44 @@ export function ProductDetail({ template }: ProductDetailProps) {
                             Dapatkan template ini sekarang dan mulai kelola data dengan lebih efisien.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <motion.button
-                                onClick={handleBuyNow}
-                                disabled={!cartEnabled}
-                                whileHover={cartEnabled ? { scale: 1.02, y: -2 } : {}}
-                                whileTap={cartEnabled ? { scale: 0.98 } : {}}
-                                className={`relative h-14 px-8 rounded-xl font-semibold text-lg shadow-lg overflow-hidden group ${cartEnabled
-                                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-orange-200/50'
-                                    : 'bg-gray-300 text-gray-500 shadow-none cursor-not-allowed'
-                                    }`}
-                            >
-                                <span className="relative z-10 flex items-center justify-center gap-2">
-                                    <LordIcon src="https://cdn.lordicon.com/medpcfcy.json" trigger="loop" size={22} colors={{ primary: '#ffffff' }} />
-                                    {cartEnabled
-                                        ? (template.isFree
-                                            ? 'Dapatkan Gratis'
-                                            : `Beli Sekarang - Rp ${(template.discountPrice || template.price).toLocaleString('id-ID')}`)
-                                        : 'Beli via Marketplace'
-                                    }
-                                </span>
-                                {cartEnabled && (
-                                    <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-amber-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                )}
-                            </motion.button>
+                            {template.isFree && template.downloadUrl ? (
+                                /* Free product - Direct download link, always active */
+                                <a href={template.downloadUrl} target="_blank" rel="noopener noreferrer">
+                                    <motion.button
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="relative h-14 px-8 rounded-xl font-semibold text-lg shadow-lg overflow-hidden group bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-200/50 cursor-pointer"
+                                    >
+                                        <span className="relative z-10 flex items-center justify-center gap-2">
+                                            <LordIcon src="https://cdn.lordicon.com/ternnbni.json" trigger="loop" size={22} colors={{ primary: '#ffffff' }} />
+                                            Download Gratis
+                                        </span>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    </motion.button>
+                                </a>
+                            ) : (
+                                <motion.button
+                                    onClick={handleBuyNow}
+                                    disabled={!cartEnabled}
+                                    whileHover={cartEnabled ? { scale: 1.02, y: -2 } : {}}
+                                    whileTap={cartEnabled ? { scale: 0.98 } : {}}
+                                    className={`relative h-14 px-8 rounded-xl font-semibold text-lg shadow-lg overflow-hidden group ${cartEnabled
+                                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-orange-200/50'
+                                        : 'bg-gray-300 text-gray-500 shadow-none cursor-not-allowed'
+                                        }`}
+                                >
+                                    <span className="relative z-10 flex items-center justify-center gap-2">
+                                        <LordIcon src="https://cdn.lordicon.com/medpcfcy.json" trigger="loop" size={22} colors={{ primary: cartEnabled ? '#ffffff' : '#9ca3af' }} />
+                                        {cartEnabled
+                                            ? `Beli Sekarang - Rp ${(template.discountPrice || template.price).toLocaleString('id-ID')}`
+                                            : 'Beli via Marketplace'
+                                        }
+                                    </span>
+                                    {cartEnabled && (
+                                        <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-amber-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    )}
+                                </motion.button>
+                            )}
                             <Link href="/templates">
                                 <motion.span
                                     whileHover={{ scale: 1.02, y: -2 }}
