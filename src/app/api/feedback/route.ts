@@ -159,29 +159,25 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: error.message, success: false }, { status: 500 })
         }
 
-        // Check if customer has pending voucher and rating is good (4-5)
+        // Check if this is an invited customer (has invite token)
         let voucherSent = false
         let voucherDebug = ''
+        const isInvited = !!data.inviteToken
         
-        if (data.email && data.rating >= 4) {
-            console.log('=== VOUCHER CHECK START ===')
+        if (isInvited && data.rating >= 4) {
+            console.log('=== VOUCHER CHECK START (INVITED USER) ===')
+            console.log('Invite token:', data.inviteToken)
             console.log('Email from form:', data.email)
             console.log('Rating:', data.rating)
             
-            // First check all customers to debug
-            const { data: allCustomers } = await supabase
-                .from('customers')
-                .select('id, email, feedback_voucher_code, voucher_sent_at')
-                .limit(10)
-            console.log('Sample customers in DB:', allCustomers)
-            
+            // Find customer by invite token
             const { data: customer, error: customerError } = await supabase
                 .from('customers')
-                .select('id, name, email, feedback_voucher_code, voucher_sent_at')
-                .ilike('email', data.email.trim())
+                .select('id, name, email, feedback_voucher_code, voucher_sent_at, feedback_invite_token')
+                .eq('feedback_invite_token', data.inviteToken)
                 .maybeSingle()
 
-            console.log('Customer lookup result:', customer)
+            console.log('Customer lookup by token result:', customer)
             console.log('Customer lookup error:', customerError)
 
             if (customer) {
@@ -215,14 +211,17 @@ export async function POST(request: NextRequest) {
                     }
                 }
             } else {
-                voucherDebug = 'customer_not_found'
-                console.log('Customer NOT found with email:', data.email.trim().toLowerCase())
+                voucherDebug = 'invalid_token'
+                console.log('Customer NOT found with invite token:', data.inviteToken)
             }
             console.log('=== VOUCHER CHECK END === Result:', voucherDebug || 'sent')
-        } else {
-            if (!data.email) voucherDebug = 'no_email'
-            else if (data.rating < 4) voucherDebug = 'low_rating'
-            console.log('Skipping voucher check - email:', data.email, 'rating:', data.rating)
+        } else if (isInvited && data.rating < 4) {
+            voucherDebug = 'low_rating'
+            console.log('Invited user but low rating:', data.rating)
+        } else if (!isInvited) {
+            // Regular visitor - no voucher expectation
+            voucherDebug = 'not_invited'
+            console.log('Regular visitor feedback - no invite token')
         }
 
         // Create notification (ignore errors)
@@ -237,7 +236,7 @@ export async function POST(request: NextRequest) {
             // Ignore notification errors
         }
 
-        return NextResponse.json({ feedback, success: true, voucherSent, voucherDebug })
+        return NextResponse.json({ feedback, success: true, voucherSent, voucherDebug, isInvited })
     } catch (error) {
         console.error('Error:', error)
         return NextResponse.json({ error: 'Gagal mengirim feedback. Silakan coba lagi.', success: false }, { status: 500 })

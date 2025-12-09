@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ClientLordIcon } from '@/components/ui/lordicon'
 
@@ -11,12 +12,16 @@ interface Product {
 
 interface DialogState {
     isOpen: boolean
-    type: 'success' | 'error' | 'low_rating' | 'wrong_email'
+    type: 'success' | 'error' | 'low_rating' | 'invalid_token'
     title: string
     message: string
 }
 
-export default function FeedbackPage() {
+function FeedbackContent() {
+    const searchParams = useSearchParams()
+    const inviteToken = searchParams.get('invite')
+    const isInvited = !!inviteToken
+    
     const [rating, setRating] = useState(5)
     const [formStatus, setFormStatus] = useState<'idle' | 'sending'>('idle')
     const [products, setProducts] = useState<Product[]>([])
@@ -64,6 +69,7 @@ export default function FeedbackPage() {
                     likes: formData.get('likes'),
                     improvements: formData.get('improvements'),
                     testimonialPermission: formData.get('permission') === 'yes',
+                    inviteToken: inviteToken,
                 }),
             })
 
@@ -72,47 +78,64 @@ export default function FeedbackPage() {
             if (res.ok && data.success) {
                 setFormStatus('idle')
                 
-                // Check for low rating first (rating < 4)
-                if (rating < 4 && data.voucherDebug === 'low_rating') {
-                    // Don't reset form - let user retry with higher rating
-                    setDialog({
-                        isOpen: true,
-                        type: 'low_rating',
-                        title: 'Yah, Sayang Sekali... 😢',
-                        message: 'Feedback Kamu sudah terkirim, terima kasih!\n\nNamun, kode voucher template gratis hanya diberikan untuk rating 4 atau 5.\n\nKami sangat menghargai masukan Kamu! Jika Kamu bersedia memberikan rating yang lebih baik, silakan kirim feedback lagi dan dapatkan template gratis sebagai apresiasi dari kami. 💝'
-                    })
-                    return
+                // Only show voucher-related dialogs for invited users
+                if (data.isInvited) {
+                    // Check for low rating (invited user with rating < 4)
+                    if (rating < 4 && data.voucherDebug === 'low_rating') {
+                        // Don't reset form - let user retry with higher rating
+                        setDialog({
+                            isOpen: true,
+                            type: 'low_rating',
+                            title: 'Yah, Sayang Sekali... 😢',
+                            message: 'Feedback Kamu sudah terkirim, terima kasih!\n\nNamun, kode voucher template gratis hanya diberikan untuk rating 4 atau 5.\n\nKami sangat menghargai masukan Kamu! Jika Kamu bersedia memberikan rating yang lebih baik, silakan kirim feedback lagi dan dapatkan template gratis sebagai apresiasi dari kami. 💝'
+                        })
+                        return
+                    }
+                    
+                    // Check for invalid token (invited but token doesn't match any customer)
+                    if (rating >= 4 && data.voucherDebug === 'invalid_token') {
+                        // Don't reset form - let user know there's an issue
+                        setDialog({
+                            isOpen: true,
+                            type: 'invalid_token',
+                            title: 'Link Tidak Valid 🔗',
+                            message: 'Feedback Kamu sudah terkirim, terima kasih!\n\nNamun, link undangan yang Kamu gunakan sudah tidak valid atau kadaluarsa.\n\nJika Kamu merasa ini adalah kesalahan, silakan hubungi kami melalui halaman Kontak.'
+                        })
+                        return
+                    }
+                    
+                    // Voucher sent successfully
+                    if (data.voucherSent) {
+                        form.reset()
+                        setRating(5)
+                        setDialog({
+                            isOpen: true,
+                            type: 'success',
+                            title: 'Terima Kasih! 🎁',
+                            message: 'Feedback Kamu sangat berarti bagi kami!\n\n🎁 Kode voucher template gratis sudah dikirim ke email Kamu! Cek inbox atau folder spam.\n\nGunakan kode voucher tersebut untuk mendapatkan 1 template berbayar secara gratis.'
+                        })
+                        return
+                    }
+                    
+                    // Voucher already sent before
+                    if (data.voucherDebug === 'already_sent') {
+                        form.reset()
+                        setRating(5)
+                        setDialog({
+                            isOpen: true,
+                            type: 'success',
+                            title: 'Terima Kasih!',
+                            message: 'Feedback Kamu sangat berarti bagi kami!\n\n📧 Kode voucher sudah pernah dikirim ke email Kamu sebelumnya. Cek inbox atau folder spam jika belum menemukannya.'
+                        })
+                        return
+                    }
                 }
                 
-                // Check for wrong email (rating >= 4 but customer not found)
-                if (rating >= 4 && data.voucherDebug === 'customer_not_found') {
-                    // Don't reset form - let user retry with correct email
-                    setDialog({
-                        isOpen: true,
-                        type: 'wrong_email',
-                        title: 'Hampir Berhasil! ✨',
-                        message: 'Feedback Kamu sudah terkirim, terima kasih!\n\nSayangnya, email yang Kamu masukkan tidak terdaftar sebagai pelanggan yang diundang untuk feedback.\n\nJika Kamu menerima undangan feedback via email, pastikan menggunakan email yang sama untuk mendapatkan kode voucher template gratis. Silakan coba kirim feedback lagi dengan email yang benar! 📧'
-                    })
-                    return
-                }
-                
-                // Success cases - reset form
+                // Regular visitor or other success cases - reset form
                 form.reset()
                 setRating(5)
                 
-                // Different message based on voucher status
                 let message = 'Feedback Kamu sangat berarti bagi kami untuk terus berkembang dan memberikan template terbaik.'
-                
-                if (data.voucherSent) {
-                    message += '\n\n🎁 Kode voucher template gratis sudah dikirim ke email Kamu! Cek inbox atau folder spam.'
-                } else if (rating >= 4) {
-                    // Good rating but no voucher sent - explain why
-                    if (data.voucherDebug === 'no_voucher_code') {
-                        message += '\n\nTerima kasih atas rating baiknya!'
-                    } else if (data.voucherDebug === 'already_sent') {
-                        message += '\n\n📧 Kode voucher sudah pernah dikirim ke email Kamu sebelumnya.'
-                    }
-                }
                 
                 if (formData.get('permission') === 'yes') {
                     message += '\n\nJika Kamu mengizinkan, testimoni Kamu mungkin akan ditampilkan di halaman utama.'
@@ -121,7 +144,7 @@ export default function FeedbackPage() {
                 setDialog({
                     isOpen: true,
                     type: 'success',
-                    title: data.voucherSent ? 'Terima Kasih! 🎁' : 'Terima Kasih!',
+                    title: 'Terima Kasih!',
                     message
                 })
             } else {
@@ -551,7 +574,7 @@ export default function FeedbackPage() {
                             <div className={`h-2 ${
                                 dialog.type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 
                                 dialog.type === 'low_rating' ? 'bg-gradient-to-r from-amber-500 to-orange-500' :
-                                dialog.type === 'wrong_email' ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
+                                dialog.type === 'invalid_token' ? 'bg-gradient-to-r from-gray-500 to-slate-500' :
                                 'bg-gradient-to-r from-red-500 to-rose-500'
                             }`} />
 
@@ -564,7 +587,7 @@ export default function FeedbackPage() {
                                     className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${
                                         dialog.type === 'success' ? 'bg-gradient-to-br from-green-500 to-emerald-500 shadow-lg shadow-green-200' :
                                         dialog.type === 'low_rating' ? 'bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-200' :
-                                        dialog.type === 'wrong_email' ? 'bg-gradient-to-br from-blue-500 to-indigo-500 shadow-lg shadow-blue-200' :
+                                        dialog.type === 'invalid_token' ? 'bg-gradient-to-br from-gray-500 to-slate-500 shadow-lg shadow-gray-200' :
                                         'bg-gradient-to-br from-red-500 to-rose-500 shadow-lg shadow-red-200'
                                     }`}
                                 >
@@ -572,7 +595,7 @@ export default function FeedbackPage() {
                                         src={
                                             dialog.type === 'success' ? "https://cdn.lordicon.com/oqdmuxru.json" :
                                             dialog.type === 'low_rating' ? "https://cdn.lordicon.com/drxwpfop.json" :
-                                            dialog.type === 'wrong_email' ? "https://cdn.lordicon.com/diihvcfp.json" :
+                                            dialog.type === 'invalid_token' ? "https://cdn.lordicon.com/nduddlov.json" :
                                             "https://cdn.lordicon.com/usownftb.json"
                                         }
                                         trigger="loop"
@@ -586,7 +609,7 @@ export default function FeedbackPage() {
                                 <h3 className={`text-2xl font-bold mb-3 ${
                                     dialog.type === 'success' ? 'text-green-800' : 
                                     dialog.type === 'low_rating' ? 'text-amber-800' :
-                                    dialog.type === 'wrong_email' ? 'text-blue-800' :
+                                    dialog.type === 'invalid_token' ? 'text-gray-800' :
                                     'text-red-800'
                                 }`}>
                                     {dialog.title}
@@ -607,7 +630,7 @@ export default function FeedbackPage() {
                                     className={`w-full py-4 rounded-xl font-semibold text-white transition-all ${
                                         dialog.type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-lg hover:shadow-green-200' :
                                         dialog.type === 'low_rating' ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:shadow-lg hover:shadow-amber-200' :
-                                        dialog.type === 'wrong_email' ? 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:shadow-lg hover:shadow-blue-200' :
+                                        dialog.type === 'invalid_token' ? 'bg-gradient-to-r from-gray-500 to-slate-500 hover:shadow-lg hover:shadow-gray-200' :
                                         'bg-gradient-to-r from-red-500 to-rose-500 hover:shadow-lg hover:shadow-red-200'
                                     }`}
                                 >
@@ -616,7 +639,7 @@ export default function FeedbackPage() {
                                             src={
                                                 dialog.type === 'success' ? "https://cdn.lordicon.com/egiwmiit.json" :
                                                 dialog.type === 'low_rating' ? "https://cdn.lordicon.com/lomfljuq.json" :
-                                                dialog.type === 'wrong_email' ? "https://cdn.lordicon.com/akuwjdzh.json" :
+                                                dialog.type === 'invalid_token' ? "https://cdn.lordicon.com/egiwmiit.json" :
                                                 "https://cdn.lordicon.com/akuwjdzh.json"
                                             }
                                             trigger="hover"
@@ -625,7 +648,7 @@ export default function FeedbackPage() {
                                         />
                                         {dialog.type === 'success' ? 'Tutup' : 
                                          dialog.type === 'low_rating' ? 'Coba Rating Lebih Tinggi' :
-                                         dialog.type === 'wrong_email' ? 'Perbaiki Email' :
+                                         dialog.type === 'invalid_token' ? 'Tutup' :
                                          'Coba Lagi'}
                                     </span>
                                 </motion.button>
@@ -635,5 +658,17 @@ export default function FeedbackPage() {
                 )}
             </AnimatePresence>
         </main>
+    )
+}
+
+export default function FeedbackPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+            </div>
+        }>
+            <FeedbackContent />
+        </Suspense>
     )
 }

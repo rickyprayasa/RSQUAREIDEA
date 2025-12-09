@@ -19,6 +19,15 @@ function generateVoucherCode(): string {
     return code
 }
 
+function generateInviteToken(): string {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    let token = ''
+    for (let i = 0; i < 16; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return token
+}
+
 function getCampaignEmailHtml(customerName: string, feedbackUrl: string, products?: string[]): string {
     const productsHtml = products && products.length > 0 
         ? `
@@ -153,8 +162,9 @@ export async function POST(request: NextRequest) {
             try {
                 console.log('Sending email to:', customer.name, 'Products:', customer.products)
                 
-                // Generate unique voucher code
+                // Generate unique voucher code and invite token
                 const voucherCode = generateVoucherCode()
+                const inviteToken = generateInviteToken()
 
                 // Create voucher in database (100% discount, 1 use)
                 const { error: voucherError } = await supabase
@@ -178,14 +188,17 @@ export async function POST(request: NextRequest) {
                     continue
                 }
 
+                // Create personalized feedback URL with invite token
+                const personalFeedbackUrl = `${feedbackUrl}?invite=${inviteToken}`
+
                 // Generate HTML email with products
-                const htmlEmail = getCampaignEmailHtml(customer.name, feedbackUrl, customer.products)
+                const htmlEmail = getCampaignEmailHtml(customer.name, personalFeedbackUrl, customer.products)
                 
                 // Plain text fallback with products
                 const productsText = customer.products && customer.products.length > 0 
                     ? `\n\nTemplate yang Kamu beli:\n${customer.products.map(p => `- ${p}`).join('\n')}\n` 
                     : ''
-                const textEmail = `Halo ${customer.name},\n\nTerima kasih sudah mempercayai RSQUARE!${productsText}\n\nKami ingin mendengar pengalaman Kamu. Sebagai apresiasi, kami akan memberikan 1 Template Google Sheets GRATIS setelah Kamu memberikan feedback!\n\nBerikan feedback di: ${feedbackUrl}\n\nSetelah mengisi feedback dengan rating bagus, kode voucher akan dikirim ke email Kamu.\n\nTerima kasih!\nTim RSQUARE`
+                const textEmail = `Halo ${customer.name},\n\nTerima kasih sudah mempercayai RSQUARE!${productsText}\n\nKami ingin mendengar pengalaman Kamu. Sebagai apresiasi, kami akan memberikan 1 Template Google Sheets GRATIS setelah Kamu memberikan feedback!\n\nBerikan feedback di: ${personalFeedbackUrl}\n\nSetelah mengisi feedback dengan rating bagus, kode voucher akan dikirim ke email Kamu.\n\nTerima kasih!\nTim RSQUARE`
 
                 // Send email
                 await transporter.sendMail({
@@ -196,12 +209,13 @@ export async function POST(request: NextRequest) {
                     html: htmlEmail,
                 })
 
-                // Update customer record
+                // Update customer record with voucher code and invite token
                 await supabase
                     .from('customers')
                     .update({
                         feedback_email_sent_at: new Date().toISOString(),
                         feedback_voucher_code: voucherCode,
+                        feedback_invite_token: inviteToken,
                     })
                     .eq('id', customer.id)
 
