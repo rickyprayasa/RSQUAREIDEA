@@ -956,9 +956,9 @@ export default function CheckoutPage() {
                                                                         <div className="flex-1 min-w-0">
                                                                             <p className="font-medium text-gray-900 text-sm truncate">{method.name}</p>
                                                                             <p className="text-xs text-gray-500">
-                                                                                {method.duitkuFee && parseInt(method.duitkuFee) > 0 
-                                                                                    ? `Admin: Rp ${parseInt(method.duitkuFee).toLocaleString('id-ID')}` 
-                                                                                    : 'Admin: Gratis'}
+                                                                                Admin: {method.duitkuFee && Number(method.duitkuFee) > 0 
+                                                                                    ? `Rp ${Number(method.duitkuFee).toLocaleString('id-ID')}` 
+                                                                                    : 'Gratis'}
                                                                             </p>
                                                                         </div>
                                                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedPayment?.id === method.id ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'}`}>
@@ -1058,11 +1058,11 @@ export default function CheckoutPage() {
                                                 <p className="text-sm text-emerald-600 mb-4">
                                                     Anda akan diarahkan ke halaman pembayaran Duitku untuk menyelesaikan transaksi.
                                                 </p>
-                                                {selectedPayment.duitkuFee && parseInt(selectedPayment.duitkuFee) > 0 && (
-                                                    <p className="text-sm text-gray-500 mb-4">
-                                                        Biaya Admin: Rp {parseInt(selectedPayment.duitkuFee).toLocaleString('id-ID')}
-                                                    </p>
-                                                )}
+                                                <p className="text-sm text-gray-500 mb-4">
+                                                    Biaya Admin: {selectedPayment.duitkuFee && Number(selectedPayment.duitkuFee) > 0 
+                                                        ? `Rp ${Number(selectedPayment.duitkuFee).toLocaleString('id-ID')}` 
+                                                        : 'Gratis'}
+                                                </p>
                                                 <div className="flex items-center justify-center gap-2 text-sm text-emerald-700">
                                                     <Check className="h-4 w-4" />
                                                     <span>Pembayaran otomatis terverifikasi</span>
