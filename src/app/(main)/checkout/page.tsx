@@ -35,7 +35,7 @@ import { trackInitiateCheckout, trackPurchase, trackButtonClick } from '@/hooks/
 interface PaymentMethod {
     id: number
     name: string
-    type: 'internal' | 'external'
+    type: 'internal' | 'external' | 'duitku'
     bankName: string | null
     accountNumber: string | null
     accountName: string | null
@@ -43,6 +43,9 @@ interface PaymentMethod {
     externalUrl: string | null
     instructions: string | null
     isActive: boolean
+    duitkuCode?: string
+    duitkuFee?: string
+    duitkuImage?: string
 }
 
 export default function CheckoutPage() {
@@ -66,6 +69,8 @@ export default function CheckoutPage() {
     const [paymentConfirmed, setPaymentConfirmed] = useState(false)
     const [paymentRejected, setPaymentRejected] = useState(false)
     const [errorDialog, setErrorDialog] = useState({ isOpen: false, title: '', message: '' })
+    const [duitkuEnabled, setDuitkuEnabled] = useState(false)
+    const [duitkuLoading, setDuitkuLoading] = useState(false)
 
     const [formData, setFormData] = useState({
         name: '',
@@ -101,14 +106,49 @@ export default function CheckoutPage() {
         Promise.all([
             fetch('/api/payments').then(res => res.json()),
             fetch('/api/settings').then(res => res.json())
-        ]).then(([paymentData, settingsData]) => {
+        ]).then(async ([paymentData, settingsData]) => {
             const methods: PaymentMethod[] = []
+
+            // Check if Duitku is enabled and fetch payment methods
+            if (settingsData.settings?.duitku_enabled === 'true') {
+                setDuitkuEnabled(true)
+                try {
+                    const duitkuRes = await fetch('/api/duitku/payment-methods', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: 50000 }), // Will update with actual amount
+                    })
+                    const duitkuData = await duitkuRes.json()
+                    if (duitkuData.paymentMethods) {
+                        // Add Duitku payment methods
+                        duitkuData.paymentMethods.forEach((dm: { paymentMethod: string; paymentName: string; paymentImage: string; totalFee: string }, index: number) => {
+                            methods.push({
+                                id: -100 - index, // Negative IDs for Duitku methods
+                                name: dm.paymentName,
+                                type: 'duitku',
+                                bankName: null,
+                                accountNumber: null,
+                                accountName: null,
+                                qrCodeImage: null,
+                                externalUrl: null,
+                                instructions: null,
+                                isActive: true,
+                                duitkuCode: dm.paymentMethod,
+                                duitkuFee: dm.totalFee,
+                                duitkuImage: dm.paymentImage,
+                            })
+                        })
+                    }
+                } catch (err) {
+                    console.error('Error fetching Duitku methods:', err)
+                }
+            }
 
             // Add QRIS from settings if enabled
             if (settingsData.settings?.qris_enabled === 'true' && settingsData.settings?.qris_static_image) {
                 methods.push({
                     id: -1,
-                    name: 'QRIS',
+                    name: 'QRIS (Manual)',
                     type: 'internal',
                     bankName: null,
                     accountNumber: null,
@@ -434,8 +474,79 @@ export default function CheckoutPage() {
         }
     }
 
+    // Handle Duitku payment
+    const handleDuitkuPayment = async () => {
+        if (!selectedPayment || selectedPayment.type !== 'duitku') return
+
+        setDuitkuLoading(true)
+        const newOrderNumber = generateOrderNumber()
+
+        trackInitiateCheckout(finalPrice)
+        trackButtonClick('Bayar via Duitku', 'Checkout')
+
+        try {
+            const res = await fetch('/api/duitku/create-transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderNumber: newOrderNumber,
+                    paymentMethod: selectedPayment.duitkuCode,
+                    totalAmount: finalPrice,
+                    customerName: formData.name,
+                    customerEmail: formData.email,
+                    customerPhone: formData.phone,
+                    items: items.map(item => ({
+                        productId: item.id,
+                        productTitle: item.title,
+                        price: item.discountPrice || item.price,
+                    })),
+                }),
+            })
+
+            const data = await res.json()
+
+            if (data.success && data.paymentUrl) {
+                // Save customer data
+                await fetch('/api/admin/customers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+                        amount: finalPrice,
+                    }),
+                })
+
+                // Redirect to Duitku payment page
+                window.location.href = data.paymentUrl
+            } else {
+                setErrorDialog({
+                    isOpen: true,
+                    title: 'Gagal Membuat Transaksi',
+                    message: data.error || 'Terjadi kesalahan saat membuat transaksi. Silakan coba lagi.',
+                })
+            }
+        } catch (error) {
+            console.error('Error creating Duitku transaction:', error)
+            setErrorDialog({
+                isOpen: true,
+                title: 'Terjadi Kesalahan',
+                message: 'Tidak dapat terhubung ke server pembayaran. Silakan coba lagi.',
+            })
+        } finally {
+            setDuitkuLoading(false)
+        }
+    }
+
     const handleSubmitOrder = async () => {
         if (!selectedPayment) return
+
+        // If Duitku payment, use different handler
+        if (selectedPayment.type === 'duitku') {
+            await handleDuitkuPayment()
+            return
+        }
 
         setLoading(true)
         const newOrderNumber = generateOrderNumber()
@@ -803,9 +914,11 @@ export default function CheckoutPage() {
                                                     : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedPayment?.id === method.id ? 'bg-orange-500' : 'bg-gray-100'
+                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden ${selectedPayment?.id === method.id ? 'bg-orange-500' : 'bg-gray-100'
                                                     }`}>
-                                                    {method.type === 'external' ? (
+                                                    {method.type === 'duitku' && method.duitkuImage ? (
+                                                        <img src={method.duitkuImage} alt={method.name} className="w-10 h-10 object-contain" />
+                                                    ) : method.type === 'external' ? (
                                                         <CreditCard className={`h-6 w-6 ${selectedPayment?.id === method.id ? 'text-white' : 'text-gray-500'}`} />
                                                     ) : method.qrCodeImage ? (
                                                         <QrCode className={`h-6 w-6 ${selectedPayment?.id === method.id ? 'text-white' : 'text-gray-500'}`} />
@@ -816,14 +929,20 @@ export default function CheckoutPage() {
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2">
                                                         <p className="font-semibold text-gray-900">{method.name}</p>
-                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${method.type === 'external'
-                                                            ? 'bg-purple-100 text-purple-700'
-                                                            : 'bg-blue-100 text-blue-700'
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                                            method.type === 'duitku'
+                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                : method.type === 'external'
+                                                                    ? 'bg-purple-100 text-purple-700'
+                                                                    : 'bg-blue-100 text-blue-700'
                                                             }`}>
-                                                            {method.type === 'external' ? 'External' : 'Transfer'}
+                                                            {method.type === 'duitku' ? 'Otomatis' : method.type === 'external' ? 'External' : 'Transfer'}
                                                         </span>
                                                     </div>
                                                     {method.bankName && <p className="text-sm text-gray-500">{method.bankName}</p>}
+                                                    {method.type === 'duitku' && method.duitkuFee && parseInt(method.duitkuFee) > 0 && (
+                                                        <p className="text-sm text-gray-500">Fee: Rp {parseInt(method.duitkuFee).toLocaleString('id-ID')}</p>
+                                                    )}
                                                     {method.type === 'external' && <p className="text-sm text-gray-500">Redirect ke halaman pembayaran</p>}
                                                 </div>
                                                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedPayment?.id === method.id ? 'border-orange-500 bg-orange-500' : 'border-gray-300'
@@ -843,6 +962,28 @@ export default function CheckoutPage() {
                                         className="mt-6 p-6 bg-gray-50 rounded-xl"
                                     >
                                         <h3 className="font-semibold text-gray-900 mb-4">Detail Pembayaran</h3>
+
+                                        {/* Duitku Payment */}
+                                        {selectedPayment.type === 'duitku' && (
+                                            <div className="text-center mb-4 p-6 bg-emerald-50 rounded-xl border border-emerald-200">
+                                                {selectedPayment.duitkuImage && (
+                                                    <img src={selectedPayment.duitkuImage} alt={selectedPayment.name} className="w-16 h-16 mx-auto mb-3 object-contain" />
+                                                )}
+                                                <p className="text-emerald-800 font-medium mb-2">Pembayaran {selectedPayment.name}</p>
+                                                <p className="text-sm text-emerald-600 mb-4">
+                                                    Anda akan diarahkan ke halaman pembayaran Duitku untuk menyelesaikan transaksi.
+                                                </p>
+                                                {selectedPayment.duitkuFee && parseInt(selectedPayment.duitkuFee) > 0 && (
+                                                    <p className="text-sm text-gray-500 mb-4">
+                                                        Biaya Admin: Rp {parseInt(selectedPayment.duitkuFee).toLocaleString('id-ID')}
+                                                    </p>
+                                                )}
+                                                <div className="flex items-center justify-center gap-2 text-sm text-emerald-700">
+                                                    <Check className="h-4 w-4" />
+                                                    <span>Pembayaran otomatis terverifikasi</span>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* External Payment */}
                                         {selectedPayment.type === 'external' && selectedPayment.externalUrl && (
@@ -952,11 +1093,13 @@ export default function CheckoutPage() {
                                 </button>
                                 <button
                                     onClick={handleSubmitOrder}
-                                    disabled={!selectedPayment || loading}
-                                    className="px-8 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                    disabled={!selectedPayment || loading || duitkuLoading}
+                                    className={`px-8 py-3 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${
+                                        selectedPayment?.type === 'duitku' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-orange-500 hover:bg-orange-600'
+                                    }`}
                                 >
-                                    {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                                    Konfirmasi Pesanan
+                                    {(loading || duitkuLoading) && <Loader2 className="h-4 w-4 animate-spin" />}
+                                    {selectedPayment?.type === 'duitku' ? 'Bayar Sekarang' : 'Konfirmasi Pesanan'}
                                 </button>
                             </div>
                         </motion.div>
