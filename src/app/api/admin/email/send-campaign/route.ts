@@ -158,7 +158,17 @@ export async function POST(request: NextRequest) {
         let sentCount = 0
         const errors: string[] = []
 
-        for (const customer of customers as Customer[]) {
+        // Helper function to add delay between emails (ZeptoMail rate limiting)
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+        for (let i = 0; i < customers.length; i++) {
+            const customer = customers[i] as Customer
+            
+            // Add 2 second delay between emails to avoid rate limiting (except first email)
+            if (i > 0) {
+                await delay(2000)
+            }
+
             try {
                 console.log('Sending email to:', customer.name, 'Products:', customer.products)
                 
