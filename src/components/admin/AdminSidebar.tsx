@@ -20,6 +20,8 @@ import {
     Users,
     ChevronDown,
     Inbox,
+    BarChart3,
+    Store,
     type LucideIcon
 } from 'lucide-react'
 import { useState } from 'react'
@@ -38,23 +40,31 @@ interface NavGroup {
     items: NavItem[]
 }
 
-// Main navigation items
+// Main navigation - Dashboard only
 const mainNav: NavItem[] = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, color: 'from-blue-500 to-cyan-500' },
-    { name: 'Produk', href: '/admin/products', icon: Package, color: 'from-orange-500 to-amber-500' },
-    { name: 'Kategori', href: '/admin/categories', icon: FolderOpen, color: 'from-green-500 to-emerald-500' },
-    { name: 'Video', href: '/admin/videos', icon: Play, color: 'from-red-500 to-pink-500' },
-    { name: 'Pelanggan', href: '/admin/customers', icon: Users, color: 'from-cyan-500 to-blue-500' },
 ]
 
 // Grouped navigation
 const navGroups: NavGroup[] = [
     {
-        name: 'Transaksi',
+        name: 'Katalog',
+        icon: Store,
+        color: 'from-orange-500 to-amber-500',
+        items: [
+            { name: 'Produk', href: '/admin/products', icon: Package, color: 'from-orange-500 to-amber-500' },
+            { name: 'Kategori', href: '/admin/categories', icon: FolderOpen, color: 'from-green-500 to-emerald-500' },
+            { name: 'Video', href: '/admin/videos', icon: Play, color: 'from-red-500 to-pink-500' },
+        ]
+    },
+    {
+        name: 'Penjualan',
         icon: ShoppingCart,
         color: 'from-purple-500 to-violet-500',
         items: [
             { name: 'Pesanan', href: '/admin/orders', icon: ShoppingCart, color: 'from-purple-500 to-violet-500' },
+            { name: 'Pelanggan', href: '/admin/customers', icon: Users, color: 'from-cyan-500 to-blue-500' },
+            { name: 'Pembayaran', href: '/admin/payments', icon: CreditCard, color: 'from-teal-500 to-cyan-500' },
         ]
     },
     {
@@ -71,15 +81,14 @@ const navGroups: NavGroup[] = [
 
 // Bottom navigation
 const bottomNav: NavItem[] = [
-    { name: 'Analytics', href: '/admin/analytics', icon: LayoutDashboard, color: 'from-cyan-500 to-blue-500' },
-    { name: 'Pembayaran', href: '/admin/payments', icon: CreditCard, color: 'from-teal-500 to-cyan-500' },
+    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, color: 'from-indigo-500 to-purple-500' },
     { name: 'Pengaturan', href: '/admin/settings', icon: Settings, color: 'from-gray-500 to-slate-500' },
 ]
 
 export function AdminSidebar() {
     const pathname = usePathname()
     const [mobileOpen, setMobileOpen] = useState(false)
-    const [expandedGroups, setExpandedGroups] = useState<string[]>(['Transaksi', 'Inbox'])
+    const [expandedGroups, setExpandedGroups] = useState<string[]>(['Katalog', 'Penjualan', 'Inbox'])
 
     const toggleGroup = (groupName: string) => {
         setExpandedGroups(prev =>
