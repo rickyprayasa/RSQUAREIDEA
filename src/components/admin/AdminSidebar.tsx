@@ -44,6 +44,7 @@ const mainNav: NavItem[] = [
     { name: 'Produk', href: '/admin/products', icon: Package, color: 'from-orange-500 to-amber-500' },
     { name: 'Kategori', href: '/admin/categories', icon: FolderOpen, color: 'from-green-500 to-emerald-500' },
     { name: 'Video', href: '/admin/videos', icon: Play, color: 'from-red-500 to-pink-500' },
+    { name: 'Pelanggan', href: '/admin/customers', icon: Users, color: 'from-cyan-500 to-blue-500' },
 ]
 
 // Grouped navigation
@@ -54,7 +55,6 @@ const navGroups: NavGroup[] = [
         color: 'from-purple-500 to-violet-500',
         items: [
             { name: 'Pesanan', href: '/admin/orders', icon: ShoppingCart, color: 'from-purple-500 to-violet-500' },
-            { name: 'Pelanggan', href: '/admin/customers', icon: Users, color: 'from-cyan-500 to-blue-500' },
         ]
     },
     {

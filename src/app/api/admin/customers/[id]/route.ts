@@ -26,6 +26,11 @@ export async function PATCH(
         if (data.source !== undefined) updateData.source = data.source
         if (data.notes !== undefined) updateData.notes = data.notes || null
         if (data.purchased_products !== undefined) updateData.purchased_products = data.purchased_products
+        if (data.tags !== undefined) updateData.tags = data.tags
+        if (data.status !== undefined) updateData.status = data.status
+        
+        // Update last_activity_at when customer is edited
+        updateData.last_activity_at = new Date().toISOString()
 
         const { data: customer, error } = await supabase
             .from('customers')

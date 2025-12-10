@@ -15,12 +15,16 @@ import {
     UserPlus,
     Send,
     CheckSquare,
-    Square
+    Square,
+    Upload,
+    Tag,
+    TrendingUp
 } from 'lucide-react'
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal'
 import AddCustomerModal from '@/components/admin/AddCustomerModal'
 import EmailCampaignModal from '@/components/admin/EmailCampaignModal'
 import CustomerDetailModal from '@/components/admin/CustomerDetailModal'
+import ImportCustomerModal from '@/components/admin/ImportCustomerModal'
 
 interface Customer {
     id: number
@@ -29,6 +33,8 @@ interface Customer {
     phone: string | null
     source?: string
     notes?: string
+    tags?: string[]
+    status?: string
     purchased_products?: string[]
     feedback_email_sent_at?: string | null
     feedback_voucher_code?: string | null
@@ -36,6 +42,7 @@ interface Customer {
     total_orders: number
     total_spent: number
     last_order_at: string | null
+    last_activity_at?: string | null
     created_at: string
     products: string[]
 }
@@ -45,8 +52,24 @@ const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
     lynk_id: { label: 'Lynk.id', color: 'bg-purple-100 text-purple-700' },
     karyakarsa: { label: 'Karyakarsa', color: 'bg-blue-100 text-blue-700' },
     mayar: { label: 'Mayar', color: 'bg-orange-100 text-orange-700' },
+    tokopedia: { label: 'Tokopedia', color: 'bg-green-100 text-green-700' },
+    shopee: { label: 'Shopee', color: 'bg-orange-100 text-orange-700' },
+    import: { label: 'Import', color: 'bg-cyan-100 text-cyan-700' },
     other: { label: 'Lainnya', color: 'bg-gray-100 text-gray-700' },
     manual: { label: 'Manual', color: 'bg-gray-100 text-gray-700' },
+}
+
+const TAG_LABELS: Record<string, { label: string; color: string }> = {
+    vip: { label: 'VIP', color: 'bg-amber-100 text-amber-700' },
+    repeat_buyer: { label: 'Repeat Buyer', color: 'bg-green-100 text-green-700' },
+    new_customer: { label: 'New Customer', color: 'bg-blue-100 text-blue-700' },
+    potential: { label: 'Potential', color: 'bg-purple-100 text-purple-700' },
+}
+
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+    active: { label: 'Active', color: 'bg-green-100 text-green-700' },
+    inactive: { label: 'Inactive', color: 'bg-gray-100 text-gray-700' },
+    vip: { label: 'VIP', color: 'bg-amber-100 text-amber-700' },
 }
 
 export default function CustomersPage() {
@@ -59,8 +82,11 @@ export default function CustomersPage() {
     const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; customer: Customer | null }>({ isOpen: false, customer: null })
     const [addModal, setAddModal] = useState(false)
     const [emailModal, setEmailModal] = useState(false)
+    const [importModal, setImportModal] = useState(false)
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
     const [detailModal, setDetailModal] = useState<{ isOpen: boolean; customer: Customer | null }>({ isOpen: false, customer: null })
+    const [statusFilter, setStatusFilter] = useState<string>('all')
+    const [tagFilter, setTagFilter] = useState<string>('all')
 
     useEffect(() => {
         fetchCustomers()
@@ -149,10 +175,24 @@ export default function CustomersPage() {
             c.email.toLowerCase().includes(search.toLowerCase()) ||
             (c.phone && c.phone.includes(search))
         const matchesSource = sourceFilter === 'all' || c.source === sourceFilter
-        return matchesSearch && matchesSource
+        const matchesStatus = statusFilter === 'all' || c.status === statusFilter
+        const matchesTag = tagFilter === 'all' || (c.tags && c.tags.includes(tagFilter))
+        return matchesSearch && matchesSource && matchesStatus && matchesTag
     })
 
     const totalRevenue = customers.reduce((sum, c) => sum + (c.total_spent || 0), 0)
+
+    // Analytics by source
+    const sourceStats = Object.entries(SOURCE_LABELS).map(([key, val]) => {
+        const sourceCustomers = customers.filter(c => c.source === key)
+        return {
+            source: key,
+            label: val.label,
+            color: val.color,
+            count: sourceCustomers.length,
+            revenue: sourceCustomers.reduce((sum, c) => sum + (c.total_spent || 0), 0),
+        }
+    }).filter(s => s.count > 0).sort((a, b) => b.revenue - a.revenue)
 
     const toggleSelect = (id: number) => {
         const newSet = new Set(selectedIds)
@@ -196,6 +236,13 @@ export default function CustomersPage() {
                     >
                         <UserPlus className="h-4 w-4" />
                         <span className="hidden sm:inline">Tambah</span>
+                    </button>
+                    <button
+                        onClick={() => setImportModal(true)}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-cyan-500 text-white rounded-xl text-sm font-medium hover:bg-cyan-600 transition-colors"
+                    >
+                        <Upload className="h-4 w-4" />
+                        <span className="hidden sm:inline">Import</span>
                     </button>
                     <button
                         onClick={() => setEmailModal(true)}
@@ -254,30 +301,77 @@ export default function CustomersPage() {
                 </div>
             </div>
 
-            {/* Search & Filter */}
-            <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Cari pelanggan..."
-                        className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                    />
+            {/* Source Analytics */}
+            {sourceStats.length > 0 && (
+                <div className="bg-white rounded-xl p-4 border border-gray-100">
+                    <div className="flex items-center gap-2 mb-3">
+                        <TrendingUp className="h-4 w-4 text-gray-500" />
+                        <h3 className="font-medium text-gray-700 text-sm">Revenue per Platform</h3>
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                        {sourceStats.slice(0, 5).map((stat) => (
+                            <div 
+                                key={stat.source}
+                                onClick={() => setSourceFilter(stat.source)}
+                                className={`flex-shrink-0 px-3 py-2 rounded-lg cursor-pointer transition-all ${
+                                    sourceFilter === stat.source 
+                                        ? 'ring-2 ring-orange-500 ' + stat.color 
+                                        : stat.color + ' hover:opacity-80'
+                                }`}
+                            >
+                                <p className="font-medium text-xs">{stat.label}</p>
+                                <p className="font-bold text-sm">Rp {(stat.revenue / 1000).toFixed(0)}k</p>
+                                <p className="text-xs opacity-75">{stat.count} pelanggan</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <select
-                    value={sourceFilter}
-                    onChange={(e) => setSourceFilter(e.target.value)}
-                    className="px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                >
-                    <option value="all">Semua Sumber</option>
-                    <option value="website">Website</option>
-                    <option value="lynk_id">Lynk.id</option>
-                    <option value="karyakarsa">Karyakarsa</option>
-                    <option value="mayar">Mayar</option>
-                    <option value="other">Lainnya</option>
-                </select>
+            )}
+
+            {/* Search & Filter */}
+            <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Cari pelanggan..."
+                            className="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        />
+                    </div>
+                    <select
+                        value={sourceFilter}
+                        onChange={(e) => setSourceFilter(e.target.value)}
+                        className="px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                        <option value="all">Semua Sumber</option>
+                        {Object.entries(SOURCE_LABELS).map(([key, val]) => (
+                            <option key={key} value={key}>{val.label}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                        <option value="all">Semua Status</option>
+                        {Object.entries(STATUS_LABELS).map(([key, val]) => (
+                            <option key={key} value={key}>{val.label}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={tagFilter}
+                        onChange={(e) => setTagFilter(e.target.value)}
+                        className="px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                        <option value="all">Semua Tag</option>
+                        {Object.entries(TAG_LABELS).map(([key, val]) => (
+                            <option key={key} value={key}>{val.label}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             {/* Selection indicator */}
@@ -521,6 +615,13 @@ export default function CustomersPage() {
                 onClose={() => setDetailModal({ isOpen: false, customer: null })}
                 onUpdate={fetchCustomers}
                 customer={detailModal.customer}
+            />
+
+            {/* Import Customer Modal */}
+            <ImportCustomerModal
+                isOpen={importModal}
+                onClose={() => setImportModal(false)}
+                onSuccess={fetchCustomers}
             />
         </div>
     )
