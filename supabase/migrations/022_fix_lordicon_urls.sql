@@ -1,6 +1,16 @@
 -- Migration: Fix broken lordicon URLs in categories table
 -- This updates any invalid/broken lordicon URLs to working ones
 
+-- First, fix specific broken URLs that are known to cause 404 errors
+UPDATE categories SET icon = 'https://cdn.lordicon.com/hvueufdo.json' 
+WHERE icon LIKE '%hvueufoo%';
+
+UPDATE categories SET icon = 'https://cdn.lordicon.com/ghhwiltn.json' 
+WHERE icon LIKE '%tosheef%';
+
+UPDATE categories SET icon = 'https://cdn.lordicon.com/ofwpzftr.json' 
+WHERE icon LIKE '%nveuefoo%';
+
 -- Update categories with known category names to appropriate icons
 UPDATE categories SET icon = 'https://cdn.lordicon.com/qhviklyi.json' 
 WHERE LOWER(name) LIKE '%keuangan%' OR LOWER(name) LIKE '%budget%' OR LOWER(name) LIKE '%finance%';
@@ -43,5 +53,14 @@ WHERE LOWER(name) LIKE '%gratis%' OR LOWER(name) LIKE '%free%';
 UPDATE categories SET icon = 'https://cdn.lordicon.com/ofwpzftr.json' 
 WHERE icon IS NULL 
    OR icon = '' 
-   OR icon NOT LIKE 'https://cdn.lordicon.com/%'
-   OR icon NOT LIKE '%.json';
+   OR icon NOT LIKE 'https://cdn.lordicon.com/%.json';
+
+-- List of valid lordicon URLs that are known to work (for reference):
+-- https://cdn.lordicon.com/ofwpzftr.json (grid/default)
+-- https://cdn.lordicon.com/qhviklyi.json (finance/budgeting)
+-- https://cdn.lordicon.com/fjvfsqea.json (business)
+-- https://cdn.lordicon.com/vduvxizq.json (productivity)
+-- https://cdn.lordicon.com/oegrrprk.json (lifestyle)
+-- https://cdn.lordicon.com/ghhwiltn.json (spreadsheet)
+-- https://cdn.lordicon.com/hvueufdo.json (sparkles)
+-- https://cdn.lordicon.com/wcjauznf.json (gift/free)
