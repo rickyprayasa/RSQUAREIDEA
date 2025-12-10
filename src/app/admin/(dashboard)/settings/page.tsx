@@ -724,27 +724,6 @@ export default function SettingsPage() {
                             </div>
                         )}
 
-                        {/* Payment Gateway Toggle */}
-                        <ToggleCard
-                            icon={CreditCard}
-                            label="Payment Gateway"
-                            description="Aktifkan pembayaran via payment gateway (Midtrans, Xendit, dll)"
-                            active={settings.payment_gateway_enabled === 'true'}
-                            onToggle={() => handleChange('payment_gateway_enabled', settings.payment_gateway_enabled === 'true' ? 'false' : 'true')}
-                            color="green"
-                        />
-
-                        {settings.payment_gateway_enabled === 'true' && (
-                            <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                                <div className="flex gap-3">
-                                    <Info className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                                    <p className="text-sm text-green-800">
-                                        <strong>Coming Soon:</strong> Integrasi payment gateway akan segera tersedia. Hubungi kami untuk informasi lebih lanjut.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-
                         {/* QRIS Toggle */}
                         <ToggleCard
                             icon={QrCode}
