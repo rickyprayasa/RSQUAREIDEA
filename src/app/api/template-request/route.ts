@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { notifyNewTemplateRequest } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
     try {
@@ -44,6 +45,14 @@ export async function POST(request: NextRequest) {
             message: `${data.name} - ${serviceLabel}${data.company ? ` (${data.company})` : ''}`,
             link: '/admin/requests',
         })
+
+        // Send Telegram notification
+        notifyNewTemplateRequest({
+            name: data.name,
+            email: data.email,
+            templateType: serviceLabel,
+            description: data.description || data.requirements || '-',
+        }).catch(console.error)
 
         return NextResponse.json({ request: templateRequest, success: true })
     } catch (error) {

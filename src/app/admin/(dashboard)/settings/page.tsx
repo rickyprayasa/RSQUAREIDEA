@@ -31,7 +31,10 @@ import {
     Gift,
     Coffee,
     Link as LinkIcon,
-    Copy
+    Copy,
+    Bell,
+    Send,
+    MessageCircle
 } from 'lucide-react'
 import jsQR from 'jsqr'
 
@@ -74,6 +77,11 @@ interface SettingsData {
     saweria_reward_product_id: string
     saweria_min_donation: string
     saweria_reward_message: string
+    // Telegram notification settings
+    telegram_enabled: string
+    telegram_bot_token: string
+    telegram_chat_id: string
+    telegram_keepalive_notify: string
 }
 
 const defaultSettings: SettingsData = {
@@ -130,6 +138,11 @@ Tim RSQUARE`,
     saweria_reward_product_id: '',
     saweria_min_donation: '50000',
     saweria_reward_message: 'Terima kasih atas dukungannya! Sebagai apresiasi, silakan download template gratis berikut:',
+    // Telegram notification settings
+    telegram_enabled: 'false',
+    telegram_bot_token: '',
+    telegram_chat_id: '',
+    telegram_keepalive_notify: 'false',
 }
 
 const tabs = [
@@ -140,6 +153,7 @@ const tabs = [
     { id: 'email', label: 'Email', icon: Mail, color: 'pink' },
     { id: 'tracking', label: 'Tracking', icon: BarChart3, color: 'cyan' },
     { id: 'saweria', label: 'Saweria', icon: Coffee, color: 'yellow' },
+    { id: 'telegram', label: 'Telegram', icon: Bell, color: 'sky' },
 ]
 
 export default function SettingsPage() {
@@ -1235,7 +1249,171 @@ export default function SettingsPage() {
                         )}
                     </div>
                 )}
+                {/* Telegram Tab */}
+                {activeTab === 'telegram' && (
+                    <TelegramSettings 
+                        settings={settings} 
+                        handleChange={handleChange}
+                    />
+                )}
             </motion.div>
+        </div>
+    )
+}
+
+function TelegramSettings({ settings, handleChange }: { settings: SettingsData, handleChange: (key: keyof SettingsData, value: string) => void }) {
+    const [testing, setTesting] = useState(false)
+    const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
+
+    const testTelegram = async () => {
+        setTesting(true)
+        setTestResult(null)
+        try {
+            const response = await fetch(`https://api.telegram.org/bot${settings.telegram_bot_token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: settings.telegram_chat_id,
+                    text: `🧪 <b>Test Notifikasi RSQUARE</b>\n\nKoneksi Telegram berhasil! ✅\nWaktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`,
+                    parse_mode: 'HTML',
+                }),
+            })
+            const data = await response.json()
+            if (data.ok) {
+                setTestResult({ success: true, message: 'Pesan test berhasil dikirim! Cek Telegram Kamu.' })
+            } else {
+                setTestResult({ success: false, message: data.description || 'Gagal mengirim pesan' })
+            }
+        } catch (error) {
+            setTestResult({ success: false, message: 'Error: ' + (error instanceof Error ? error.message : 'Unknown error') })
+        } finally {
+            setTesting(false)
+        }
+    }
+
+    return (
+        <div className="space-y-4 md:space-y-6">
+            <SectionHeader
+                icon={Bell}
+                title="Notifikasi Telegram"
+                subtitle="Terima notifikasi real-time via Telegram Bot"
+                color="sky"
+            />
+
+            <ToggleCard
+                icon={MessageCircle}
+                label="Aktifkan Notifikasi Telegram"
+                description="Kirim notifikasi ke Telegram saat ada pesanan baru, pembayaran, pesan, dll"
+                active={settings.telegram_enabled === 'true'}
+                onToggle={() => handleChange('telegram_enabled', settings.telegram_enabled === 'true' ? 'false' : 'true')}
+                color="sky"
+            />
+
+            {settings.telegram_enabled === 'true' && (
+                <div className="space-y-4">
+                    <InputField
+                        label="Bot Token"
+                        icon={Code}
+                        value={settings.telegram_bot_token}
+                        onChange={(v) => handleChange('telegram_bot_token', v)}
+                        placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
+                        iconColor="text-sky-500"
+                    />
+                    <p className="text-xs text-gray-500 -mt-2 ml-1">
+                        Dapatkan dari @BotFather di Telegram
+                    </p>
+
+                    <InputField
+                        label="Chat ID"
+                        icon={Users}
+                        value={settings.telegram_chat_id}
+                        onChange={(v) => handleChange('telegram_chat_id', v)}
+                        placeholder="-1001234567890 atau 123456789"
+                        iconColor="text-sky-500"
+                    />
+                    <p className="text-xs text-gray-500 -mt-2 ml-1">
+                        Chat ID pribadi atau grup. Dapatkan dari @userinfobot
+                    </p>
+
+                    <ToggleCard
+                        icon={Bell}
+                        label="Notifikasi Keep-alive"
+                        description="Kirim notifikasi setiap kali cron keep-alive berjalan (setiap 3 hari)"
+                        active={settings.telegram_keepalive_notify === 'true'}
+                        onToggle={() => handleChange('telegram_keepalive_notify', settings.telegram_keepalive_notify === 'true' ? 'false' : 'true')}
+                        color="sky"
+                    />
+
+                    {/* Test Button */}
+                    <div className="pt-2">
+                        <button
+                            onClick={testTelegram}
+                            disabled={testing || !settings.telegram_bot_token || !settings.telegram_chat_id}
+                            className="w-full px-4 py-3 bg-sky-500 text-white rounded-xl font-medium hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                        >
+                            {testing ? (
+                                <>
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                    Mengirim...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="h-5 w-5" />
+                                    Test Kirim Notifikasi
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                    {testResult && (
+                        <div className={`p-4 rounded-xl border ${testResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                            <div className="flex items-center gap-2">
+                                {testResult.success ? (
+                                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                ) : (
+                                    <AlertCircle className="h-5 w-5 text-red-500" />
+                                )}
+                                <p className={`text-sm ${testResult.success ? 'text-green-700' : 'text-red-700'}`}>
+                                    {testResult.message}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Setup Guide */}
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <div className="flex items-start gap-3">
+                            <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                            <div className="text-sm text-blue-700">
+                                <p className="font-medium mb-2">Cara Setup Telegram Bot:</p>
+                                <ol className="list-decimal list-inside space-y-1.5 text-blue-600">
+                                    <li>Buka Telegram, cari <code className="bg-blue-100 px-1 rounded">@BotFather</code></li>
+                                    <li>Kirim <code className="bg-blue-100 px-1 rounded">/newbot</code> dan ikuti instruksi</li>
+                                    <li>Copy Bot Token yang diberikan</li>
+                                    <li>Cari <code className="bg-blue-100 px-1 rounded">@userinfobot</code> untuk mendapatkan Chat ID</li>
+                                    <li>Atau tambahkan bot ke grup dan gunakan Chat ID grup</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Notification Types */}
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                        <p className="font-medium text-gray-700 mb-2 flex items-center gap-2">
+                            <Bell className="h-4 w-4" />
+                            Notifikasi yang akan dikirim:
+                        </p>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                            <li>🛒 Pesanan baru</li>
+                            <li>✅ Pembayaran dikonfirmasi</li>
+                            <li>💬 Pesan masuk dari form kontak</li>
+                            <li>⭐ Feedback baru</li>
+                            <li>📋 Request template baru</li>
+                            <li>📱 Konfirmasi QRIS baru</li>
+                        </ul>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
@@ -1249,6 +1427,7 @@ function SectionHeader({ icon: Icon, title, subtitle, color }: { icon: React.Ele
         cyan: { bg: 'bg-cyan-100', text: 'text-cyan-600' },
         pink: { bg: 'bg-pink-100', text: 'text-pink-600' },
         yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+        sky: { bg: 'bg-sky-100', text: 'text-sky-600' },
     }
     const c = colors[color] || colors.orange
 
@@ -1326,6 +1505,7 @@ function ToggleCard({ icon: Icon, label, description, active, onToggle, color }:
         purple: { bg: 'bg-purple-50 border-purple-200', icon: 'text-purple-500' },
         green: { bg: 'bg-green-50 border-green-200', icon: 'text-green-500' },
         yellow: { bg: 'bg-yellow-50 border-yellow-200', icon: 'text-yellow-500' },
+        sky: { bg: 'bg-sky-50 border-sky-200', icon: 'text-sky-500' },
     }
     const c = colors[color] || colors.green
 

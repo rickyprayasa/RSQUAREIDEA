@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { isLocalhost } from '@/lib/isLocalhost'
+import { notifyQrisConfirmation } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
     try {
@@ -62,6 +63,14 @@ export async function POST(request: NextRequest) {
             message: `${data.customerName} mengirim bukti pembayaran Rp ${Number(data.amount).toLocaleString('id-ID')} untuk pesanan ${data.orderNumber}`,
             link: '/admin/orders?filter=pending_confirmation',
         })
+
+        // Send Telegram notification
+        notifyQrisConfirmation({
+            name: data.customerName,
+            email: data.customerEmail,
+            productTitle: data.orderNumber,
+            amount: data.amount,
+        }).catch(console.error)
 
         return NextResponse.json({ confirmation, success: true })
     } catch (error) {

@@ -1,0 +1,128 @@
+// Telegram Bot Notification Service
+
+interface TelegramConfig {
+    botToken: string
+    chatId: string
+}
+
+interface SendMessageOptions {
+    parseMode?: 'HTML' | 'Markdown' | 'MarkdownV2'
+    disableWebPagePreview?: boolean
+}
+
+export async function sendTelegramMessage(
+    config: TelegramConfig,
+    message: string,
+    options: SendMessageOptions = {}
+): Promise<{ success: boolean; error?: string }> {
+    if (!config.botToken || !config.chatId) {
+        return { success: false, error: 'Telegram not configured' }
+    }
+
+    try {
+        const url = `https://api.telegram.org/bot${config.botToken}/sendMessage`
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: config.chatId,
+                text: message,
+                parse_mode: options.parseMode || 'HTML',
+                disable_web_page_preview: options.disableWebPagePreview ?? true,
+            }),
+        })
+
+        const data = await response.json()
+        
+        if (!data.ok) {
+            return { success: false, error: data.description || 'Failed to send message' }
+        }
+
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+}
+
+// Notification message templates
+export const notificationTemplates = {
+    newOrder: (order: { id: number; customerName: string; email: string; productTitle: string; amount: number }) => `
+🛒 <b>Pesanan Baru!</b>
+
+📦 Produk: ${order.productTitle}
+👤 Nama: ${order.customerName}
+📧 Email: ${order.email}
+💰 Total: Rp ${order.amount.toLocaleString('id-ID')}
+
+🔗 <a href="https://rsquareidea.my.id/admin/orders">Lihat Detail</a>
+`,
+
+    paymentConfirmed: (payment: { orderId: number; customerName: string; amount: number; method: string }) => `
+✅ <b>Pembayaran Dikonfirmasi!</b>
+
+🧾 Order ID: #${payment.orderId}
+👤 Nama: ${payment.customerName}
+💰 Jumlah: Rp ${payment.amount.toLocaleString('id-ID')}
+💳 Metode: ${payment.method}
+
+🔗 <a href="https://rsquareidea.my.id/admin/payments">Lihat Detail</a>
+`,
+
+    newMessage: (msg: { name: string; email: string; subject: string; message: string }) => `
+💬 <b>Pesan Baru!</b>
+
+👤 Dari: ${msg.name}
+📧 Email: ${msg.email}
+📝 Subject: ${msg.subject}
+
+💭 Pesan:
+${msg.message.substring(0, 200)}${msg.message.length > 200 ? '...' : ''}
+
+🔗 <a href="https://rsquareidea.my.id/admin/messages">Lihat Detail</a>
+`,
+
+    newFeedback: (feedback: { name: string; email: string; rating: number; message: string; productTitle?: string }) => `
+⭐ <b>Feedback Baru!</b>
+
+👤 Dari: ${feedback.name}
+📧 Email: ${feedback.email}
+${feedback.productTitle ? `📦 Produk: ${feedback.productTitle}\n` : ''}⭐ Rating: ${'⭐'.repeat(feedback.rating)}
+
+💭 Feedback:
+${feedback.message.substring(0, 200)}${feedback.message.length > 200 ? '...' : ''}
+
+🔗 <a href="https://rsquareidea.my.id/admin/feedback">Lihat Detail</a>
+`,
+
+    newTemplateRequest: (request: { name: string; email: string; templateType: string; description: string }) => `
+📋 <b>Request Template Baru!</b>
+
+👤 Dari: ${request.name}
+📧 Email: ${request.email}
+📁 Tipe: ${request.templateType}
+
+📝 Deskripsi:
+${request.description.substring(0, 200)}${request.description.length > 200 ? '...' : ''}
+
+🔗 <a href="https://rsquareidea.my.id/admin/requests">Lihat Detail</a>
+`,
+
+    qrisConfirmation: (data: { name: string; email: string; productTitle: string; amount: number }) => `
+📱 <b>Konfirmasi QRIS Baru!</b>
+
+👤 Nama: ${data.name}
+📧 Email: ${data.email}
+📦 Produk: ${data.productTitle}
+💰 Jumlah: Rp ${data.amount.toLocaleString('id-ID')}
+
+🔗 <a href="https://rsquareidea.my.id/admin/qris">Lihat Detail</a>
+`,
+
+    keepAlive: () => `
+🤖 <b>Keep-alive Ping</b>
+
+Database tetap aktif! ✅
+Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}
+`,
+}

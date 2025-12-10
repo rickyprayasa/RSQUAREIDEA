@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { notifyNewMessage } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
     try {
@@ -31,6 +32,14 @@ export async function POST(request: NextRequest) {
             message: `${data.name} mengirim pesan: ${data.subject || 'Tanpa Subjek'}`,
             link: '/admin/messages',
         })
+
+        // Send Telegram notification
+        notifyNewMessage({
+            name: data.name,
+            email: data.email,
+            subject: data.subject || 'Tanpa Subjek',
+            message: data.message,
+        }).catch(console.error)
 
         return NextResponse.json({ message, success: true })
     } catch (error) {

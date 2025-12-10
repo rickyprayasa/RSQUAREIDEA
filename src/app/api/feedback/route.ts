@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import nodemailer from 'nodemailer'
+import { notifyNewFeedback } from '@/lib/notifications'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -256,6 +257,15 @@ export async function POST(request: NextRequest) {
         } catch {
             // Ignore notification errors
         }
+
+        // Send Telegram notification
+        notifyNewFeedback({
+            name: data.name || 'Anonymous',
+            email: data.email || '-',
+            rating: data.rating,
+            message: data.testimonialPermission ? (data.likes || data.improvements || '-') : '-',
+            productTitle: data.templateName,
+        }).catch(console.error)
 
         return NextResponse.json({ feedback, success: true, voucherSent, voucherDebug, isInvited })
     } catch (error) {

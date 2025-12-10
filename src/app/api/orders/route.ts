@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { isLocalhost } from '@/lib/isLocalhost'
+import { notifyNewOrder } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
     try {
@@ -66,6 +67,15 @@ export async function POST(request: NextRequest) {
                 console.error('Error creating order items:', itemsError)
             }
         }
+
+        // Send Telegram notification
+        notifyNewOrder({
+            id: order.id,
+            customerName: data.customerName,
+            email: data.customerEmail,
+            productTitle: data.items.map((i: { productTitle: string }) => i.productTitle).join(', '),
+            amount: data.totalAmount,
+        }).catch(console.error)
 
         // Update voucher usage count if voucher was used
         if (data.voucherCode) {
