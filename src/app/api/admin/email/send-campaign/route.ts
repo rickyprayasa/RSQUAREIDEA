@@ -126,20 +126,36 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Tidak ada pelanggan yang dipilih' }, { status: 400 })
         }
 
-        // Check SMTP configuration
-        const smtpHost = process.env.SMTP_HOST
-        const smtpPort = parseInt(process.env.SMTP_PORT || '465')
-        const smtpUser = process.env.SMTP_USER
-        const smtpPass = process.env.SMTP_PASS
-        const smtpFrom = process.env.SMTP_FROM || smtpUser
+        const supabase = await createClient()
+
+        // Fetch SMTP configuration from database (same as test-email)
+        const { data: settingsData } = await supabase
+            .from('site_settings')
+            .select('key, value')
+            .in('key', ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_password', 'smtp_from_name', 'smtp_from_email'])
+
+        if (!settingsData || settingsData.length === 0) {
+            return NextResponse.json({ error: 'Pengaturan email belum dikonfigurasi di Settings' }, { status: 500 })
+        }
+
+        const smtpSettings: Record<string, string> = {}
+        settingsData.forEach(s => {
+            if (s.value) smtpSettings[s.key] = s.value
+        })
+
+        const smtpHost = smtpSettings.smtp_host
+        const smtpPort = parseInt(smtpSettings.smtp_port || '465')
+        const smtpUser = smtpSettings.smtp_user
+        const smtpPass = smtpSettings.smtp_password
+        const smtpFromName = smtpSettings.smtp_from_name || 'RSQUARE'
+        const smtpFromEmail = smtpSettings.smtp_from_email || smtpUser
 
         if (!smtpHost || !smtpUser || !smtpPass) {
             return NextResponse.json({ 
-                error: 'Konfigurasi SMTP belum lengkap. Tambahkan SMTP_HOST, SMTP_USER, SMTP_PASS di .env.local' 
+                error: 'Konfigurasi SMTP belum lengkap. Isi SMTP Host, Username, dan Password di menu Pengaturan > Email' 
             }, { status: 500 })
         }
 
-        const supabase = await createClient()
         const feedbackUrl = process.env.NEXT_PUBLIC_SITE_URL 
             ? `${process.env.NEXT_PUBLIC_SITE_URL}/feedback` 
             : 'https://www.rsquareidea.my.id/feedback'
@@ -212,7 +228,7 @@ export async function POST(request: NextRequest) {
 
                 // Send email
                 await transporter.sendMail({
-                    from: smtpFrom,
+                    from: `"${smtpFromName}" <${smtpFromEmail}>`,
                     to: customer.email,
                     subject: subject,
                     text: textEmail,
