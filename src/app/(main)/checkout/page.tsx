@@ -24,7 +24,10 @@ import {
     AlertCircle,
     X,
     Ticket,
-    Tag
+    Tag,
+    ChevronDown,
+    Zap,
+    FileText
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -71,6 +74,7 @@ export default function CheckoutPage() {
     const [errorDialog, setErrorDialog] = useState({ isOpen: false, title: '', message: '' })
     const [duitkuEnabled, setDuitkuEnabled] = useState(false)
     const [duitkuLoading, setDuitkuLoading] = useState(false)
+    const [expandedSection, setExpandedSection] = useState<'auto' | 'manual' | null>('auto')
 
     const [formData, setFormData] = useState({
         name: '',
@@ -892,8 +896,8 @@ export default function CheckoutPage() {
                     {/* Step 2: Payment */}
                     {step === 2 && (
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6">
-                                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200 mb-6">
+                                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                     <CreditCard className="h-5 w-5 text-orange-500" /> Pilih Metode Pembayaran
                                 </h2>
 
@@ -904,53 +908,131 @@ export default function CheckoutPage() {
                                         <p className="text-sm text-gray-400 mt-1">Silakan hubungi admin</p>
                                     </div>
                                 ) : (
-                                    <div className="grid gap-3">
-                                        {paymentMethods.map((method) => (
-                                            <button
-                                                key={method.id}
-                                                onClick={() => setSelectedPayment(method)}
-                                                className={`flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${selectedPayment?.id === method.id
-                                                    ? 'border-orange-500 bg-orange-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
-                                                    }`}
-                                            >
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden ${selectedPayment?.id === method.id ? 'bg-orange-500' : 'bg-gray-100'
-                                                    }`}>
-                                                    {method.type === 'duitku' && method.duitkuImage ? (
-                                                        <img src={method.duitkuImage} alt={method.name} className="w-10 h-10 object-contain" />
-                                                    ) : method.type === 'external' ? (
-                                                        <CreditCard className={`h-6 w-6 ${selectedPayment?.id === method.id ? 'text-white' : 'text-gray-500'}`} />
-                                                    ) : method.qrCodeImage ? (
-                                                        <QrCode className={`h-6 w-6 ${selectedPayment?.id === method.id ? 'text-white' : 'text-gray-500'}`} />
-                                                    ) : (
-                                                        <Building2 className={`h-6 w-6 ${selectedPayment?.id === method.id ? 'text-white' : 'text-gray-500'}`} />
-                                                    )}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-semibold text-gray-900">{method.name}</p>
-                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                                            method.type === 'duitku'
-                                                                ? 'bg-emerald-100 text-emerald-700'
-                                                                : method.type === 'external'
-                                                                    ? 'bg-purple-100 text-purple-700'
-                                                                    : 'bg-blue-100 text-blue-700'
-                                                            }`}>
-                                                            {method.type === 'duitku' ? 'Otomatis' : method.type === 'external' ? 'External' : 'Transfer'}
-                                                        </span>
+                                    <div className="space-y-3">
+                                        {/* Automatic Payments Section */}
+                                        {paymentMethods.some(m => m.type === 'duitku') && (
+                                            <div className="border border-emerald-200 rounded-xl overflow-hidden">
+                                                <button
+                                                    onClick={() => setExpandedSection(expandedSection === 'auto' ? null : 'auto')}
+                                                    className="w-full flex items-center justify-between p-3 md:p-4 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-emerald-500 rounded-lg">
+                                                            <Zap className="h-4 w-4 text-white" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="font-semibold text-emerald-800">Pembayaran Otomatis</p>
+                                                            <p className="text-xs text-emerald-600">Verifikasi instan, tanpa upload bukti</p>
+                                                        </div>
                                                     </div>
-                                                    {method.bankName && <p className="text-sm text-gray-500">{method.bankName}</p>}
-                                                    {method.type === 'duitku' && method.duitkuFee && parseInt(method.duitkuFee) > 0 && (
-                                                        <p className="text-sm text-gray-500">Fee: Rp {parseInt(method.duitkuFee).toLocaleString('id-ID')}</p>
+                                                    <ChevronDown className={`h-5 w-5 text-emerald-600 transition-transform ${expandedSection === 'auto' ? 'rotate-180' : ''}`} />
+                                                </button>
+                                                <AnimatePresence>
+                                                    {expandedSection === 'auto' && (
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            transition={{ duration: 0.2 }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <div className="p-3 md:p-4 bg-white grid gap-2">
+                                                                {paymentMethods.filter(m => m.type === 'duitku').map((method) => (
+                                                                    <button
+                                                                        key={method.id}
+                                                                        onClick={() => setSelectedPayment(method)}
+                                                                        className={`flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-all ${selectedPayment?.id === method.id
+                                                                            ? 'border-emerald-500 bg-emerald-50'
+                                                                            : 'border-gray-100 hover:border-emerald-200 hover:bg-gray-50'
+                                                                            }`}
+                                                                    >
+                                                                        <div className="w-10 h-10 rounded-lg bg-white border border-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                                            {method.duitkuImage ? (
+                                                                                <img src={method.duitkuImage} alt={method.name} className="w-8 h-8 object-contain" />
+                                                                            ) : (
+                                                                                <CreditCard className="h-5 w-5 text-gray-400" />
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <p className="font-medium text-gray-900 text-sm truncate">{method.name}</p>
+                                                                            {method.duitkuFee && parseInt(method.duitkuFee) > 0 && (
+                                                                                <p className="text-xs text-gray-500">+Rp {parseInt(method.duitkuFee).toLocaleString('id-ID')}</p>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedPayment?.id === method.id ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'}`}>
+                                                                            {selectedPayment?.id === method.id && <Check className="h-3 w-3 text-white" />}
+                                                                        </div>
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </motion.div>
                                                     )}
-                                                    {method.type === 'external' && <p className="text-sm text-gray-500">Redirect ke halaman pembayaran</p>}
-                                                </div>
-                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedPayment?.id === method.id ? 'border-orange-500 bg-orange-500' : 'border-gray-300'
-                                                    }`}>
-                                                    {selectedPayment?.id === method.id && <Check className="h-4 w-4 text-white" />}
-                                                </div>
-                                            </button>
-                                        ))}
+                                                </AnimatePresence>
+                                            </div>
+                                        )}
+
+                                        {/* Manual Payments Section */}
+                                        {paymentMethods.some(m => m.type !== 'duitku') && (
+                                            <div className="border border-blue-200 rounded-xl overflow-hidden">
+                                                <button
+                                                    onClick={() => setExpandedSection(expandedSection === 'manual' ? null : 'manual')}
+                                                    className="w-full flex items-center justify-between p-3 md:p-4 bg-blue-50 hover:bg-blue-100 transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-blue-500 rounded-lg">
+                                                            <FileText className="h-4 w-4 text-white" />
+                                                        </div>
+                                                        <div className="text-left">
+                                                            <p className="font-semibold text-blue-800">Pembayaran Manual</p>
+                                                            <p className="text-xs text-blue-600">Transfer bank, perlu konfirmasi admin</p>
+                                                        </div>
+                                                    </div>
+                                                    <ChevronDown className={`h-5 w-5 text-blue-600 transition-transform ${expandedSection === 'manual' ? 'rotate-180' : ''}`} />
+                                                </button>
+                                                <AnimatePresence>
+                                                    {expandedSection === 'manual' && (
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            transition={{ duration: 0.2 }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <div className="p-3 md:p-4 bg-white grid gap-2">
+                                                                {paymentMethods.filter(m => m.type !== 'duitku').map((method) => (
+                                                                    <button
+                                                                        key={method.id}
+                                                                        onClick={() => setSelectedPayment(method)}
+                                                                        className={`flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-all ${selectedPayment?.id === method.id
+                                                                            ? 'border-blue-500 bg-blue-50'
+                                                                            : 'border-gray-100 hover:border-blue-200 hover:bg-gray-50'
+                                                                            }`}
+                                                                    >
+                                                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${selectedPayment?.id === method.id ? 'bg-blue-500' : 'bg-gray-100'}`}>
+                                                                            {method.qrCodeImage ? (
+                                                                                <QrCode className={`h-5 w-5 ${selectedPayment?.id === method.id ? 'text-white' : 'text-gray-500'}`} />
+                                                                            ) : method.type === 'external' ? (
+                                                                                <CreditCard className={`h-5 w-5 ${selectedPayment?.id === method.id ? 'text-white' : 'text-gray-500'}`} />
+                                                                            ) : (
+                                                                                <Building2 className={`h-5 w-5 ${selectedPayment?.id === method.id ? 'text-white' : 'text-gray-500'}`} />
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <p className="font-medium text-gray-900 text-sm truncate">{method.name}</p>
+                                                                            {method.bankName && <p className="text-xs text-gray-500">{method.bankName}</p>}
+                                                                            {method.type === 'external' && <p className="text-xs text-gray-500">Link eksternal</p>}
+                                                                        </div>
+                                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedPayment?.id === method.id ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`}>
+                                                                            {selectedPayment?.id === method.id && <Check className="h-3 w-3 text-white" />}
+                                                                        </div>
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
