@@ -5,11 +5,50 @@ import { sendTelegramMessage } from '@/lib/telegram'
 // Internal API to send Telegram notifications
 // Called by other API routes when events occur
 
+interface DuitkuPaymentData {
+    orderId: string
+    customerName: string
+    customerEmail: string
+    amount: number
+    productTitle: string
+    paymentMethod: string
+    downloadLinks: number
+}
+
+function formatDuitkuPaymentMessage(data: DuitkuPaymentData): string {
+    return `💳 *PEMBAYARAN OTOMATIS BERHASIL*
+
+📦 Order: \`${data.orderId}\`
+👤 Customer: ${data.customerName}
+📧 Email: ${data.customerEmail}
+💰 Amount: Rp ${data.amount.toLocaleString('id-ID')}
+🛍️ Product: ${data.productTitle}
+💳 Method: ${data.paymentMethod}
+
+✅ *Status: SELESAI OTOMATIS*
+📧 Email dengan link download sudah dikirim (${data.downloadLinks} file)
+
+_Tidak perlu konfirmasi manual_`
+}
+
 export async function POST(request: NextRequest) {
     try {
-        const { message, type } = await request.json()
+        const body = await request.json()
+        const { message, type, data } = body
 
-        if (!message) {
+        // Generate message based on type if not provided directly
+        let finalMessage = message
+        if (!finalMessage && type && data) {
+            switch (type) {
+                case 'duitku_payment':
+                    finalMessage = formatDuitkuPaymentMessage(data as DuitkuPaymentData)
+                    break
+                default:
+                    return NextResponse.json({ error: 'Unknown notification type' }, { status: 400 })
+            }
+        }
+
+        if (!finalMessage) {
             return NextResponse.json({ error: 'Message is required' }, { status: 400 })
         }
 
@@ -34,7 +73,7 @@ export async function POST(request: NextRequest) {
                 botToken: config.telegram_bot_token,
                 chatId: config.telegram_chat_id,
             },
-            message
+            finalMessage
         )
 
         if (!result.success) {

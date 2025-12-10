@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyCallback } from '@/lib/duitku'
-import { notifyPaymentConfirmed } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,6 +12,7 @@ export async function POST(request: NextRequest) {
         const signature = formData.get('signature') as string
         const resultCode = formData.get('resultCode') as string
         const reference = formData.get('reference') as string
+        const paymentCode = formData.get('paymentCode') as string
 
         console.log('Duitku Callback received:', {
             merchantCode,
@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
             merchantOrderId,
             resultCode,
             reference,
+            paymentCode,
         })
 
         if (!merchantCode || !amount || !merchantOrderId || !signature) {
@@ -62,35 +63,79 @@ export async function POST(request: NextRequest) {
 
         const { data: order, error: updateError } = await supabase
             .from('orders')
-            .update({
-                status: newStatus,
-                notes: supabase.rpc('jsonb_set_value', {
-                    target: 'notes',
-                    path: '{duitku_result_code}',
-                    value: resultCode,
-                }),
-            })
+            .update({ status: newStatus })
             .eq('order_number', merchantOrderId)
-            .select('id, customer_name, customer_email, amount, product_title')
+            .select('id, customer_name, customer_email, amount, product_title, payment_method')
             .single()
 
         if (updateError) {
-            // Try simple update without jsonb
-            await supabase
-                .from('orders')
-                .update({ status: newStatus })
-                .eq('order_number', merchantOrderId)
+            console.error('Error updating order:', updateError)
         }
 
-        // If payment successful, send notification and update customer
+        // If payment successful, send email, notification and update customer
         if (resultCode === '00' && order) {
-            // Send Telegram notification
-            notifyPaymentConfirmed({
-                orderId: order.id,
-                customerName: order.customer_name,
-                amount: order.amount,
-                method: 'Duitku',
-            }).catch(console.error)
+            // Get download links from order_items
+            const downloadLinks: { title: string; url: string }[] = []
+            
+            const { data: orderItems } = await supabase
+                .from('order_items')
+                .select('product_id, product_title, products(download_url, title)')
+                .eq('order_id', order.id)
+
+            if (orderItems && orderItems.length > 0) {
+                for (const item of orderItems) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const product = item.products as any
+                    if (product?.download_url) {
+                        downloadLinks.push({
+                            title: item.product_title || product.title || 'Template',
+                            url: product.download_url
+                        })
+                    }
+                }
+            }
+
+            // Send email with download links
+            try {
+                const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://rsquareidea.my.id'
+                await fetch(`${baseUrl}/api/send-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: order.customer_email,
+                        customerName: order.customer_name,
+                        orderNumber: merchantOrderId,
+                        totalAmount: order.amount,
+                        downloadLinks,
+                    }),
+                })
+                console.log('Email sent successfully to:', order.customer_email)
+            } catch (emailError) {
+                console.error('Error sending email:', emailError)
+            }
+
+            // Send Telegram notification for automatic payment
+            try {
+                const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://rsquareidea.my.id'
+                await fetch(`${baseUrl}/api/notify/telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'duitku_payment',
+                        data: {
+                            orderId: merchantOrderId,
+                            customerName: order.customer_name,
+                            customerEmail: order.customer_email,
+                            amount: order.amount,
+                            productTitle: order.product_title,
+                            paymentMethod: order.payment_method || paymentCode,
+                            downloadLinks: downloadLinks.length,
+                        }
+                    }),
+                })
+            } catch (notifyError) {
+                console.error('Error sending Telegram notification:', notifyError)
+            }
 
             // Update or create customer record
             const { data: existingCustomer } = await supabase
@@ -116,7 +161,7 @@ export async function POST(request: NextRequest) {
                         email: order.customer_email,
                         total_orders: 1,
                         total_spent: order.amount,
-                        source: 'website',
+                        source: 'duitku',
                         last_order_at: new Date().toISOString(),
                     })
             }
@@ -124,8 +169,8 @@ export async function POST(request: NextRequest) {
             // Create notification for admin
             await supabase.from('notifications').insert({
                 type: 'payment',
-                title: 'Pembayaran Duitku Berhasil',
-                message: `${order.customer_name} - ${order.product_title} - Rp ${order.amount.toLocaleString('id-ID')}`,
+                title: '💳 Pembayaran Otomatis Berhasil',
+                message: `${order.customer_name} - ${order.product_title} - Rp ${order.amount.toLocaleString('id-ID')} (Email & Download otomatis terkirim)`,
                 link: '/admin/orders',
             })
         }
