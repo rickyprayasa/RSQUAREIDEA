@@ -82,6 +82,11 @@ interface SettingsData {
     telegram_bot_token: string
     telegram_chat_id: string
     telegram_keepalive_notify: string
+    // Duitku payment gateway settings
+    duitku_enabled: string
+    duitku_merchant_code: string
+    duitku_api_key: string
+    duitku_production: string
 }
 
 const defaultSettings: SettingsData = {
@@ -143,6 +148,11 @@ Tim RSQUARE`,
     telegram_bot_token: '',
     telegram_chat_id: '',
     telegram_keepalive_notify: 'false',
+    // Duitku payment gateway settings
+    duitku_enabled: 'false',
+    duitku_merchant_code: '',
+    duitku_api_key: '',
+    duitku_production: 'false',
 }
 
 const tabs = [
@@ -154,6 +164,7 @@ const tabs = [
     { id: 'tracking', label: 'Tracking', icon: BarChart3, color: 'cyan' },
     { id: 'saweria', label: 'Saweria', icon: Coffee, color: 'yellow' },
     { id: 'telegram', label: 'Telegram', icon: Bell, color: 'sky' },
+    { id: 'duitku', label: 'Duitku', icon: CreditCard, color: 'emerald' },
 ]
 
 export default function SettingsPage() {
@@ -1256,6 +1267,13 @@ export default function SettingsPage() {
                         handleChange={handleChange}
                     />
                 )}
+                {/* Duitku Tab */}
+                {activeTab === 'duitku' && (
+                    <DuitkuSettings 
+                        settings={settings} 
+                        handleChange={handleChange}
+                    />
+                )}
             </motion.div>
         </div>
     )
@@ -1418,6 +1436,171 @@ function TelegramSettings({ settings, handleChange }: { settings: SettingsData, 
     )
 }
 
+function DuitkuSettings({ settings, handleChange }: { settings: SettingsData, handleChange: (key: keyof SettingsData, value: string) => void }) {
+    const [testing, setTesting] = useState(false)
+    const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
+
+    const testDuitku = async () => {
+        setTesting(true)
+        setTestResult(null)
+        try {
+            const response = await fetch('/api/duitku/payment-methods', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: 50000 }),
+            })
+            const data = await response.json()
+            if (data.paymentMethods) {
+                setTestResult({ 
+                    success: true, 
+                    message: `Berhasil! ${data.paymentMethods.length} metode pembayaran tersedia.` 
+                })
+            } else {
+                setTestResult({ success: false, message: data.error || 'Gagal mengambil metode pembayaran' })
+            }
+        } catch (error) {
+            setTestResult({ success: false, message: 'Error: ' + (error instanceof Error ? error.message : 'Unknown error') })
+        } finally {
+            setTesting(false)
+        }
+    }
+
+    return (
+        <div className="space-y-4 md:space-y-6">
+            <SectionHeader
+                icon={CreditCard}
+                title="Duitku Payment Gateway"
+                subtitle="Terima pembayaran otomatis via VA, QRIS, E-wallet"
+                color="emerald"
+            />
+
+            <ToggleCard
+                icon={CreditCard}
+                label="Aktifkan Duitku"
+                description="Gunakan Duitku sebagai payment gateway untuk menerima pembayaran otomatis"
+                active={settings.duitku_enabled === 'true'}
+                onToggle={() => handleChange('duitku_enabled', settings.duitku_enabled === 'true' ? 'false' : 'true')}
+                color="emerald"
+            />
+
+            {settings.duitku_enabled === 'true' && (
+                <div className="space-y-4">
+                    <InputField
+                        label="Merchant Code"
+                        icon={Code}
+                        value={settings.duitku_merchant_code}
+                        onChange={(v) => handleChange('duitku_merchant_code', v)}
+                        placeholder="DXXXXX"
+                        iconColor="text-emerald-500"
+                    />
+                    <p className="text-xs text-gray-500 -mt-2 ml-1">
+                        Dapatkan dari dashboard Duitku → Project
+                    </p>
+
+                    <InputField
+                        label="API Key"
+                        icon={Code}
+                        value={settings.duitku_api_key}
+                        onChange={(v) => handleChange('duitku_api_key', v)}
+                        placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        iconColor="text-emerald-500"
+                    />
+                    <p className="text-xs text-gray-500 -mt-2 ml-1">
+                        API Key dari dashboard Duitku → Project → API Key
+                    </p>
+
+                    <ToggleCard
+                        icon={ShoppingCart}
+                        label="Mode Production"
+                        description="Aktifkan untuk menerima pembayaran real. Nonaktifkan untuk testing (Sandbox)"
+                        active={settings.duitku_production === 'true'}
+                        onToggle={() => handleChange('duitku_production', settings.duitku_production === 'true' ? 'false' : 'true')}
+                        color="emerald"
+                    />
+
+                    {/* Test Button */}
+                    <div className="pt-2">
+                        <button
+                            onClick={testDuitku}
+                            disabled={testing || !settings.duitku_merchant_code || !settings.duitku_api_key}
+                            className="w-full px-4 py-3 bg-emerald-500 text-white rounded-xl font-medium hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                        >
+                            {testing ? (
+                                <>
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                    Testing...
+                                </>
+                            ) : (
+                                <>
+                                    <CreditCard className="h-5 w-5" />
+                                    Test Koneksi Duitku
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                    {testResult && (
+                        <div className={`p-4 rounded-xl border ${testResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                            <div className="flex items-center gap-2">
+                                {testResult.success ? (
+                                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                ) : (
+                                    <AlertCircle className="h-5 w-5 text-red-500" />
+                                )}
+                                <p className={`text-sm ${testResult.success ? 'text-green-700' : 'text-red-700'}`}>
+                                    {testResult.message}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Supported Payment Methods */}
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                        <p className="font-medium text-gray-700 mb-2 flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            Metode Pembayaran yang Didukung:
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                            <div>
+                                <p className="font-medium text-gray-700">Virtual Account:</p>
+                                <ul className="text-xs space-y-0.5">
+                                    <li>• BCA, Mandiri, BNI, BRI</li>
+                                    <li>• Permata, CIMB, BSI</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p className="font-medium text-gray-700">E-Wallet & QRIS:</p>
+                                <ul className="text-xs space-y-0.5">
+                                    <li>• OVO, GoPay, DANA</li>
+                                    <li>• ShopeePay, LinkAja</li>
+                                    <li>• QRIS (semua bank)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Setup Guide */}
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <div className="flex items-start gap-3">
+                            <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                            <div className="text-sm text-blue-700">
+                                <p className="font-medium mb-2">Cara Setup Duitku:</p>
+                                <ol className="list-decimal list-inside space-y-1.5 text-blue-600">
+                                    <li>Daftar di <a href="https://passport.duitku.com/merchant" target="_blank" rel="noopener noreferrer" className="underline">duitku.com</a></li>
+                                    <li>Buat Project baru di dashboard</li>
+                                    <li>Copy Merchant Code dan API Key</li>
+                                    <li>Set Callback URL: <code className="bg-blue-100 px-1 rounded text-xs">https://rsquareidea.my.id/api/duitku/callback</code></li>
+                                    <li>Test di mode Sandbox dulu sebelum Production</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
 function SectionHeader({ icon: Icon, title, subtitle, color }: { icon: React.ElementType, title: string, subtitle: string, color: string }) {
     const colors: Record<string, { bg: string, text: string }> = {
         orange: { bg: 'bg-orange-100', text: 'text-orange-600' },
@@ -1428,6 +1611,7 @@ function SectionHeader({ icon: Icon, title, subtitle, color }: { icon: React.Ele
         pink: { bg: 'bg-pink-100', text: 'text-pink-600' },
         yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
         sky: { bg: 'bg-sky-100', text: 'text-sky-600' },
+        emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600' },
     }
     const c = colors[color] || colors.orange
 
@@ -1506,6 +1690,7 @@ function ToggleCard({ icon: Icon, label, description, active, onToggle, color }:
         green: { bg: 'bg-green-50 border-green-200', icon: 'text-green-500' },
         yellow: { bg: 'bg-yellow-50 border-yellow-200', icon: 'text-yellow-500' },
         sky: { bg: 'bg-sky-50 border-sky-200', icon: 'text-sky-500' },
+        emerald: { bg: 'bg-emerald-50 border-emerald-200', icon: 'text-emerald-500' },
     }
     const c = colors[color] || colors.green
 
