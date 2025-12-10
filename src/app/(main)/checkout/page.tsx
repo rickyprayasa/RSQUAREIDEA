@@ -940,7 +940,7 @@ export default function CheckoutPage() {
                                                                 {paymentMethods.filter(m => m.type === 'duitku').map((method) => (
                                                                     <button
                                                                         key={method.id}
-                                                                        onClick={() => setSelectedPayment(method)}
+                                                                        onClick={() => setSelectedPayment(selectedPayment?.id === method.id ? null : method)}
                                                                         className={`flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-all ${selectedPayment?.id === method.id
                                                                             ? 'border-emerald-500 bg-emerald-50'
                                                                             : 'border-gray-100 hover:border-emerald-200 hover:bg-gray-50'
@@ -955,9 +955,11 @@ export default function CheckoutPage() {
                                                                         </div>
                                                                         <div className="flex-1 min-w-0">
                                                                             <p className="font-medium text-gray-900 text-sm truncate">{method.name}</p>
-                                                                            {method.duitkuFee && parseInt(method.duitkuFee) > 0 && (
-                                                                                <p className="text-xs text-gray-500">+Rp {parseInt(method.duitkuFee).toLocaleString('id-ID')}</p>
-                                                                            )}
+                                                                            <p className="text-xs text-gray-500">
+                                                                                {method.duitkuFee && parseInt(method.duitkuFee) > 0 
+                                                                                    ? `Admin: Rp ${parseInt(method.duitkuFee).toLocaleString('id-ID')}` 
+                                                                                    : 'Admin: Gratis'}
+                                                                            </p>
                                                                         </div>
                                                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedPayment?.id === method.id ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'}`}>
                                                                             {selectedPayment?.id === method.id && <Check className="h-3 w-3 text-white" />}
@@ -1002,7 +1004,7 @@ export default function CheckoutPage() {
                                                                 {paymentMethods.filter(m => m.type !== 'duitku').map((method) => (
                                                                     <button
                                                                         key={method.id}
-                                                                        onClick={() => setSelectedPayment(method)}
+                                                                        onClick={() => setSelectedPayment(selectedPayment?.id === method.id ? null : method)}
                                                                         className={`flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-all ${selectedPayment?.id === method.id
                                                                             ? 'border-blue-500 bg-blue-50'
                                                                             : 'border-gray-100 hover:border-blue-200 hover:bg-gray-50'
@@ -1019,8 +1021,9 @@ export default function CheckoutPage() {
                                                                         </div>
                                                                         <div className="flex-1 min-w-0">
                                                                             <p className="font-medium text-gray-900 text-sm truncate">{method.name}</p>
-                                                                            {method.bankName && <p className="text-xs text-gray-500">{method.bankName}</p>}
-                                                                            {method.type === 'external' && <p className="text-xs text-gray-500">Link eksternal</p>}
+                                                                            <p className="text-xs text-gray-500">
+                                                                                {method.bankName || (method.type === 'external' ? 'Link eksternal' : '')} • Admin: Gratis
+                                                                            </p>
                                                                         </div>
                                                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedPayment?.id === method.id ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`}>
                                                                             {selectedPayment?.id === method.id && <Check className="h-3 w-3 text-white" />}
