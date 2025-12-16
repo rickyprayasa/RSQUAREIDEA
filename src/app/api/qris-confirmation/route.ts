@@ -1,24 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { isLocalhost } from '@/lib/isLocalhost'
-import { notifyQrisConfirmation } from '@/lib/notifications'
+import { sendTelegramMessage, notificationTemplates } from '@/lib/telegram'
 
 export async function POST(request: NextRequest) {
     try {
         const data = await request.json()
-        
-        // Check if running on localhost - don't save to database
-        const localhost = await isLocalhost()
-        if (localhost) {
-            console.log('[LOCALHOST] QRIS confirmation skipped - test mode')
-            return NextResponse.json({ 
-                confirmation: { id: 'test-' + Date.now(), status: 'pending' }, 
-                success: true, 
-                testMode: true 
-            })
-        }
-
-        const supabase = await createClient()
+        const supabase = createClient()
 
         // Find order_id from orders table if not provided
         let orderId = data.orderId || null
@@ -61,16 +48,25 @@ export async function POST(request: NextRequest) {
             type: 'payment',
             title: 'Konfirmasi Pembayaran Baru',
             message: `${data.customerName} mengirim bukti pembayaran Rp ${Number(data.amount).toLocaleString('id-ID')} untuk pesanan ${data.orderNumber}`,
-            link: '/admin/orders?filter=pending_confirmation',
+            link: '/admin/qris',
         })
 
-        // Send Telegram notification
-        notifyQrisConfirmation({
-            name: data.customerName,
+        // Send Telegram notification with accept/reject buttons
+        const telegramConfig = {
+            botToken: process.env.TELEGRAM_BOT_TOKEN!,
+            chatId: process.env.TELEGRAM_CHAT_ID!,
+        }
+
+        const { message, replyMarkup } = notificationTemplates.manualConfirmation({
+            id: confirmation.id,
+            customerName: data.customerName,
             email: data.customerEmail,
             productTitle: data.orderNumber,
             amount: data.amount,
-        }).catch(console.error)
+            imageUrl: data.proofImage // Assuming data.proofImage is the full public URL
+        });
+
+        await sendTelegramMessage(telegramConfig, message, { replyMarkup, parseMode: 'HTML', disableWebPagePreview: false });
 
         return NextResponse.json({ confirmation, success: true })
     } catch (error) {

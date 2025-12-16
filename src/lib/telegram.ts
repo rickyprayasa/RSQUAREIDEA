@@ -5,9 +5,19 @@ interface TelegramConfig {
     chatId: string
 }
 
+interface InlineKeyboardButton {
+    text: string
+    callback_data: string
+}
+
+interface InlineKeyboardMarkup {
+    inline_keyboard: InlineKeyboardButton[][]
+}
+
 interface SendMessageOptions {
     parseMode?: 'HTML' | 'Markdown' | 'MarkdownV2'
     disableWebPagePreview?: boolean
+    replyMarkup?: InlineKeyboardMarkup
 }
 
 export async function sendTelegramMessage(
@@ -22,15 +32,21 @@ export async function sendTelegramMessage(
     try {
         const url = `https://api.telegram.org/bot${config.botToken}/sendMessage`
         
+        const body: any = {
+            chat_id: config.chatId,
+            text: message,
+            parse_mode: options.parseMode || 'HTML',
+            disable_web_page_preview: options.disableWebPagePreview ?? false, // Set to false to allow image previews
+        }
+
+        if (options.replyMarkup) {
+            body.reply_markup = options.replyMarkup
+        }
+
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: config.chatId,
-                text: message,
-                parse_mode: options.parseMode || 'HTML',
-                disable_web_page_preview: options.disableWebPagePreview ?? true,
-            }),
+            body: JSON.stringify(body),
         })
 
         const data = await response.json()
@@ -57,6 +73,39 @@ export const notificationTemplates = {
 
 🔗 <a href="https://rsquareidea.my.id/admin/orders">Lihat Detail</a>
 `,
+
+    manualConfirmation: (order: { id: number; customerName: string; email: string; productTitle: string; amount: number; imageUrl?: string }) => {
+        let message = `
+🔽 <b>KONFIRMASI MANUAL DIBUTUHKAN</b> 🔽
+-----------------------------------------
+🛒 <b>Pesanan Baru!</b>
+
+📦 Produk: ${order.productTitle}
+👤 Nama: ${order.customerName}
+📧 Email: ${order.email}
+💰 Total: Rp ${order.amount.toLocaleString('id-ID')}
+`
+        if (order.imageUrl) {
+            message += `
+
+📄 <a href="${order.imageUrl}">LIHAT BUKTI PEMBAYARAN</a>
+`
+        }
+
+        message += `
+-----------------------------------------
+Mohon untuk segera dikonfirmasi.`
+
+        const replyMarkup: InlineKeyboardMarkup = {
+            inline_keyboard: [
+                [
+                    { text: '✅ Terima', callback_data: `{'''action''': '''accept_order''', '''order_id''': ${order.id}}` },
+                    { text: '❌ Tolak', callback_data: `{'''action''': '''reject_order''', '''order_id''': ${order.id}}` }
+                ]
+            ]
+        }
+        return { message, replyMarkup }
+    },
 
     paymentConfirmed: (payment: { orderId: number; customerName: string; amount: number; method: string }) => `
 ✅ <b>Pembayaran Dikonfirmasi!</b>
