@@ -1,11 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { sendTelegramMessage, notificationTemplates } from '@/lib/telegram'
+import { isLocalhost } from '@/lib/isLocalhost'
+import { notifyQrisConfirmation } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
     try {
         const data = await request.json()
-        const supabase = createClient()
+        
+        // Check if running on localhost
+        const localhost = await isLocalhost()
+        if (localhost) {
+            console.log('[LOCALHOST] QRIS confirmation - test mode (Telegram notification will be sent)')
+            // Still send Telegram notification for testing
+            const testConfirmationId = Date.now()
+            notifyQrisConfirmation({
+                name: data.customerName,
+                email: data.customerEmail,
+                productTitle: data.orderNumber,
+                amount: data.amount,
+                confirmationId: testConfirmationId,
+                proofImage: data.proofImage,
+            }).catch(console.error)
+            
+            return NextResponse.json({ 
+                confirmation: { id: testConfirmationId, status: 'pending' }, 
+                success: true, 
+                testMode: true 
+            })
+        }
+
+        const supabase = await createClient()
 
         // Find order_id from orders table if not provided
         let orderId = data.orderId || null
@@ -48,25 +72,18 @@ export async function POST(request: NextRequest) {
             type: 'payment',
             title: 'Konfirmasi Pembayaran Baru',
             message: `${data.customerName} mengirim bukti pembayaran Rp ${Number(data.amount).toLocaleString('id-ID')} untuk pesanan ${data.orderNumber}`,
-            link: '/admin/qris',
+            link: '/admin/orders?filter=pending_confirmation',
         })
 
-        // Send Telegram notification with accept/reject buttons
-        const telegramConfig = {
-            botToken: process.env.TELEGRAM_BOT_TOKEN!,
-            chatId: process.env.TELEGRAM_CHAT_ID!,
-        }
-
-        const { message, replyMarkup } = notificationTemplates.manualConfirmation({
-            id: confirmation.id,
-            customerName: data.customerName,
+        // Send Telegram notification with proof image and inline buttons
+        notifyQrisConfirmation({
+            name: data.customerName,
             email: data.customerEmail,
             productTitle: data.orderNumber,
             amount: data.amount,
-            imageUrl: data.proofImage // Assuming data.proofImage is the full public URL
-        });
-
-        await sendTelegramMessage(telegramConfig, message, { replyMarkup, parseMode: 'HTML', disableWebPagePreview: false });
+            confirmationId: confirmation.id,
+            proofImage: data.proofImage,
+        }).catch(console.error)
 
         return NextResponse.json({ confirmation, success: true })
     } catch (error) {

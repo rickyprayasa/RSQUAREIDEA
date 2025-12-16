@@ -217,6 +217,25 @@ export function Footer() {
                                                 </span>
                                             </a>
                                         </li>
+                                        <li>
+                                            <a
+                                                href="https://wa.me/6285794047694"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="group text-gray-400 hover:text-orange-400 transition-colors duration-200 flex items-start gap-1.5 md:gap-2"
+                                            >
+                                                <ClientLordIcon
+                                                    src="https://cdn.lordicon.com/axewyqun.json"
+                                                    trigger="hover"
+                                                    colors="primary:#fb923c,secondary:#fbbf24"
+                                                    style={{ width: '16px', height: '16px', marginTop: '2px', flexShrink: 0 }}
+                                                />
+                                                <span className="relative text-xs md:text-sm">
+                                                    +62 857-9404-7694
+                                                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-full" />
+                                                </span>
+                                            </a>
+                                        </li>
                                         <li className="flex items-start gap-1.5 md:gap-2 text-gray-400">
                                             <ClientLordIcon
                                                 src="https://cdn.lordicon.com/surcxhka.json"
@@ -225,7 +244,10 @@ export function Footer() {
                                                 colors="primary:#fb923c,secondary:#fbbf24"
                                                 style={{ width: '16px', height: '16px', marginTop: '2px', flexShrink: 0 }}
                                             />
-                                            <span className="text-xs md:text-sm">Indonesia</span>
+                                            <span className="text-xs md:text-sm leading-relaxed">
+                                                Bumi Arum Regency Blok Akasia no.21,<br />
+                                                Kec. Rancaekek, Kab. Bandung
+                                            </span>
                                         </li>
                                     </ul>
 

@@ -20,6 +20,17 @@ interface SendMessageOptions {
     replyMarkup?: InlineKeyboardMarkup
 }
 
+interface InlineKeyboardButton {
+    text: string
+    callback_data?: string
+    url?: string
+}
+
+interface SendPhotoOptions {
+    parseMode?: 'HTML' | 'Markdown' | 'MarkdownV2'
+    inlineKeyboard?: InlineKeyboardButton[][]
+}
+
 export async function sendTelegramMessage(
     config: TelegramConfig,
     message: string,
@@ -53,6 +64,114 @@ export async function sendTelegramMessage(
         
         if (!data.ok) {
             return { success: false, error: data.description || 'Failed to send message' }
+        }
+
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+}
+
+export async function sendTelegramPhoto(
+    config: TelegramConfig,
+    photoUrl: string,
+    caption: string,
+    options: SendPhotoOptions = {}
+): Promise<{ success: boolean; error?: string }> {
+    if (!config.botToken || !config.chatId) {
+        return { success: false, error: 'Telegram not configured' }
+    }
+
+    try {
+        const url = `https://api.telegram.org/bot${config.botToken}/sendPhoto`
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const body: Record<string, any> = {
+            chat_id: config.chatId,
+            photo: photoUrl,
+            caption: caption,
+            parse_mode: options.parseMode || 'HTML',
+        }
+
+        if (options.inlineKeyboard) {
+            body.reply_markup = {
+                inline_keyboard: options.inlineKeyboard,
+            }
+        }
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+
+        const data = await response.json()
+        
+        if (!data.ok) {
+            return { success: false, error: data.description || 'Failed to send photo' }
+        }
+
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+}
+
+export async function answerCallbackQuery(
+    botToken: string,
+    callbackQueryId: string,
+    text?: string,
+    showAlert?: boolean
+): Promise<{ success: boolean; error?: string }> {
+    try {
+        const url = `https://api.telegram.org/bot${botToken}/answerCallbackQuery`
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                callback_query_id: callbackQueryId,
+                text: text,
+                show_alert: showAlert ?? false,
+            }),
+        })
+
+        const data = await response.json()
+        
+        if (!data.ok) {
+            return { success: false, error: data.description || 'Failed to answer callback' }
+        }
+
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+}
+
+export async function editMessageCaption(
+    config: TelegramConfig,
+    messageId: number,
+    caption: string,
+    parseMode: string = 'HTML'
+): Promise<{ success: boolean; error?: string }> {
+    try {
+        const url = `https://api.telegram.org/bot${config.botToken}/editMessageCaption`
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: config.chatId,
+                message_id: messageId,
+                caption: caption,
+                parse_mode: parseMode,
+            }),
+        })
+
+        const data = await response.json()
+        
+        if (!data.ok) {
+            return { success: false, error: data.description || 'Failed to edit caption' }
         }
 
         return { success: true }

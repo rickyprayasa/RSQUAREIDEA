@@ -2,7 +2,7 @@
 // Sends Telegram notifications when events occur
 
 import { createClient } from '@/lib/supabase/server'
-import { sendTelegramMessage, notificationTemplates } from './telegram'
+import { sendTelegramMessage, sendTelegramPhoto, notificationTemplates } from './telegram'
 
 interface TelegramConfig {
     enabled: boolean
@@ -10,7 +10,7 @@ interface TelegramConfig {
     chatId: string
 }
 
-async function getTelegramConfig(): Promise<TelegramConfig> {
+export async function getTelegramConfig(): Promise<TelegramConfig> {
     const supabase = await createClient()
     
     const { data: settings } = await supabase
@@ -110,12 +110,32 @@ export async function notifyQrisConfirmation(data: {
     email: string
     productTitle: string
     amount: number
+    confirmationId: number
+    proofImage: string
 }) {
     const config = await getTelegramConfig()
     if (!config.enabled) return
     
-    await sendTelegramMessage(
+    const caption = `📱 <b>Konfirmasi Pembayaran Baru!</b>
+
+👤 Nama: ${data.name}
+📧 Email: ${data.email}
+📦 Pesanan: ${data.productTitle}
+💰 Jumlah: Rp ${data.amount.toLocaleString('id-ID')}
+
+⏳ Menunggu konfirmasi admin...`
+    
+    await sendTelegramPhoto(
         { botToken: config.botToken, chatId: config.chatId },
-        notificationTemplates.qrisConfirmation(data)
+        data.proofImage,
+        caption,
+        {
+            inlineKeyboard: [
+                [
+                    { text: '✅ Terima', callback_data: `approve_${data.confirmationId}` },
+                    { text: '❌ Tolak', callback_data: `reject_${data.confirmationId}` },
+                ],
+            ],
+        }
     )
 }
