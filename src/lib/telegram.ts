@@ -7,7 +7,8 @@ interface TelegramConfig {
 
 interface InlineKeyboardButton {
     text: string
-    callback_data: string
+    callback_data?: string
+    url?: string
 }
 
 interface InlineKeyboardMarkup {
@@ -18,12 +19,6 @@ interface SendMessageOptions {
     parseMode?: 'HTML' | 'Markdown' | 'MarkdownV2'
     disableWebPagePreview?: boolean
     replyMarkup?: InlineKeyboardMarkup
-}
-
-interface InlineKeyboardButton {
-    text: string
-    callback_data?: string
-    url?: string
 }
 
 interface SendPhotoOptions {
