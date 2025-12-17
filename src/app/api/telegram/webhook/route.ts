@@ -25,6 +25,9 @@ interface TelegramUpdate {
 export async function POST(request: NextRequest) {
     try {
         console.log('Webhook POST endpoint called');
+        console.log('Request URL:', request.url);
+        console.log('Request method:', request.method);
+        console.log('Request headers:', JSON.stringify(Object.fromEntries(request.headers.entries()), null, 2));
 
         const update: TelegramUpdate = await request.json()
 
@@ -525,7 +528,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true })
 } catch (error) {
-    console.error('Telegram webhook error:', error)
+    console.error('Telegram webhook error:', error instanceof Error ? error.message : error)
+    // Ensure we return a clean response without redirect
     return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 })
 }
 }
