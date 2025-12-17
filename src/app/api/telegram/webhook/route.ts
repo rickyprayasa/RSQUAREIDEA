@@ -3,10 +3,33 @@ import { createClient } from '@/lib/supabase/server'
 import { answerCallbackQuery, editMessageCaption } from '@/lib/telegram'
 import { getTelegramConfig } from '@/lib/notifications'
 
+// Define interface for the update object
+interface TelegramUpdate {
+    update_id: number;
+    callback_query?: {
+        id: string;
+        from: { id: number; first_name: string; username?: string };
+        message?: {
+            message_id: number;
+            from?: { id: number; is_bot: boolean; first_name: string; username: string };
+            chat: { id: number; first_name: string; type: string };
+            date: number;
+            text?: string;
+            photo?: Array<{ file_id: string; width: number; height: number; file_size?: number }>;
+            caption?: string;
+        };
+        data: string;
+    };
+}
+
 export async function POST(request: NextRequest) {
     try {
-        const update = await request.json()
-        
+        console.log('Webhook POST endpoint called');
+
+        const update: TelegramUpdate = await request.json()
+
+        console.log('Raw update received:', JSON.stringify(update, null, 2));
+
         // Handle callback query (inline button press)
         if (update.callback_query) {
             const callbackQuery = update.callback_query
@@ -18,7 +41,8 @@ export async function POST(request: NextRequest) {
                 callbackData,
                 messageId,
                 chatId,
-                callbackQueryId: callbackQuery.id
+                callbackQueryId: callbackQuery.id,
+                from: callbackQuery.from
             })
             
             // Parse callback data which could be in format 'action_id' or JSON format
@@ -474,12 +498,18 @@ export async function POST(request: NextRequest) {
             status: statusToUpdate
         });
 
-        await answerCallbackQuery(
-            config.botToken,
-            callbackQuery.id,
-            statusToUpdate === 'approved' || statusToUpdate === 'paid' ? '✅ Pembayaran disetujui!' : '❌ Pembayaran ditolak!',
-            false
-        )
+        try {
+            await answerCallbackQuery(
+                config.botToken,
+                callbackQuery.id,
+                statusToUpdate === 'approved' || statusToUpdate === 'paid' ? '✅ Pembayaran disetujui!' : '❌ Pembayaran ditolak!',
+                false
+            )
+            console.log('Successfully answered callback query');
+        } catch (answerError) {
+            console.error('Error answering callback query:', answerError);
+            // Continue execution even if answering fails
+        }
 
         console.log('Webhook processing completed successfully for confirmationId:', confirmationId);
         return NextResponse.json({ ok: true })
@@ -492,11 +522,57 @@ export async function POST(request: NextRequest) {
 }
 }
 
+// Helper function to get webhook info from Telegram
+async function getWebhookInfo(botToken: string) {
+    try {
+        const response = await fetch(`https://api.telegram.org/bot${botToken}/getWebhookInfo`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error getting webhook info:', error);
+        return null;
+    }
+}
+
 // GET endpoint to verify webhook
-export async function GET() {
+export async function GET(request: NextRequest) {
     // Log when someone accesses the webhook URL for debugging
     console.log('Telegram webhook GET endpoint accessed');
 
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get('action');
+
+    if (action === 'info') {
+        // Return webhook info from Telegram
+        try {
+            const config = await getTelegramConfig();
+            if (!config.botToken) {
+                return NextResponse.json({
+                    error: 'Bot token not configured'
+                });
+            }
+
+            const webhookInfo = await getWebhookInfo(config.botToken);
+            return NextResponse.json({
+                config: {
+                    enabled: config.enabled,
+                    hasBotToken: !!config.botToken,
+                    chatId: config.chatId ? config.chatId : 'not set'
+                },
+                webhookInfo
+            });
+        } catch (error) {
+            console.error('Error getting webhook info:', error);
+            return NextResponse.json({
+                error: 'Failed to get webhook info',
+                details: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    }
+
+    // Default: return basic status
     try {
         const config = await getTelegramConfig();
         return NextResponse.json({
@@ -505,13 +581,15 @@ export async function GET() {
                 enabled: config.enabled,
                 hasBotToken: !!config.botToken,
                 chatId: config.chatId ? config.chatId : 'not set'
-            }
+            },
+            message: "Use ?action=info to get detailed webhook information from Telegram"
         });
     } catch (error) {
         console.error('Error getting Telegram config in GET:', error);
         return NextResponse.json({
             status: 'Telegram webhook is active',
-            config: 'error retrieving config'
+            config: 'error retrieving config',
+            message: "Use ?action=info to get detailed webhook information from Telegram"
         });
     }
 }
