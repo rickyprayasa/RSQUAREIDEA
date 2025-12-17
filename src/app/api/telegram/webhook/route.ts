@@ -13,12 +13,20 @@ export async function POST(request: NextRequest) {
             const callbackData = callbackQuery.data
             const messageId = callbackQuery.message?.message_id
             const chatId = callbackQuery.message?.chat?.id
+
+            console.log('Received callback query:', {
+                callbackData,
+                messageId,
+                chatId,
+                callbackQueryId: callbackQuery.id
+            })
             
             // Parse callback data which could be in format 'action_id' or JSON format
             let action, confirmationId;
 
             // Check if callbackData is in JSON format (for manual confirmation)
             if (callbackData.startsWith('{')) {
+                console.log('Processing JSON format callback data:', callbackData);
                 try {
                     // Replace triple single quotes with proper quotes for JSON parsing
                     const jsonString = callbackData.replace(/'''/g, '"');
@@ -44,6 +52,7 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json({ ok: true });
                 }
             } else {
+                console.log('Processing standard format callback data:', callbackData);
                 // Original format: approve_123 or reject_123
                 const parts = callbackData.split('_');
                 if (parts.length < 2) {
@@ -77,6 +86,8 @@ export async function POST(request: NextRequest) {
             // Determine if this is a QRIS confirmation or a manual order confirmation
             const isQrisConfirmation = !callbackData.startsWith('{');
 
+            console.log('Confirmation type:', { isQrisConfirmation, confirmationId, action });
+
             let orderData: any = null;
             let confirmationData: any = null;
             let statusToUpdate: string | null = null;
@@ -92,6 +103,7 @@ export async function POST(request: NextRequest) {
                     .single()
 
                 if (!confirmation) {
+                    console.log('QRIS confirmation not found:', confirmationId);
                     await answerCallbackQuery(
                         config.botToken,
                         callbackQuery.id,
@@ -114,6 +126,8 @@ export async function POST(request: NextRequest) {
                 confirmationData = confirmation;
                 statusToUpdate = action === 'approve' ? 'approved' : 'rejected';
 
+                console.log('Processing QRIS confirmation:', { confirmationId, statusToUpdate });
+
             } else {
                 // Handle manual order confirmation (from manualConfirmation template)
 
@@ -125,6 +139,7 @@ export async function POST(request: NextRequest) {
                     .single()
 
                 if (!order) {
+                    console.log('Order not found:', confirmationId);
                     await answerCallbackQuery(
                         config.botToken,
                         callbackQuery.id,
@@ -146,9 +161,12 @@ export async function POST(request: NextRequest) {
 
                 orderData = order;
                 statusToUpdate = action === 'approve' ? 'paid' : 'cancelled';
+
+                console.log('Processing manual order confirmation:', { orderId: confirmationId, statusToUpdate });
             }
 
             if (!statusToUpdate) {
+                console.log('Invalid status to update:', statusToUpdate);
                 await answerCallbackQuery(
                     config.botToken,
                     callbackQuery.id,
@@ -160,6 +178,8 @@ export async function POST(request: NextRequest) {
 
             const statusLabel = statusToUpdate === 'approved' || statusToUpdate === 'paid' ? 'DISETUJUI ✅' : 'DITOLAK ❌'
 
+            console.log('Updating status for confirmationId:', confirmationId, 'to', statusToUpdate);
+
             // Update the appropriate table based on confirmation type
             if (isQrisConfirmation) {
                 // Update confirmation status in qris_confirmations table
@@ -168,6 +188,32 @@ export async function POST(request: NextRequest) {
                     admin_notes: `Dikonfirmasi via Telegram`,
                     updated_at: new Date().toISOString(),
                 }
+
+                // Update confirmation status in qris_confirmations table (this was missing!)
+                if (statusToUpdate === 'approved') {
+                    updateData.approved_at = new Date().toISOString()
+                    updateData.approved_by = 'Telegram Bot'
+                }
+
+                console.log('Updating qris_confirmations table with:', updateData);
+
+                const { error: updateError } = await supabase
+                    .from('qris_confirmations')
+                    .update(updateData)
+                    .eq('id', confirmationId)
+
+                if (updateError) {
+                    console.error('Error updating qris confirmations:', updateError);
+                    await answerCallbackQuery(
+                        config.botToken,
+                        callbackQuery.id,
+                        'Gagal mengupdate status',
+                        true
+                    )
+                    return NextResponse.json({ ok: true })
+                }
+
+                console.log('Successfully updated qris confirmations table');
 
                 // If approved, update order status and send email
                 if (statusToUpdate === 'approved') {
