@@ -207,11 +207,11 @@ export async function POST(request: NextRequest) {
                     }
                 }
                 
-                if (downloadLinks.length === 0 && confirmation.order_number) {
+                if (downloadLinks.length === 0 && confirmationData.order_number) {
                     const { data: order } = await supabase
                         .from('orders')
                         .select('id, notes, product_id')
-                        .eq('order_number', confirmation.order_number)
+                        .eq('order_number', confirmationData.order_number)
                         .single()
                     
                     if (order) {
