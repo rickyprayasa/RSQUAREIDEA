@@ -115,7 +115,9 @@ export async function notifyQrisConfirmation(data: {
 }) {
     const config = await getTelegramConfig()
     if (!config.enabled) return
-    
+
+    // Get base URL for CMS link
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://rsquareidea.my.id'
     const caption = `📱 <b>Konfirmasi Pembayaran Baru!</b>
 
 👤 Nama: ${data.name}
@@ -123,8 +125,9 @@ export async function notifyQrisConfirmation(data: {
 📦 Pesanan: ${data.productTitle}
 💰 Jumlah: Rp ${data.amount.toLocaleString('id-ID')}
 
-⏳ Menunggu konfirmasi admin...`
-    
+⏳ Menunggu konfirmasi admin...
+🔗 <a href="${baseUrl}/admin/qris">Lihat di CMS</a>`
+
     await sendTelegramPhoto(
         { botToken: config.botToken, chatId: config.chatId },
         data.proofImage,
@@ -135,6 +138,9 @@ export async function notifyQrisConfirmation(data: {
                     { text: '✅ Terima', callback_data: `approve_${data.confirmationId}` },
                     { text: '❌ Tolak', callback_data: `reject_${data.confirmationId}` },
                 ],
+                [
+                    { text: '🌐 Buka CMS', url: `${baseUrl}/admin/qris` }
+                ]
             ],
         }
     )

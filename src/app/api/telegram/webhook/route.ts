@@ -215,6 +215,19 @@ export async function POST(request: NextRequest) {
 
                 console.log('Successfully updated qris confirmations table');
 
+                // Verify the update was successful by fetching the updated record
+                const { data: updatedConfirmation, error: fetchError } = await supabase
+                    .from('qris_confirmations')
+                    .select('*')
+                    .eq('id', confirmationId)
+                    .single();
+
+                if (fetchError) {
+                    console.error('Error fetching updated confirmation:', fetchError);
+                } else {
+                    console.log('Verified updated confirmation status:', updatedConfirmation.status, 'for ID:', confirmationId);
+                }
+
                 // If approved, update order status and send email
                 if (statusToUpdate === 'approved') {
                     // Update order status
@@ -455,6 +468,12 @@ export async function POST(request: NextRequest) {
         }
 
         // Answer callback query
+        console.log('Sending answer to callback query:', {
+            callbackQueryId: callbackQuery.id,
+            statusMessage: statusToUpdate === 'approved' || statusToUpdate === 'paid' ? '✅ Pembayaran disetujui!' : '❌ Pembayaran ditolak!',
+            status: statusToUpdate
+        });
+
         await answerCallbackQuery(
             config.botToken,
             callbackQuery.id,
@@ -462,6 +481,7 @@ export async function POST(request: NextRequest) {
             false
         )
 
+        console.log('Webhook processing completed successfully for confirmationId:', confirmationId);
         return NextResponse.json({ ok: true })
     }
 
@@ -474,5 +494,24 @@ export async function POST(request: NextRequest) {
 
 // GET endpoint to verify webhook
 export async function GET() {
-    return NextResponse.json({ status: 'Telegram webhook is active' })
+    // Log when someone accesses the webhook URL for debugging
+    console.log('Telegram webhook GET endpoint accessed');
+
+    try {
+        const config = await getTelegramConfig();
+        return NextResponse.json({
+            status: 'Telegram webhook is active',
+            config: {
+                enabled: config.enabled,
+                hasBotToken: !!config.botToken,
+                chatId: config.chatId ? config.chatId : 'not set'
+            }
+        });
+    } catch (error) {
+        console.error('Error getting Telegram config in GET:', error);
+        return NextResponse.json({
+            status: 'Telegram webhook is active',
+            config: 'error retrieving config'
+        });
+    }
 }
