@@ -387,11 +387,15 @@ export async function POST(request: NextRequest) {
 <b>Status: ${statusLabel}</b>
 🕐 ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`
 
-            await editMessageCaption(
-                { botToken: config.botToken, chatId: chatId?.toString() || config.chatId },
-                messageId,
-                updatedCaption
-            )
+            if (messageId) {
+                await editMessageCaption(
+                    { botToken: config.botToken, chatId: chatId?.toString() || config.chatId },
+                    messageId,
+                    updatedCaption
+                )
+            } else {
+                console.error('messageId is undefined, cannot edit message caption');
+            }
         } else {
             // Handle manual order confirmation
 
@@ -484,11 +488,15 @@ export async function POST(request: NextRequest) {
 <b>Status: ${statusLabel}</b>
 🕐 ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`
 
-            await editMessageCaption(
-                { botToken: config.botToken, chatId: chatId?.toString() || config.chatId },
-                messageId,
-                updatedCaption
-            )
+            if (messageId) {
+                await editMessageCaption(
+                    { botToken: config.botToken, chatId: chatId?.toString() || config.chatId },
+                    messageId,
+                    updatedCaption
+                )
+            } else {
+                console.error('messageId is undefined, cannot edit message caption');
+            }
         }
 
         // Answer callback query
