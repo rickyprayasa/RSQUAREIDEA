@@ -1,6 +1,4 @@
-export const config = {
-  runtime: 'edge',
-};
+export const runtime = 'edge';
 
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -13,7 +11,7 @@ async function handleTelegramWebhook(request: NextRequest) {
   try {
     console.log('Edge webhook function called');
     console.log('Request URL:', request.url);
-    
+
     const update = await request.json();
     console.log('Received update:', JSON.stringify(update, null, 2));
 
@@ -40,7 +38,7 @@ export async function POST(request: NextRequest) {
 
 // Tangani permintaan GET untuk debugging
 export async function GET(request: NextRequest) {
-  return NextResponse.json({ 
+  return NextResponse.json({
     status: 'Edge webhook endpoint is active',
     timestamp: new Date().toISOString(),
     url: request.url,

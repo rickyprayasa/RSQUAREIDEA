@@ -1,7 +1,7 @@
 'use client'
 
 /* eslint-disable @next/next/no-img-element */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -51,7 +51,7 @@ interface PaymentMethod {
     duitkuImage?: string
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { items, removeItem, clearCart, totalPrice } = useCart()
@@ -1635,5 +1635,20 @@ export default function CheckoutPage() {
                 )}
             </AnimatePresence>
         </div>
+    )
+}
+
+export default function CheckoutPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+                    <p className="text-gray-500 font-medium">Memuat halaman checkout...</p>
+                </div>
+            </div>
+        }>
+            <CheckoutContent />
+        </Suspense>
     )
 }
