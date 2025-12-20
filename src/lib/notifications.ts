@@ -12,15 +12,15 @@ interface TelegramConfig {
 
 export async function getTelegramConfig(): Promise<TelegramConfig> {
     const supabase = await createClient()
-    
+
     const { data: settings } = await supabase
         .from('site_settings')
         .select('key, value')
         .in('key', ['telegram_enabled', 'telegram_bot_token', 'telegram_chat_id'])
-    
+
     const config: Record<string, string> = {}
     settings?.forEach(s => { config[s.key] = s.value || '' })
-    
+
     return {
         enabled: config.telegram_enabled === 'true',
         botToken: config.telegram_bot_token || '',
@@ -34,13 +34,23 @@ export async function notifyNewOrder(order: {
     email: string
     productTitle: string
     amount: number
+    status?: string
+    paymentMethod?: string
 }) {
     const config = await getTelegramConfig()
     if (!config.enabled) return
-    
+
+    // Choose template based on status
+    const message = (order.status === 'completed' || order.status === 'paid')
+        ? notificationTemplates.successfulPurchase({
+            ...order,
+            paymentMethod: order.paymentMethod || 'Otomatis'
+        })
+        : notificationTemplates.newOrder(order)
+
     await sendTelegramMessage(
         { botToken: config.botToken, chatId: config.chatId },
-        notificationTemplates.newOrder(order)
+        message
     )
 }
 
@@ -52,7 +62,7 @@ export async function notifyPaymentConfirmed(payment: {
 }) {
     const config = await getTelegramConfig()
     if (!config.enabled) return
-    
+
     await sendTelegramMessage(
         { botToken: config.botToken, chatId: config.chatId },
         notificationTemplates.paymentConfirmed(payment)
@@ -67,7 +77,7 @@ export async function notifyNewMessage(msg: {
 }) {
     const config = await getTelegramConfig()
     if (!config.enabled) return
-    
+
     await sendTelegramMessage(
         { botToken: config.botToken, chatId: config.chatId },
         notificationTemplates.newMessage(msg)
@@ -83,7 +93,7 @@ export async function notifyNewFeedback(feedback: {
 }) {
     const config = await getTelegramConfig()
     if (!config.enabled) return
-    
+
     await sendTelegramMessage(
         { botToken: config.botToken, chatId: config.chatId },
         notificationTemplates.newFeedback(feedback)
@@ -98,7 +108,7 @@ export async function notifyNewTemplateRequest(request: {
 }) {
     const config = await getTelegramConfig()
     if (!config.enabled) return
-    
+
     await sendTelegramMessage(
         { botToken: config.botToken, chatId: config.chatId },
         notificationTemplates.newTemplateRequest(request)

@@ -6,12 +6,12 @@ import { notifyNewOrder } from '@/lib/notifications'
 export async function POST(request: NextRequest) {
     try {
         const data = await request.json()
-        
+
         // Check if running on localhost - don't save to database
         const localhost = await isLocalhost()
         if (localhost) {
             console.log('[LOCALHOST] Order creation skipped - test mode')
-            return NextResponse.json({ 
+            return NextResponse.json({
                 order: {
                     id: 'test-' + Date.now(),
                     order_number: data.orderNumber,
@@ -75,6 +75,8 @@ export async function POST(request: NextRequest) {
             email: data.customerEmail,
             productTitle: data.items.map((i: { productTitle: string }) => i.productTitle).join(', '),
             amount: data.totalAmount,
+            status: data.status || 'pending',
+            paymentMethod: data.paymentMethod,
         }).catch(console.error)
 
         // Update voucher usage count if voucher was used
@@ -88,15 +90,15 @@ export async function POST(request: NextRequest) {
 
                 if (voucher) {
                     const newUsedCount = (voucher.used_count || 0) + 1
-                    const updateData: { used_count: number; is_active?: boolean } = { 
-                        used_count: newUsedCount 
+                    const updateData: { used_count: number; is_active?: boolean } = {
+                        used_count: newUsedCount
                     }
-                    
+
                     // Deactivate voucher if usage limit reached
                     if (voucher.usage_limit && newUsedCount >= voucher.usage_limit) {
                         updateData.is_active = false
                     }
-                    
+
                     await supabase
                         .from('vouchers')
                         .update(updateData)

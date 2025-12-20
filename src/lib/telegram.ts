@@ -37,7 +37,7 @@ export async function sendTelegramMessage(
 
     try {
         const url = `https://api.telegram.org/bot${config.botToken}/sendMessage`
-        
+
         const body: any = {
             chat_id: config.chatId,
             text: message,
@@ -56,7 +56,7 @@ export async function sendTelegramMessage(
         })
 
         const data = await response.json()
-        
+
         if (!data.ok) {
             return { success: false, error: data.description || 'Failed to send message' }
         }
@@ -79,7 +79,7 @@ export async function sendTelegramPhoto(
 
     try {
         const url = `https://api.telegram.org/bot${config.botToken}/sendPhoto`
-        
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const body: Record<string, any> = {
             chat_id: config.chatId,
@@ -101,7 +101,7 @@ export async function sendTelegramPhoto(
         })
 
         const data = await response.json()
-        
+
         if (!data.ok) {
             return { success: false, error: data.description || 'Failed to send photo' }
         }
@@ -120,7 +120,7 @@ export async function answerCallbackQuery(
 ): Promise<{ success: boolean; error?: string }> {
     try {
         const url = `https://api.telegram.org/bot${botToken}/answerCallbackQuery`
-        
+
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -132,7 +132,7 @@ export async function answerCallbackQuery(
         })
 
         const data = await response.json()
-        
+
         if (!data.ok) {
             return { success: false, error: data.description || 'Failed to answer callback' }
         }
@@ -151,7 +151,7 @@ export async function editMessageCaption(
 ): Promise<{ success: boolean; error?: string }> {
     try {
         const url = `https://api.telegram.org/bot${config.botToken}/editMessageCaption`
-        
+
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -164,7 +164,7 @@ export async function editMessageCaption(
         })
 
         const data = await response.json()
-        
+
         if (!data.ok) {
             return { success: false, error: data.description || 'Failed to edit caption' }
         }
@@ -178,13 +178,27 @@ export async function editMessageCaption(
 // Notification message templates
 export const notificationTemplates = {
     newOrder: (order: { id: number; customerName: string; email: string; productTitle: string; amount: number }) => `
-🛒 <b>Pesanan Baru!</b>
+🛒 <b>Pesanan Baru! (Menunggu Pembayaran)</b>
 
 📦 Produk: ${order.productTitle}
 👤 Nama: ${order.customerName}
 📧 Email: ${order.email}
 💰 Total: Rp ${order.amount.toLocaleString('id-ID')}
 
+🔗 <a href="https://rsquareidea.my.id/admin/orders">Lihat Detail</a>
+`,
+
+    successfulPurchase: (order: { id: number; customerName: string; email: string; productTitle: string; amount: number; paymentMethod: string }) => `
+✅ <b>PEMBELIAN BERHASIL!</b>
+
+📦 Produk: ${order.productTitle}
+👤 Nama: ${order.customerName}
+📧 Email: ${order.email}
+💰 Total: Rp ${order.amount.toLocaleString('id-ID')}
+💳 Metode: ${order.paymentMethod}
+
+✅ <b>Status: SELESAI OTOMATIS</b>
+_Tidak perlu konfirmasi manual_
 🔗 <a href="https://rsquareidea.my.id/admin/orders">Lihat Detail</a>
 `,
 

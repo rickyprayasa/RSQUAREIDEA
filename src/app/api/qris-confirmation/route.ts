@@ -110,6 +110,32 @@ export async function GET(request: NextRequest) {
         }
 
         const { data: confirmations, error } = await query
+        
+        // IF no manual confirmation found, check if the order is already completed (e.g. by Duitku)
+        if ((!confirmations || confirmations.length === 0) && orderNumber) {
+            const { data: order } = await supabase
+                .from('orders')
+                .select('id, status, amount, customer_name, customer_email')
+                .eq('order_number', orderNumber)
+                .single()
+
+            if (order && order.status === 'completed') {
+                // Return a synthetic "approved" confirmation so the frontend treats it as done
+                return NextResponse.json({
+                    confirmations: [{
+                        id: 0, // Synthetic ID
+                        order_id: order.id,
+                        order_number: orderNumber,
+                        customer_name: order.customer_name,
+                        customer_email: order.customer_email,
+                        amount: order.amount,
+                        status: 'approved', // Force approved status
+                        proof_image: null,
+                        created_at: new Date().toISOString()
+                    }]
+                })
+            }
+        }
 
         if (error) {
             console.error('Error fetching confirmations:', error)

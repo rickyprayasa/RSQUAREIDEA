@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     ShoppingCart,
@@ -53,6 +53,7 @@ interface PaymentMethod {
 
 export default function CheckoutPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const { items, removeItem, clearCart, totalPrice } = useCart()
     const [step, setStep] = useState(1)
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
@@ -94,16 +95,30 @@ export default function CheckoutPage() {
 
     // Check if running on localhost
     const [isLocalhost, setIsLocalhost] = useState(false)
-    
+
     useEffect(() => {
         const hostname = window.location.hostname
         setIsLocalhost(
-            hostname === 'localhost' || 
-            hostname === '127.0.0.1' || 
+            hostname === 'localhost' ||
+            hostname === '127.0.0.1' ||
             hostname.startsWith('192.168.') ||
             hostname.startsWith('10.')
         )
     }, [])
+
+    // Handle return from Duitku
+    useEffect(() => {
+        const status = searchParams.get('status')
+        const order = searchParams.get('order')
+
+        if (status === 'check' && order) {
+            setOrderNumber(order)
+            setConfirmationSent(true)
+            setStep(3)
+            // Clear cart as order is placed
+            clearCart()
+        }
+    }, [searchParams, clearCart])
 
     useEffect(() => {
         // Fetch payment methods and QRIS settings
@@ -956,8 +971,8 @@ export default function CheckoutPage() {
                                                                         <div className="flex-1 min-w-0">
                                                                             <p className="font-medium text-gray-900 text-sm truncate">{method.name}</p>
                                                                             <p className="text-xs text-gray-500">
-                                                                                Admin: {method.duitkuFee && Number(method.duitkuFee) > 0 
-                                                                                    ? `Rp ${Number(method.duitkuFee).toLocaleString('id-ID')}` 
+                                                                                Admin: {method.duitkuFee && Number(method.duitkuFee) > 0
+                                                                                    ? `Rp ${Number(method.duitkuFee).toLocaleString('id-ID')}`
                                                                                     : 'Gratis'}
                                                                             </p>
                                                                         </div>
@@ -1059,8 +1074,8 @@ export default function CheckoutPage() {
                                                     Anda akan diarahkan ke halaman pembayaran Duitku untuk menyelesaikan transaksi.
                                                 </p>
                                                 <p className="text-sm text-gray-500 mb-4">
-                                                    Biaya Admin: {selectedPayment.duitkuFee && Number(selectedPayment.duitkuFee) > 0 
-                                                        ? `Rp ${Number(selectedPayment.duitkuFee).toLocaleString('id-ID')}` 
+                                                    Biaya Admin: {selectedPayment.duitkuFee && Number(selectedPayment.duitkuFee) > 0
+                                                        ? `Rp ${Number(selectedPayment.duitkuFee).toLocaleString('id-ID')}`
                                                         : 'Gratis'}
                                                 </p>
                                                 <div className="flex items-center justify-center gap-2 text-sm text-emerald-700">
@@ -1179,9 +1194,8 @@ export default function CheckoutPage() {
                                 <button
                                     onClick={handleSubmitOrder}
                                     disabled={!selectedPayment || loading || duitkuLoading}
-                                    className={`px-8 py-3 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${
-                                        selectedPayment?.type === 'duitku' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-orange-500 hover:bg-orange-600'
-                                    }`}
+                                    className={`px-8 py-3 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${selectedPayment?.type === 'duitku' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-orange-500 hover:bg-orange-600'
+                                        }`}
                                 >
                                     {(loading || duitkuLoading) && <Loader2 className="h-4 w-4 animate-spin" />}
                                     {selectedPayment?.type === 'duitku' ? 'Bayar Sekarang' : 'Konfirmasi Pesanan'}
@@ -1404,7 +1418,7 @@ export default function CheckoutPage() {
                                         <div>
                                             <h3 className="font-bold text-red-800 text-lg mb-1">Pembayaran Ditolak</h3>
                                             <p className="text-sm text-red-700 mb-3">
-                                                Maaf, konfirmasi pembayaran Kamu tidak dapat diverifikasi. 
+                                                Maaf, konfirmasi pembayaran Kamu tidak dapat diverifikasi.
                                                 Hal ini bisa terjadi karena bukti pembayaran tidak valid atau nominal tidak sesuai.
                                             </p>
                                             <p className="text-sm text-red-600">
@@ -1445,7 +1459,7 @@ export default function CheckoutPage() {
 
             {/* QRIS Confirmation Modal */}
             {showQrisConfirm && createPortal(
-                <div 
+                <div
                     className="fixed inset-0 bg-black/60 z-[9999] flex items-end md:items-center justify-center"
                     onClick={() => setShowQrisConfirm(false)}
                 >
@@ -1578,7 +1592,7 @@ export default function CheckoutPage() {
                         </div>
                     </motion.div>
                 </div>
-            , document.body)}
+                , document.body)}
             {/* Error Dialog */}
             <AnimatePresence>
                 {errorDialog.isOpen && (

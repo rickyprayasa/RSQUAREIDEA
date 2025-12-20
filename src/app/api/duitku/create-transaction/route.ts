@@ -63,11 +63,27 @@ export async function POST(request: NextRequest) {
                 callbackUrl: `${baseUrl}/api/duitku/callback`,
                 returnUrl: `${baseUrl}/checkout?status=check&order=${orderNumber}`,
                 expiryPeriod: 1440, // 24 hours
-                itemDetails: items?.map((i: { productTitle: string; price: number }) => ({
-                    name: i.productTitle,
-                    price: i.price,
-                    quantity: 1,
-                })),
+                itemDetails: (() => {
+                    const mappedItems = items?.map((i: { productTitle: string; price: number }) => ({
+                        name: i.productTitle,
+                        price: i.price,
+                        quantity: 1,
+                    })) || []
+
+                    const itemsTotal = mappedItems.reduce((sum: number, item: { price: number }) => sum + item.price, 0)
+
+                    // If totalAmount is less than itemsTotal, it means a voucher/discount was applied
+                    if (totalAmount < itemsTotal) {
+                        const discount = itemsTotal - totalAmount
+                        mappedItems.push({
+                            name: 'Diskon Voucher',
+                            price: -discount,
+                            quantity: 1,
+                        })
+                    }
+
+                    return mappedItems
+                })(),
             }
         )
 
@@ -115,6 +131,9 @@ export async function POST(request: NextRequest) {
         }
 
         // Send Telegram notification
+        // Send Telegram notification - REMOVED to avoid double notification. 
+        // Success notification will be sent by the callback.
+        /*
         notifyNewOrder({
             id: order?.id || 0,
             customerName: customerName,
@@ -122,6 +141,7 @@ export async function POST(request: NextRequest) {
             productTitle: items?.map((i: { productTitle: string }) => i.productTitle).join(', ') || 'Template',
             amount: totalAmount,
         }).catch(console.error)
+        */
 
         return NextResponse.json({
             success: true,
