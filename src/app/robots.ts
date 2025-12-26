@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://rsquareidea.my.id'
-  
+  const baseUrl = 'https://www.rsquareidea.my.id'
+
   return {
     rules: [
       {

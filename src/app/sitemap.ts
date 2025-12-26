@@ -5,8 +5,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://rsquareidea.my.id'
-  
+  const baseUrl = 'https://www.rsquareidea.my.id'
+
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -55,7 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Dynamic template pages from Supabase
   let templatePages: MetadataRoute.Sitemap = []
-  
+
   try {
     const supabase = createClient(supabaseUrl, supabaseKey)
     const { data: templates } = await supabase

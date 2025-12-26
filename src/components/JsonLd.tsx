@@ -3,8 +3,8 @@ export function OrganizationJsonLd() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'RSQUARE',
-    url: 'https://rsquareidea.my.id',
-    logo: 'https://rsquareidea.my.id/icon-512x512.png',
+    url: 'https://www.rsquareidea.my.id',
+    logo: 'https://www.rsquareidea.my.id/icon-512x512.png',
     description: 'Koleksi template Google Sheets premium untuk bisnis dan personal Indonesia',
     sameAs: [
       'https://instagram.com/rsquareidea',
@@ -29,12 +29,12 @@ export function WebsiteJsonLd() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'RSQUARE',
-    url: 'https://rsquareidea.my.id',
+    url: 'https://www.rsquareidea.my.id',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://rsquareidea.my.id/templates?search={search_term_string}',
+        urlTemplate: 'https://www.rsquareidea.my.id/templates?search={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },
@@ -71,7 +71,7 @@ export function ProductJsonLd({
     name,
     description,
     image,
-    url: `https://rsquareidea.my.id/templates/${slug}`,
+    url: `https://www.rsquareidea.my.id/templates/${slug}`,
     brand: {
       '@type': 'Brand',
       name: 'RSQUARE',

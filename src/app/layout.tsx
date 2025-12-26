@@ -21,14 +21,14 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://rsquareidea.my.id'),
+  metadataBase: new URL('https://www.rsquareidea.my.id'),
   title: {
     default: 'RSQUARE - Template Premium Google Sheets Indonesia',
     template: '%s | RSQUARE'
   },
   description: 'Koleksi template Google Sheets premium untuk bisnis dan personal. Budget tracker, invoice, inventory, dan lainnya. Hemat waktu, tingkatkan produktivitas.',
   keywords: ['template google sheets', 'spreadsheet indonesia', 'budget tracker', 'invoice template', 'inventory management', 'template gratis', 'template premium'],
-  authors: [{ name: 'RSQUARE', url: 'https://rsquareidea.my.id' }],
+  authors: [{ name: 'RSQUARE', url: 'https://www.rsquareidea.my.id' }],
   creator: 'RSQUARE',
   publisher: 'RSQUARE',
   robots: {
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'id_ID',
-    url: 'https://rsquareidea.my.id',
+    url: 'https://www.rsquareidea.my.id',
     siteName: 'RSQUARE',
     title: 'RSQUARE - Template Premium Google Sheets Indonesia',
     description: 'Koleksi template Google Sheets premium untuk bisnis dan personal. Budget tracker, invoice, inventory, dan lainnya.',
