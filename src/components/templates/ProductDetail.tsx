@@ -416,18 +416,18 @@ export function ProductDetail({ template }: ProductDetailProps) {
                             </div>
 
                             {/* Title */}
-                            <motion.h1 
+                            <motion.h1
                                 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight"
                                 initial={{ opacity: 0, y: 30, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                                transition={{ 
-                                    duration: 0.8, 
-                                    delay: 0.2, 
-                                    type: "spring", 
+                                transition={{
+                                    duration: 0.8,
+                                    delay: 0.2,
+                                    type: "spring",
                                     stiffness: 120,
                                     damping: 20
                                 }}
-                                whileHover={{ 
+                                whileHover={{
                                     scale: 1.01,
                                     transition: { duration: 0.2 }
                                 }}
@@ -459,7 +459,7 @@ export function ProductDetail({ template }: ProductDetailProps) {
                             </div>
 
                             {/* Description */}
-                            <motion.p 
+                            <motion.p
                                 className="text-gray-600 text-lg leading-relaxed mb-6"
                                 initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
                                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -505,7 +505,7 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                         className="relative flex-1 h-14 rounded-xl font-semibold text-lg shadow-lg overflow-hidden group bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-200/50 cursor-pointer"
                                     >
                                         <span className="relative z-10 flex items-center justify-center gap-2">
-                                            <LordIcon src="https://cdn.lordicon.com/ternnbni.json" trigger="loop" size={22} colors={{ primary: '#ffffff' }} />
+                                            <LordIcon src="https://cdn.lordicon.com/albuvbjq.json" trigger="loop" size={22} colors={{ primary: '#ffffff' }} />
                                             Dapatkan Gratis
                                         </span>
                                         <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -830,7 +830,7 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                     className="relative h-14 px-8 rounded-xl font-semibold text-lg shadow-lg overflow-hidden group bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-200/50 cursor-pointer"
                                 >
                                     <span className="relative z-10 flex items-center justify-center gap-2">
-                                        <LordIcon src="https://cdn.lordicon.com/ternnbni.json" trigger="loop" size={22} colors={{ primary: '#ffffff' }} />
+                                        <LordIcon src="https://cdn.lordicon.com/albuvbjq.json" trigger="loop" size={22} colors={{ primary: '#ffffff' }} />
                                         Dapatkan Gratis
                                     </span>
                                     <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

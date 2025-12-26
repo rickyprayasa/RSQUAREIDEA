@@ -222,31 +222,41 @@ export default function KontakPage() {
                                 </div>
 
                                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+                                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                                        <ClientLordIcon
+                                            src="https://cdn.lordicon.com/axewyqun.json"
+                                            trigger="loop"
+                                            delay="2500"
+                                            colors="primary:#16a34a"
+                                            style={{ width: '28px', height: '28px' }}
+                                        />
+                                    </div>
+                                    <h3 className="font-semibold text-gray-900 mb-2">WhatsApp</h3>
+                                    <a
+                                        href="https://wa.me/6285794047694"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-green-600 hover:text-green-700 transition-colors text-sm"
+                                    >
+                                        +62 857-9404-7694
+                                    </a>
+                                </div>
+
+                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
                                         <ClientLordIcon
                                             src="https://cdn.lordicon.com/surcxhka.json"
                                             trigger="loop"
-                                            delay="2500"
+                                            delay="3000"
                                             colors="primary:#2563eb"
                                             style={{ width: '28px', height: '28px' }}
                                         />
                                     </div>
                                     <h3 className="font-semibold text-gray-900 mb-2">Lokasi</h3>
-                                    <p className="text-gray-600 text-sm">Indonesia</p>
-                                </div>
-
-                                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-                                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-                                        <ClientLordIcon
-                                            src="https://cdn.lordicon.com/aycieyht.json"
-                                            trigger="loop"
-                                            delay="3000"
-                                            colors="primary:#7c3aed"
-                                            style={{ width: '28px', height: '28px' }}
-                                        />
-                                    </div>
-                                    <h3 className="font-semibold text-gray-900 mb-2">Jam Operasional</h3>
-                                    <p className="text-gray-600 text-sm">Senin - Jumat, 09:00 - 17:00</p>
+                                    <p className="text-gray-600 text-sm leading-relaxed">
+                                        Bumi Arum Regency Blok Akasia no.21,<br />
+                                        Kec. Rancaekek, Kab. Bandung
+                                    </p>
                                 </div>
                             </motion.div>
 

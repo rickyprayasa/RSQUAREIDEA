@@ -25,6 +25,8 @@ function FeedbackContent() {
     const [rating, setRating] = useState(5)
     const [formStatus, setFormStatus] = useState<'idle' | 'sending'>('idle')
     const [products, setProducts] = useState<Product[]>([])
+    const [selectedTemplate, setSelectedTemplate] = useState('')
+    const [customAppName, setCustomAppName] = useState('')
     const [dialog, setDialog] = useState<DialogState>({
         isOpen: false,
         type: 'success',
@@ -64,7 +66,9 @@ function FeedbackContent() {
                     email: formData.get('email'),
                     socialMedia: formData.get('social'),
                     socialMediaUrl: formData.get('socialUrl'),
-                    templateName: formData.get('template'),
+                    templateName: selectedTemplate === 'request_template' 
+                        ? `Request Template: ${customAppName}` 
+                        : formData.get('template'),
                     rating: rating,
                     likes: formData.get('likes'),
                     improvements: formData.get('improvements'),
@@ -120,6 +124,8 @@ function FeedbackContent() {
                     if (data.voucherSent) {
                         form.reset()
                         setRating(5)
+                        setSelectedTemplate('')
+                        setCustomAppName('')
                         setDialog({
                             isOpen: true,
                             type: 'success',
@@ -133,6 +139,8 @@ function FeedbackContent() {
                     if (data.voucherDebug === 'already_sent') {
                         form.reset()
                         setRating(5)
+                        setSelectedTemplate('')
+                        setCustomAppName('')
                         setDialog({
                             isOpen: true,
                             type: 'success',
@@ -146,6 +154,8 @@ function FeedbackContent() {
                     if (data.voucherDebug === 'send_failed') {
                         form.reset()
                         setRating(5)
+                        setSelectedTemplate('')
+                        setCustomAppName('')
                         setDialog({
                             isOpen: true,
                             type: 'success',
@@ -172,6 +182,8 @@ function FeedbackContent() {
                 // Regular visitor or other success cases - reset form
                 form.reset()
                 setRating(5)
+                setSelectedTemplate('')
+                setCustomAppName('')
                 
                 let message = 'Feedback Kamu sangat berarti bagi kami untuk terus berkembang dan memberikan template terbaik.'
                 
@@ -430,14 +442,50 @@ function FeedbackContent() {
                                             id="template"
                                             name="template"
                                             required
+                                            value={selectedTemplate}
+                                            onChange={(e) => {
+                                                setSelectedTemplate(e.target.value)
+                                                if (e.target.value !== 'request_template') {
+                                                    setCustomAppName('')
+                                                }
+                                            }}
                                             className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
                                         >
                                             <option value="">-- Pilih Template --</option>
                                             {products.map((product) => (
                                                 <option key={product.id} value={product.title}>{product.title}</option>
                                             ))}
+                                            <option value="request_template">Request Template (Template Kustom)</option>
                                         </select>
                                     </div>
+
+                                    {/* Custom App Name Input - Only shown when Request Template is selected */}
+                                    {selectedTemplate === 'request_template' && (
+                                        <div>
+                                            <label htmlFor="customAppName" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+                                                <ClientLordIcon
+                                                    src="https://cdn.lordicon.com/wloilxuq.json"
+                                                    trigger="hover"
+                                                    colors="primary:#6b7280"
+                                                    style={{ width: '18px', height: '18px' }}
+                                                />
+                                                Nama Aplikasi Request Template
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="customAppName"
+                                                name="customAppName"
+                                                required
+                                                value={customAppName}
+                                                onChange={(e) => setCustomAppName(e.target.value)}
+                                                placeholder="Contoh: Sistem Inventory Toko, Laporan Keuangan UMKM, dll."
+                                                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
+                                            />
+                                            <p className="mt-2 text-xs text-gray-500">
+                                                Masukkan nama aplikasi/template kustom yang Kamu pesan dari RSQUARE.
+                                            </p>
+                                        </div>
+                                    )}
 
                                     {/* Rating */}
                                     <div>
