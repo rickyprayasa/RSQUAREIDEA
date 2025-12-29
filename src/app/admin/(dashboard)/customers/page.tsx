@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
-    Users, 
+import {
+    Users,
     Mail,
     Phone,
     ShoppingCart,
@@ -266,7 +266,7 @@ export default function CustomersPage() {
 
             {/* Stats - horizontal scroll on mobile */}
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
-                <div className="bg-white rounded-xl p-4 border border-gray-100 min-w-[140px] flex-shrink-0 md:min-w-0">
+                <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-lg min-w-[140px] flex-shrink-0 md:min-w-0">
                     <div className="flex items-center gap-2 md:gap-3">
                         <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg md:rounded-xl flex items-center justify-center">
                             <Users className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
@@ -277,7 +277,7 @@ export default function CustomersPage() {
                         </div>
                     </div>
                 </div>
-                <div className="bg-white rounded-xl p-4 border border-gray-100 min-w-[160px] flex-shrink-0 md:min-w-0">
+                <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-lg min-w-[160px] flex-shrink-0 md:min-w-0">
                     <div className="flex items-center gap-2 md:gap-3">
                         <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg md:rounded-xl flex items-center justify-center">
                             <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
@@ -288,7 +288,7 @@ export default function CustomersPage() {
                         </div>
                     </div>
                 </div>
-                <div className="bg-white rounded-xl p-4 border border-gray-100 min-w-[140px] flex-shrink-0 md:min-w-0">
+                <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-lg min-w-[140px] flex-shrink-0 md:min-w-0">
                     <div className="flex items-center gap-2 md:gap-3">
                         <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-100 rounded-lg md:rounded-xl flex items-center justify-center">
                             <ShoppingCart className="h-4 w-4 md:h-5 md:w-5 text-orange-600" />
@@ -303,21 +303,20 @@ export default function CustomersPage() {
 
             {/* Source Analytics */}
             {sourceStats.length > 0 && (
-                <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-lg">
                     <div className="flex items-center gap-2 mb-3">
                         <TrendingUp className="h-4 w-4 text-gray-500" />
                         <h3 className="font-medium text-gray-700 text-sm">Revenue per Platform</h3>
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                         {sourceStats.slice(0, 5).map((stat) => (
-                            <div 
+                            <div
                                 key={stat.source}
                                 onClick={() => setSourceFilter(stat.source)}
-                                className={`flex-shrink-0 px-3 py-2 rounded-lg cursor-pointer transition-all ${
-                                    sourceFilter === stat.source 
-                                        ? 'ring-2 ring-orange-500 ' + stat.color 
+                                className={`flex-shrink-0 px-3 py-2 rounded-lg cursor-pointer transition-all ${sourceFilter === stat.source
+                                        ? 'ring-2 ring-orange-500 ' + stat.color
                                         : stat.color + ' hover:opacity-80'
-                                }`}
+                                    }`}
                             >
                                 <p className="font-medium text-xs">{stat.label}</p>
                                 <p className="font-bold text-sm">Rp {(stat.revenue / 1000).toFixed(0)}k</p>
@@ -391,7 +390,7 @@ export default function CustomersPage() {
 
             {/* Empty state */}
             {filteredCustomers.length === 0 ? (
-                <div className="text-center py-12 md:py-16 bg-white rounded-2xl border border-gray-100">
+                <div className="text-center py-12 md:py-16 bg-white rounded-2xl border border-gray-200 shadow-lg">
                     <Users className="h-12 w-12 md:h-16 md:w-16 text-gray-200 mx-auto mb-4" />
                     <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">Belum Ada Pelanggan</h3>
                     <p className="text-sm text-gray-500">Data pelanggan akan muncul setelah ada pembelian</p>
@@ -401,10 +400,10 @@ export default function CustomersPage() {
                     {/* Mobile: Card layout */}
                     <div className="md:hidden space-y-3">
                         {filteredCustomers.map((customer) => (
-                            <div 
-                                key={customer.id} 
+                            <div
+                                key={customer.id}
                                 onClick={() => setDetailModal({ isOpen: true, customer })}
-                                className={`bg-white rounded-xl p-4 border-2 transition-colors cursor-pointer ${selectedIds.has(customer.id) ? 'border-blue-400 bg-blue-50/30' : 'border-gray-100'}`}
+                                className={`bg-white rounded-2xl p-4 border-2 transition-colors cursor-pointer shadow-lg hover:shadow-xl ${selectedIds.has(customer.id) ? 'border-blue-400 bg-blue-50/30' : 'border-gray-200'}`}
                             >
                                 <div className="flex items-start gap-3 mb-3">
                                     <button
@@ -471,7 +470,7 @@ export default function CustomersPage() {
                     </div>
 
                     {/* Desktop: Table layout */}
-                    <div className="hidden md:block bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                    <div className="hidden md:block bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className="bg-gray-50 border-b border-gray-100">

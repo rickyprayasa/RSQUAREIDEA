@@ -51,7 +51,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [activeTab, setActiveTab] = useState<'basic' | 'media' | 'pricing' | 'settings'>('basic')
-    
+
     const [formData, setFormData] = useState({
         title: product?.title || '',
         slug: product?.slug || '',
@@ -76,7 +76,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         product?.features || []
     )
     const [newFeature, setNewFeature] = useState('')
-    
+
     const [externalLinks, setExternalLinks] = useState<ExternalLink[]>(
         product?.external_links || []
     )
@@ -85,7 +85,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target
-        
+
         if (type === 'checkbox') {
             const checked = (e.target as HTMLInputElement).checked
             setFormData(prev => ({ ...prev, [name]: checked }))
@@ -125,10 +125,10 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         setLoading(true)
 
         try {
-            const url = product 
-                ? `/api/admin/products/${product.id}` 
+            const url = product
+                ? `/api/admin/products/${product.id}`
                 : '/api/admin/products'
-            
+
             const method = product ? 'PUT' : 'POST'
 
             const res = await fetch(url, {
@@ -173,18 +173,17 @@ export function ProductForm({ product, categories }: ProductFormProps) {
             )}
 
             {/* Tabs */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                 <div className="flex border-b border-gray-100">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             type="button"
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-4 text-sm font-medium transition-colors ${
-                                activeTab === tab.id
+                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-4 text-sm font-medium transition-colors ${activeTab === tab.id
                                     ? 'text-orange-600 border-b-2 border-orange-500 bg-orange-50/50'
                                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                            }`}
+                                }`}
                         >
                             <tab.icon className="w-4 h-4" />
                             <span className="hidden sm:inline">{tab.label}</span>
@@ -529,7 +528,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                             <div className="border-t border-gray-100 pt-6">
                                 <h3 className="font-medium text-gray-900 mb-4">Link Pembelian Eksternal</h3>
                                 <p className="text-sm text-gray-500 mb-4">Tambahkan link pembelian di platform lain (Tokopedia, Shopee, dll)</p>
-                                
+
                                 {externalLinks.length > 0 && (
                                     <div className="space-y-2 mb-4">
                                         {externalLinks.map((link, index) => (
@@ -550,7 +549,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                         ))}
                                     </div>
                                 )}
-                                
+
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
@@ -602,7 +601,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div className="flex items-center justify-between bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
                 <Link
                     href="/admin/products"
                     className="inline-flex items-center gap-2 px-4 py-2.5 text-gray-600 hover:text-gray-900 font-medium transition-colors"

@@ -49,7 +49,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
 
             {/* Empty state */}
             {products.length === 0 ? (
-                <div className="bg-white rounded-xl p-8 md:p-12 text-center border border-gray-100">
+                <div className="bg-white rounded-2xl p-8 md:p-12 text-center border border-gray-200 shadow-lg">
                     <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500">Belum ada produk</p>
                     <Link
@@ -65,9 +65,9 @@ export function ProductsTable({ products }: ProductsTableProps) {
                     {/* Mobile: Card layout */}
                     <div className="md:hidden space-y-3">
                         {products.map((product) => (
-                            <motion.div 
+                            <motion.div
                                 key={product.id}
-                                className="bg-white rounded-xl p-4 border border-gray-100"
+                                className="bg-white rounded-2xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-shadow"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                             >
@@ -81,9 +81,8 @@ export function ProductsTable({ products }: ProductsTableProps) {
                                             <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
                                                 {product.category}
                                             </span>
-                                            <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                                product.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                                            }`}>
+                                            <span className={`text-xs px-2 py-0.5 rounded-full ${product.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                                                }`}>
                                                 {product.isActive ? 'Aktif' : 'Nonaktif'}
                                             </span>
                                             {product.isFeatured && (
@@ -119,8 +118,8 @@ export function ProductsTable({ products }: ProductsTableProps) {
                     </div>
 
                     {/* Desktop: Table layout */}
-                    <motion.div 
-                        className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                    <motion.div
+                        className="hidden md:block bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
@@ -148,8 +147,8 @@ export function ProductsTable({ products }: ProductsTableProps) {
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                     {products.map((product, index) => (
-                                        <motion.tr 
-                                            key={product.id} 
+                                        <motion.tr
+                                            key={product.id}
                                             className="hover:bg-gray-50"
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
@@ -189,11 +188,10 @@ export function ProductsTable({ products }: ProductsTableProps) {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
-                                                        product.isActive
+                                                    <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${product.isActive
                                                             ? 'bg-green-100 text-green-700'
                                                             : 'bg-gray-100 text-gray-600'
-                                                    }`}>
+                                                        }`}>
                                                         {product.isActive ? 'Aktif' : 'Nonaktif'}
                                                     </span>
                                                     {product.isFeatured && (

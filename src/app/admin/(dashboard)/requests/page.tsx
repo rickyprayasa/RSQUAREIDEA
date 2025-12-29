@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
-    FileSpreadsheet, 
+import {
+    FileSpreadsheet,
     Clock,
     Check,
     X,
@@ -132,9 +132,8 @@ export default function RequestsPage() {
                     <button
                         key={f}
                         onClick={() => setFilter(f)}
-                        className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
-                            filter === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                        }`}
+                        className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${filter === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                            }`}
                     >
                         {f === 'all' && 'Semua'}
                         {f === 'pending' && `Menunggu (${requests.filter(r => r.status === 'pending').length})`}
@@ -146,7 +145,7 @@ export default function RequestsPage() {
             </div>
 
             {filteredRequests.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
+                <div className="text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-lg">
                     <FileSpreadsheet className="h-16 w-16 text-gray-200 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada Request</h3>
                     <p className="text-gray-500">Permintaan template kustom akan muncul di sini</p>
@@ -162,9 +161,8 @@ export default function RequestsPage() {
                                 key={req.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className={`bg-white rounded-xl border p-5 hover:shadow-md transition-shadow cursor-pointer ${
-                                    req.status === 'pending' ? 'border-yellow-200' : 'border-gray-100'
-                                }`}
+                                className={`bg-white rounded-2xl border p-5 shadow-lg hover:shadow-xl transition-shadow cursor-pointer ${req.status === 'pending' ? 'border-yellow-300' : 'border-gray-200'
+                                    }`}
                                 onClick={() => setSelectedRequest(req)}
                             >
                                 <div className="flex items-start gap-4">

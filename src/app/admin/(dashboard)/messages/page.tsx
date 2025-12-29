@@ -138,7 +138,7 @@ export default function MessagesPage() {
             </div>
 
             {filteredMessages.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
+                <div className="text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-lg">
                     <MessageSquare className="h-16 w-16 text-gray-200 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada Pesan</h3>
                     <p className="text-gray-500">Pesan dari pengunjung akan muncul di sini</p>
@@ -154,7 +154,7 @@ export default function MessagesPage() {
                                 key={message.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className={`bg-white rounded-xl border p-5 hover:shadow-md transition-shadow cursor-pointer ${message.status === 'unread' ? 'border-red-200 bg-red-50/30' : 'border-gray-100'
+                                className={`bg-white rounded-2xl border p-5 shadow-lg hover:shadow-xl transition-shadow cursor-pointer ${message.status === 'unread' ? 'border-red-300 bg-red-50/30' : 'border-gray-200'
                                     }`}
                                 onClick={() => {
                                     setSelectedMessage(message)

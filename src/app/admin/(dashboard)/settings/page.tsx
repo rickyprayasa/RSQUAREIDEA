@@ -458,7 +458,7 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.15 }}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6"
+                className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 md:p-6"
             >
                 {/* General Tab */}
                 {activeTab === 'general' && (
@@ -515,7 +515,7 @@ export default function SettingsPage() {
                                 />
                             </div>
                         </div>
-                        <div className="mt-3 md:mt-4 p-2.5 md:p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div className="mt-3 md:mt-4 p-2.5 md:p-3 bg-gray-50 border border-gray-200 rounded-xl">
                             <p className="text-xs text-gray-600">
                                 <strong>Info:</strong> Data ini ditampilkan di halaman Tentang Kami. Total penjualan adalah gabungan dari penjualan di platform lain (Lynk.ID, Karyakarsa, Mayar.id, dll) + orders completed dari website ini.
                             </p>
@@ -561,7 +561,7 @@ export default function SettingsPage() {
                                 iconColor="text-pink-500"
                             />
                         </div>
-                        
+
                         {/* Masa Aktif Voucher */}
                         <div className="p-3 md:p-4 bg-purple-50 border border-purple-200 rounded-xl">
                             <h4 className="font-medium text-purple-900 mb-3 flex items-center gap-2 text-sm md:text-base">
@@ -1206,11 +1206,10 @@ export default function SettingsPage() {
                                                 setCopiedUrl(true)
                                                 setTimeout(() => setCopiedUrl(false), 2000)
                                             }}
-                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${
-                                                copiedUrl 
-                                                    ? 'bg-green-500 text-white' 
+                                            className={`px-4 py-3 rounded-xl font-medium transition-all ${copiedUrl
+                                                    ? 'bg-green-500 text-white'
                                                     : 'bg-yellow-500 text-white hover:bg-yellow-600'
-                                            }`}
+                                                }`}
                                         >
                                             {copiedUrl ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
                                         </button>
@@ -1241,15 +1240,15 @@ export default function SettingsPage() {
                 )}
                 {/* Telegram Tab */}
                 {activeTab === 'telegram' && (
-                    <TelegramSettings 
-                        settings={settings} 
+                    <TelegramSettings
+                        settings={settings}
                         handleChange={handleChange}
                     />
                 )}
                 {/* Duitku Tab */}
                 {activeTab === 'duitku' && (
-                    <DuitkuSettings 
-                        settings={settings} 
+                    <DuitkuSettings
+                        settings={settings}
                         handleChange={handleChange}
                     />
                 )}
@@ -1430,9 +1429,9 @@ function DuitkuSettings({ settings, handleChange }: { settings: SettingsData, ha
             })
             const data = await response.json()
             if (data.paymentMethods) {
-                setTestResult({ 
-                    success: true, 
-                    message: `Berhasil! ${data.paymentMethods.length} metode pembayaran tersedia.` 
+                setTestResult({
+                    success: true,
+                    message: `Berhasil! ${data.paymentMethods.length} metode pembayaran tersedia.`
                 })
             } else {
                 setTestResult({ success: false, message: data.error || 'Gagal mengambil metode pembayaran' })

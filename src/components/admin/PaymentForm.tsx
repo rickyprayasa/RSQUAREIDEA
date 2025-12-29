@@ -26,7 +26,7 @@ export function PaymentForm({ payment }: PaymentFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    
+
     const [formData, setFormData] = useState({
         type: payment?.type || 'internal',
         name: payment?.name || '',
@@ -41,7 +41,7 @@ export function PaymentForm({ payment }: PaymentFormProps) {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target
-        
+
         if (type === 'checkbox') {
             const checked = (e.target as HTMLInputElement).checked
             setFormData(prev => ({ ...prev, [name]: checked }))
@@ -56,10 +56,10 @@ export function PaymentForm({ payment }: PaymentFormProps) {
         setLoading(true)
 
         try {
-            const url = payment 
-                ? `/api/admin/payments/${payment.id}` 
+            const url = payment
+                ? `/api/admin/payments/${payment.id}`
                 : '/api/admin/payments'
-            
+
             const method = payment ? 'PUT' : 'POST'
 
             const res = await fetch(url, {
@@ -84,7 +84,7 @@ export function PaymentForm({ payment }: PaymentFormProps) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                 {error && (
                     <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">
                         {error}
@@ -98,11 +98,10 @@ export function PaymentForm({ payment }: PaymentFormProps) {
                             Tipe Pembayaran *
                         </label>
                         <div className="grid grid-cols-2 gap-4">
-                            <label className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                                formData.type === 'internal'
+                            <label className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.type === 'internal'
                                     ? 'border-blue-500 bg-blue-50'
                                     : 'border-gray-200 hover:border-gray-300'
-                            }`}>
+                                }`}>
                                 <input
                                     type="radio"
                                     name="type"
@@ -111,19 +110,17 @@ export function PaymentForm({ payment }: PaymentFormProps) {
                                     onChange={handleChange}
                                     className="sr-only"
                                 />
-                                <Building className={`h-5 w-5 ${
-                                    formData.type === 'internal' ? 'text-blue-600' : 'text-gray-400'
-                                }`} />
+                                <Building className={`h-5 w-5 ${formData.type === 'internal' ? 'text-blue-600' : 'text-gray-400'
+                                    }`} />
                                 <div>
                                     <p className="font-medium text-gray-900">Internal</p>
                                     <p className="text-xs text-gray-500">Bank, QRIS, E-Wallet</p>
                                 </div>
                             </label>
-                            <label className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                                formData.type === 'external'
+                            <label className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.type === 'external'
                                     ? 'border-purple-500 bg-purple-50'
                                     : 'border-gray-200 hover:border-gray-300'
-                            }`}>
+                                }`}>
                                 <input
                                     type="radio"
                                     name="type"
@@ -132,9 +129,8 @@ export function PaymentForm({ payment }: PaymentFormProps) {
                                     onChange={handleChange}
                                     className="sr-only"
                                 />
-                                <ExternalLink className={`h-5 w-5 ${
-                                    formData.type === 'external' ? 'text-purple-600' : 'text-gray-400'
-                                }`} />
+                                <ExternalLink className={`h-5 w-5 ${formData.type === 'external' ? 'text-purple-600' : 'text-gray-400'
+                                    }`} />
                                 <div>
                                     <p className="font-medium text-gray-900">External</p>
                                     <p className="text-xs text-gray-500">Redirect URL</p>
@@ -163,7 +159,7 @@ export function PaymentForm({ payment }: PaymentFormProps) {
                     {formData.type === 'internal' && (
                         <div className="space-y-6 border-t border-gray-100 pt-6">
                             <h3 className="font-semibold text-gray-900">Detail Rekening</h3>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -227,7 +223,7 @@ export function PaymentForm({ payment }: PaymentFormProps) {
                     {formData.type === 'external' && (
                         <div className="space-y-6 border-t border-gray-100 pt-6">
                             <h3 className="font-semibold text-gray-900">URL Pembayaran</h3>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     URL Redirect *

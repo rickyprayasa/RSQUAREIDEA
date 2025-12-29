@@ -151,7 +151,7 @@ export default function FeedbackPage() {
             </div>
 
             {filteredFeedback.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
+                <div className="text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-lg">
                     <MessageSquare className="h-16 w-16 text-gray-200 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada Feedback</h3>
                     <p className="text-gray-500">Feedback dari pengguna akan muncul di sini</p>
@@ -166,7 +166,7 @@ export default function FeedbackPage() {
                                 key={fb.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-shadow cursor-pointer"
+                                className="bg-white rounded-2xl border border-gray-200 p-5 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
                                 onClick={() => setSelectedFeedback(fb)}
                             >
                                 <div className="flex items-start justify-between">

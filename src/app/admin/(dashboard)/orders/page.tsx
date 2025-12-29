@@ -158,7 +158,7 @@ export default function OrdersPage() {
         return (
             <div className="space-y-6">
                 <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
-                <div className="bg-white rounded-xl p-12">
+                <div className="bg-white rounded-2xl p-12 shadow-lg border border-gray-200">
                     <div className="animate-pulse space-y-4">
                         {[1, 2, 3].map(i => (
                             <div key={i} className="h-16 bg-gray-100 rounded-lg" />
@@ -210,7 +210,7 @@ export default function OrdersPage() {
 
             {/* Empty State */}
             {filteredOrders.length === 0 ? (
-                <div className="bg-white rounded-xl p-8 md:p-12 text-center border border-gray-100">
+                <div className="bg-white rounded-2xl p-8 md:p-12 text-center border border-gray-200 shadow-lg">
                     <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500">Tidak ada pesanan</p>
                 </div>
@@ -222,7 +222,7 @@ export default function OrdersPage() {
                             const status = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending
                             const confirmStatus = order.confirmation ? confirmationStatusConfig[order.confirmation.status] : null
                             return (
-                                <div key={order.id} className="bg-white rounded-xl p-4 border border-gray-100">
+                                <div key={order.id} className="bg-white rounded-2xl p-4 border border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
                                     <div className="flex items-start justify-between gap-2 mb-3">
                                         <div>
                                             <p className="font-mono text-xs font-medium text-gray-900">{order.orderNumber}</p>
@@ -280,7 +280,7 @@ export default function OrdersPage() {
                     </div>
 
                     {/* Desktop: Table layout */}
-                    <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="hidden md:block bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>

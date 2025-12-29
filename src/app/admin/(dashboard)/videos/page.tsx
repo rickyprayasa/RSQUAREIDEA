@@ -38,7 +38,7 @@ export default async function VideosPage() {
             </div>
 
             {videos.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                         <Play className="w-8 h-8 text-gray-400" />
                     </div>
@@ -61,7 +61,7 @@ export default async function VideosPage() {
                         return (
                             <div
                                 key={video.id}
-                                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden group"
+                                className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden group hover:shadow-xl transition-shadow"
                             >
                                 <div className="relative aspect-video bg-gray-100">
                                     {thumbnail && (

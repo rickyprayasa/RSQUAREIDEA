@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
-                    className="mt-8 space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-gray-100"
+                    className="mt-8 space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-gray-200"
                     onSubmit={handleSubmit}
                 >
                     {error && (

@@ -86,8 +86,8 @@ export default function CategoriesPage() {
         const iconUrl = formData.icon || suggestIcon(formData.name)
 
         try {
-            const url = editingCategory 
-                ? `/api/admin/categories/${editingCategory.id}` 
+            const url = editingCategory
+                ? `/api/admin/categories/${editingCategory.id}`
                 : '/api/admin/categories'
             const method = editingCategory ? 'PUT' : 'POST'
 
@@ -174,7 +174,7 @@ export default function CategoriesPage() {
                 </button>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                 <div className="divide-y divide-gray-100">
                     {categories.length === 0 ? (
                         <div className="p-12 text-center">
@@ -209,13 +209,13 @@ export default function CategoriesPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button 
+                                    <button
                                         onClick={() => handleEdit(category)}
                                         className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                                     >
                                         <Pencil className="h-4 w-4" />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setDeleteModal({ isOpen: true, category })}
                                         className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                     >
@@ -232,7 +232,7 @@ export default function CategoriesPage() {
             <AnimatePresence>
                 {showForm && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -374,7 +374,7 @@ export default function CategoriesPage() {
             <AnimatePresence>
                 {deleteModal.isOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -393,7 +393,7 @@ export default function CategoriesPage() {
                                 </div>
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">Hapus Kategori?</h3>
                                 <p className="text-gray-500 mb-6">
-                                    Apakah Anda yakin ingin menghapus kategori <strong className="text-gray-900">{deleteModal.category?.name}</strong>? 
+                                    Apakah Anda yakin ingin menghapus kategori <strong className="text-gray-900">{deleteModal.category?.name}</strong>?
                                     Tindakan ini tidak dapat dibatalkan.
                                 </p>
                                 <div className="flex gap-3">

@@ -94,7 +94,7 @@ export default function PaymentsPage() {
             </div>
 
             {payments.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-12 text-center">
                     <CreditCard className="h-16 w-16 mx-auto text-gray-300 mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada Metode Pembayaran</h3>
                     <p className="text-gray-500 mb-6">Tambahkan metode pembayaran untuk pelanggan</p>
@@ -111,15 +111,13 @@ export default function PaymentsPage() {
                     {payments.map((payment) => (
                         <div
                             key={payment.id}
-                            className={`bg-white rounded-xl border p-5 transition-all ${
-                                payment.isActive ? 'border-gray-100' : 'border-gray-200 opacity-60'
-                            }`}
+                            className={`bg-white rounded-2xl border p-5 transition-all shadow-lg hover:shadow-xl ${payment.isActive ? 'border-gray-200' : 'border-gray-200 opacity-60'
+                                }`}
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                        payment.type === 'external' ? 'bg-purple-100' : 'bg-blue-100'
-                                    }`}>
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${payment.type === 'external' ? 'bg-purple-100' : 'bg-blue-100'
+                                        }`}>
                                         {payment.type === 'external' ? (
                                             <ExternalLink className="h-6 w-6 text-purple-600" />
                                         ) : payment.qrCodeImage ? (
@@ -131,11 +129,10 @@ export default function PaymentsPage() {
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h3 className="font-semibold text-gray-900">{payment.name}</h3>
-                                            <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                                payment.type === 'external' 
-                                                    ? 'bg-purple-100 text-purple-700' 
+                                            <span className={`text-xs px-2 py-0.5 rounded-full ${payment.type === 'external'
+                                                    ? 'bg-purple-100 text-purple-700'
                                                     : 'bg-blue-100 text-blue-700'
-                                            }`}>
+                                                }`}>
                                                 {payment.type === 'external' ? 'External' : 'Transfer'}
                                             </span>
                                         </div>
@@ -150,14 +147,12 @@ export default function PaymentsPage() {
                                 <div className="flex items-center gap-3">
                                     <button
                                         onClick={() => toggleStatus(payment.id, payment.isActive)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                            payment.isActive ? 'bg-green-500' : 'bg-gray-300'
-                                        }`}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${payment.isActive ? 'bg-green-500' : 'bg-gray-300'
+                                            }`}
                                     >
                                         <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                                payment.isActive ? 'translate-x-6' : 'translate-x-1'
-                                            }`}
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${payment.isActive ? 'translate-x-6' : 'translate-x-1'
+                                                }`}
                                         />
                                     </button>
                                     <Link
@@ -183,7 +178,7 @@ export default function PaymentsPage() {
             <AnimatePresence>
                 {deleteModal.isOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -202,7 +197,7 @@ export default function PaymentsPage() {
                                 </div>
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">Hapus Metode Pembayaran?</h3>
                                 <p className="text-gray-500 mb-6">
-                                    Apakah Anda yakin ingin menghapus <strong className="text-gray-900">{deleteModal.payment?.name}</strong>? 
+                                    Apakah Anda yakin ingin menghapus <strong className="text-gray-900">{deleteModal.payment?.name}</strong>?
                                     Tindakan ini tidak dapat dibatalkan.
                                 </p>
                                 <div className="flex gap-3">

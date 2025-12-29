@@ -103,7 +103,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
         <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
             <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
                 <div className="lg:hidden w-10" />
-                
+
                 <div className="flex-1" />
 
                 {/* Notifications */}
@@ -125,15 +125,15 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                     <AnimatePresence>
                         {notifOpen && (
                             <>
-                                <motion.div 
+                                <motion.div
                                     className="fixed inset-0 z-10"
                                     onClick={() => setNotifOpen(false)}
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                 />
-                                <motion.div 
-                                    className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden"
+                                <motion.div
+                                    className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-lg border border-gray-200 z-20 overflow-hidden"
                                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -164,9 +164,8 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                                                 return (
                                                     <div
                                                         key={notif.id}
-                                                        className={`flex items-start gap-3 p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors ${
-                                                            !notif.is_read ? 'bg-orange-50/50' : ''
-                                                        }`}
+                                                        className={`flex items-start gap-3 p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors ${!notif.is_read ? 'bg-orange-50/50' : ''
+                                                            }`}
                                                     >
                                                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${colorClass}`}>
                                                             <Icon className="h-4 w-4" />
@@ -245,15 +244,15 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                     <AnimatePresence>
                         {dropdownOpen && (
                             <>
-                                <motion.div 
+                                <motion.div
                                     className="fixed inset-0 z-10"
                                     onClick={() => setDropdownOpen(false)}
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                 />
-                                <motion.div 
-                                    className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden"
+                                <motion.div
+                                    className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-lg border border-gray-200 z-20 overflow-hidden"
                                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
