@@ -284,6 +284,44 @@ export interface Database {
                     updated_at?: string
                 }
             }
+            articles: {
+                Row: {
+                    id: string
+                    title: string
+                    slug: string
+                    excerpt: string | null
+                    content: string | null
+                    thumbnail_url: string | null
+                    published: boolean
+                    author_id: string | null
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    title: string
+                    slug: string
+                    excerpt?: string | null
+                    content?: string | null
+                    thumbnail_url?: string | null
+                    published?: boolean
+                    author_id?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    title?: string
+                    slug?: string
+                    excerpt?: string | null
+                    content?: string | null
+                    thumbnail_url?: string | null
+                    published?: boolean
+                    author_id?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
         }
     }
 }

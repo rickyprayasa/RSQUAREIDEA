@@ -22,6 +22,7 @@ import {
     Inbox,
     BarChart3,
     Store,
+    FileText,
     type LucideIcon
 } from 'lucide-react'
 import { useState } from 'react'
@@ -77,6 +78,14 @@ const navGroups: NavGroup[] = [
             { name: 'Request', href: '/admin/requests', icon: FileSpreadsheet, color: 'from-lime-500 to-green-500' },
         ]
     },
+    {
+        name: 'Konten',
+        icon: FileText,
+        color: 'from-blue-500 to-indigo-500',
+        items: [
+            { name: 'Artikel', href: '/admin/articles', icon: FileText, color: 'from-blue-500 to-indigo-500' },
+        ]
+    },
 ]
 
 // Bottom navigation
@@ -88,7 +97,7 @@ const bottomNav: NavItem[] = [
 export function AdminSidebar() {
     const pathname = usePathname()
     const [mobileOpen, setMobileOpen] = useState(false)
-    const [expandedGroups, setExpandedGroups] = useState<string[]>(['Katalog', 'Penjualan', 'Inbox'])
+    const [expandedGroups, setExpandedGroups] = useState<string[]>(['Katalog', 'Penjualan', 'Inbox', 'Konten'])
 
     const toggleGroup = (groupName: string) => {
         setExpandedGroups(prev =>
@@ -117,8 +126,8 @@ export function AdminSidebar() {
             >
                 <div
                     className={`flex items-center gap-2.5 px-3 ${compact ? 'py-2 pl-9' : 'py-2.5'} rounded-lg text-sm font-medium transition-all ${isActive
-                            ? `bg-gradient-to-r ${item.color} text-white shadow-lg`
-                            : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg`
+                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
                         }`}
                 >
                     <item.icon className={`${compact ? 'h-4 w-4' : 'h-4.5 w-4.5'}`} />

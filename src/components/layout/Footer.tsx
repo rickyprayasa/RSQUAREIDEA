@@ -9,6 +9,7 @@ import { LordIcon, ClientLordIcon } from '@/components/ui/lordicon'
 const footerLinks = {
     products: [
         { name: 'Semua Template', href: '/templates', lordicon: 'https://cdn.lordicon.com/pflszboa.json' },
+        { name: 'Artikel & Tutorial', href: '/articles', lordicon: 'https://cdn.lordicon.com/wxnxiano.json' },
         { name: 'Template Gratis', href: '/templates?filter=free', lordicon: 'https://cdn.lordicon.com/wcjauznf.json' },
         { name: 'Template Premium', href: '/templates?filter=premium', lordicon: 'https://cdn.lordicon.com/mdgrhyca.json' },
         { name: 'Jasa Kustom', href: '/jasa-kustom', lordicon: 'https://cdn.lordicon.com/wloilxuq.json' },
@@ -108,10 +109,10 @@ export function Footer() {
                                         <LordIcon src={item.lordicon} trigger="hover" size={36} colors={item.colors} />
                                     </a>
                                 ))}
-                                
+
                                 {/* Divider */}
                                 <div className="w-px h-6 md:h-8 bg-gray-700 mx-0.5 md:mx-1" />
-                                
+
                                 {/* Saweria */}
                                 <a
                                     href="https://saweria.co/rsquareidea"

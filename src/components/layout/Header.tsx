@@ -13,6 +13,7 @@ import { CartButton } from '@/components/cart/CartButton'
 const navigation = [
     { name: 'Beranda', href: '/' },
     { name: 'Templates', href: '/templates' },
+    { name: 'Artikel', href: '/articles' },
     { name: 'Kontak', href: '/kontak' },
 ]
 
@@ -50,9 +51,8 @@ export function Header() {
                                 <span className={`relative z-10 ${isActive ? 'text-orange-600' : 'text-gray-600 group-hover:text-gray-900'}`}>
                                     {item.name}
                                 </span>
-                                <span className={`absolute bottom-0 left-1/2 h-0.5 bg-orange-500 transition-all duration-300 ease-out ${
-                                    isActive ? 'w-1/2 -translate-x-1/2' : 'w-0 group-hover:w-1/2 group-hover:-translate-x-1/2'
-                                }`} />
+                                <span className={`absolute bottom-0 left-1/2 h-0.5 bg-orange-500 transition-all duration-300 ease-out ${isActive ? 'w-1/2 -translate-x-1/2' : 'w-0 group-hover:w-1/2 group-hover:-translate-x-1/2'
+                                    }`} />
                             </Link>
                         )
                     })}
@@ -89,7 +89,7 @@ export function Header() {
             {/* Mobile Navigation */}
             <AnimatePresence>
                 {mobileMenuOpen && (
-                    <motion.div 
+                    <motion.div
                         className="md:hidden border-t border-gray-100 bg-white overflow-hidden"
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
@@ -109,11 +109,10 @@ export function Header() {
                                     >
                                         <Link
                                             href={item.href}
-                                            className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                                                isActive 
-                                                    ? 'bg-orange-50 text-orange-600' 
+                                            className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${isActive
+                                                    ? 'bg-orange-50 text-orange-600'
                                                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 active:scale-[0.98]'
-                                            }`}
+                                                }`}
                                             onClick={() => setMobileMenuOpen(false)}
                                         >
                                             {item.name}
