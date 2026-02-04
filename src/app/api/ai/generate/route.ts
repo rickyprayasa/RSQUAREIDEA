@@ -2,6 +2,7 @@ import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { streamText } from 'ai';
 
 export const maxDuration = 60;
+export const runtime = 'edge';
 
 // Initialize Z.Ai (Zhipu AI) using OpenAI-compatible provider
 const zai = createOpenAICompatible({
