@@ -29,6 +29,7 @@ interface ArticleEditorProps {
 export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [isPublishing, setIsPublishing] = useState(false)
     const [showSidebar, setShowSidebar] = useState(true)
     const [formData, setFormData] = useState({
         title: article?.title || '',
@@ -90,9 +91,9 @@ export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
         setFormData(prev => ({ ...prev, content }))
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setLoading(true)
+    const saveArticle = async (data: typeof formData, isPublishAction = false) => {
+        const loader = isPublishAction ? setIsPublishing : setLoading
+        loader(true)
 
         try {
             const url = isNew ? '/api/admin/articles' : `/api/admin/articles/${article?.id}`
@@ -101,22 +102,43 @@ export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
             const res = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(data),
             })
 
             if (!res.ok) throw new Error('Failed to save article')
 
-            const data = await res.json()
+            const responseData = await res.json()
 
-            // alert('Article saved successfully!')
-            router.push('/admin/articles')
+            if (isPublishAction) {
+                toast.success(data.published ? 'Artikel berhasil dipublish!' : 'Artikel dikembalikan ke draft')
+            } else {
+                toast.success('Artikel berhasil disimpan')
+            }
+
             router.refresh()
+            if (isNew && !isPublishAction) {
+                // If it was a new article and we saved it, we might want to redirect to edit mode or just stay
+                // For now let's go back to list as per original behavior or maybe stay?
+                // Original behavior was push to /admin/articles
+                router.push('/admin/articles')
+            }
         } catch (error) {
             console.error('Error saving article:', error)
-            alert('Error saving article')
+            toast.error('Gagal menyimpan artikel')
         } finally {
-            setLoading(false)
+            loader(false)
         }
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        await saveArticle(formData)
+    }
+
+    const handlePublish = async () => {
+        const newPublishedState = !formData.published
+        setFormData(prev => ({ ...prev, published: newPublishedState }))
+        await saveArticle({ ...formData, published: newPublishedState }, true)
     }
 
     return (
@@ -135,11 +157,20 @@ export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
                             {isNew ? 'Buat Artikel Baru' : 'Edit Artikel'}
                         </h1>
                         <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                            <span className={formData.published ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>
-                                {formData.published ? 'Published' : 'Draft'}
-                            </span>
-                            <span>•</span>
-                            <span>{formData.content?.length || 0} karakter</span>
+                            {loading || isPublishing ? (
+                                <span className="flex items-center gap-1.5 text-orange-600 font-medium animate-pulse">
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    Menyimpan...
+                                </span>
+                            ) : (
+                                <>
+                                    <span className={formData.published ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>
+                                        {formData.published ? 'Published' : 'Draft'}
+                                    </span>
+                                    <span>•</span>
+                                    <span>{formData.content?.length || 0} karakter</span>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -156,17 +187,19 @@ export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
                     <div className="h-6 w-px bg-gray-200 mx-1" />
                     <button
                         type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, published: !prev.published }))}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${formData.published
+                        onClick={handlePublish}
+                        disabled={loading || isPublishing}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border flex items-center gap-2 ${formData.published
                             ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
                             : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-                            }`}
+                            } disabled:opacity-50`}
                     >
+                        {isPublishing && <Loader2 className="h-3 w-3 animate-spin" />}
                         {formData.published ? 'Unpublish' : 'Publish'}
                     </button>
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || isPublishing}
                         className="flex items-center gap-2 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium transition-colors disabled:opacity-50 shadow-sm shadow-orange-200"
                     >
                         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

@@ -56,25 +56,67 @@ PERBAIKAN YANG HARUS DILAKUKAN:
 7. JANGAN ubah kata-kata atau redaksi kalimat, HANYA format HTML-nya saja.
 
 RETURN: Hanya kode HTML yang sudah dirapikan.`;
+    } else if (command === 'fix_grammar') {
+        systemInstruction += `
+
+TUGAS: Koreksi Typo, Ejaan, dan Kesalahan Penulisan Lainnya dari konten HTML berikut tanpa merusak tag HTML-nya.
+
+PERBAIKAN YANG HARUS DILAKUKAN:
+1. Koreksi semua kesalahan penulisan (typo) Bahasa Indonesia.
+2. Hapus spasi berlebih (misal: "kalimat  ini" menjadi "kalimat ini").
+3. Hapus kata yang tertulis ganda secara tidak sengaja (misal: "dan dan" menjadi "dan", "saya saya" menjadi "saya").
+   CATATAN: Hati-hati dengan kata ulang yang valid dalam Bahasa Indonesia (misal: "kura-kura", "jalan-jalan", "makan-makan" itu BENAR, jangan dihapus).
+4. Perbaiki tanda baca (titik, koma, spasi setelah tanda baca).
+5. Gunakan Ejaan Yang Disempurnakan (EYD) / PUEBI.
+6. SANGAT PENTING: JANGAN MENGHAPUS ATAU MERUSAK TAG HTML (<p>, <h2>, <strong>, dll).
+7. JANGAN mengubah makna kalimat atau gaya bahasa (tetap santai/casual jika aslinya demikian).
+
+RETURN: Kode HTML lengkap yang isinya sudah dikoreksi.`;
     } else if (command === 'generate') {
         systemInstruction += `
 
 TUGAS: Tulis artikel atau bagian artikel berdasarkan permintaan pengguna.
 
-FORMAT OUTPUT (WAJIB):
-- Gunakan format HTML yang valid
-- Gunakan <h2> untuk sub-judul utama, <h3> untuk sub-sub-judul
-- Gunakan <p> untuk paragraf
-- Gunakan <ul><li> untuk daftar
-- Gunakan <strong> untuk penekanan penting
-- JANGAN gunakan Markdown, gunakan HTML saja
-- Buat paragraf pendek-pendek (2-3 kalimat) agar mudah dibaca
+GAYA PENULISAN (TONE & VOICE):
+- Gunakan Bahasa Indonesia yang **NON-FORMAL, SANTAI, dan RAMAH** (seperti ngobrol dengan teman akrab).
+- **HINDARI** bahasa baku kaku seperti "Anda", "adalah", "merupakan". Ganti dengan "Kamu", "itu", "tuh".
+- Buat tulisan yang **MUDAH DIPAHAMI** oleh pemula sekalipun. Hindari istilah teknis yang rumit tanpa penjelasan.
+- Gunakan **EMOJI (Icon)** yang relevan di judul, sub-judul, atau poin-poin penting agar tampilan LEBIH MENARIK 🤩✨.
+- Boleh gunakan kata seru seperti "Wah", "Lho", "Kok bisa?", "Nah", dll.
 
-GAYA PENULISAN:
-- Mulai dengan kalimat pembuka yang menarik
-- Jelaskan poin-poin dengan bahasa sederhana
-- Berikan contoh nyata jika memungkinkan
-- Akhiri dengan ringkasan atau ajakan bertindak`;
+FORMAT OUTPUT (WAJIB HTML):
+- Gunakan format HTML yang valid.
+- Gunakan <h2> untuk sub-judul utama, <h3> untuk sub-sub-judul.
+- Gunakan <p> untuk paragraf.
+- Gunakan <ul><li> untuk daftar.
+- Gunakan <strong> untuk penekanan penting.
+- JANGAN gunakan Markdown, gunakan HTML saja.
+- Buat paragraf pendek-pendek (2-3 kalimat) agar mata tidak lelah.
+
+STRUKTUR KONTEN:
+1. **Hook**: Mulai dengan pertanyaan atau pernyataan yang relate dengan masalah pembaca.
+2. **Body**: Jelaskan solusi dengan langkah-langkah yang jelas.
+3. **Closing**: Berikan kesimpulan singkat dan semangat.
+
+INSTRUKSI KHUSUS (VISUAL & FORMULA):
+1. **FORMULA EXCEL/SPREADSHEET**: Jika menulis rumus, WAJIB gunakan format UI gelap agar terlihat profesional. Gunakan struktur HTML ini:
+   \`\`\`html
+   <div class="bg-slate-900 text-slate-50 p-4 rounded-lg font-mono text-sm shadow-sm overflow-x-auto my-4 border border-slate-700">
+     =RUMUS(param1; param2; ...)
+   </div>
+   \`\`\`
+   JANGAN hanya menulis rumus di dalam paragraf biasa atau blockquote.
+
+2. **ILUSTRASI GAMBAR**: Berikan saran di mana gambar harus diletakkan untuk memperjelas penjelasan. Gunakan format placeholder ini:
+   \`\`\`html
+   <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg text-blue-800 my-4 flex items-start gap-3">
+     <span class="text-2xl mt-1">🖼️</span>
+     <div>
+       <strong>Saran Ilustrasi:</strong> [Deskripsi detail gambar yang sebaiknya dimasukkan di sini, misal: Screenshot tabel data sebelum difilter]
+     </div>
+   </div>
+   \`\`\`
+   Berikan minimal 1-2 saran ilustrasi per artikel.`;
     }
 
     try {

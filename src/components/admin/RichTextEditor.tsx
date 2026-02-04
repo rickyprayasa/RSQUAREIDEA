@@ -105,8 +105,8 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
             const imgMatch = html.match(/<img[^>]+src="([^">]+)"/)
             const imageUrl = imgMatch ? imgMatch[1] : undefined
 
-            // For fix_format, send the current content as context
-            const context = cmd === 'fix_format' ? html : undefined
+            // For fix_format and fix_grammar, send the current content as context
+            const context = (cmd === 'fix_format' || cmd === 'fix_grammar') ? html : undefined
 
             const response = await fetch('/api/ai/generate', {
                 method: 'POST',
@@ -129,10 +129,10 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
             if (data.text) {
                 console.log("Inserting AI content:", data.text.substring(0, 100))
 
-                if (cmd === 'fix_format') {
+                if (cmd === 'fix_format' || cmd === 'fix_grammar') {
                     // Replace entire content
                     editor.commands.setContent(data.text)
-                    toast.success('Format artikel berhasil dirapikan!')
+                    toast.success(cmd === 'fix_format' ? 'Format artikel berhasil dirapikan!' : 'Typo dan ejaan berhasil diperbaiki!')
                 } else {
                     editor.chain().focus().insertContent(data.text).run()
                 }
@@ -323,6 +323,17 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                         >
                             {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 text-green-500" />}
                             Rapikan Format
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => generateContent('fix_grammar')}
+                            disabled={isGenerating}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-gray-900 transition-colors disabled:opacity-50"
+                            title="Koreksi typo dan ejaan otomatis"
+                        >
+                            {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3 text-blue-500" />}
+                            Cek Typo
                         </button>
 
                         <motion.button
