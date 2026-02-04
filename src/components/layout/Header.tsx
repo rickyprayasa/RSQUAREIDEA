@@ -46,11 +46,17 @@ export function Header() {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className="relative px-4 py-2 text-sm font-medium transition-colors duration-200 group"
+                                className="relative px-4 py-2 text-sm font-medium transition-colors duration-200 group flex items-center gap-1.5"
                             >
                                 <span className={`relative z-10 ${isActive ? 'text-orange-600' : 'text-gray-600 group-hover:text-gray-900'}`}>
                                     {item.name}
                                 </span>
+                                {item.name === 'Artikel' && (
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                    </span>
+                                )}
                                 <span className={`absolute bottom-0 left-1/2 h-0.5 bg-orange-500 transition-all duration-300 ease-out ${isActive ? 'w-1/2 -translate-x-1/2' : 'w-0 group-hover:w-1/2 group-hover:-translate-x-1/2'
                                     }`} />
                             </Link>
@@ -110,8 +116,8 @@ export function Header() {
                                         <Link
                                             href={item.href}
                                             className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${isActive
-                                                    ? 'bg-orange-50 text-orange-600'
-                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 active:scale-[0.98]'
+                                                ? 'bg-orange-50 text-orange-600'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 active:scale-[0.98]'
                                                 }`}
                                             onClick={() => setMobileMenuOpen(false)}
                                         >

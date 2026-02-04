@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
@@ -15,13 +15,21 @@ type Props = {
 
 async function getArticle(slug: string) {
     const supabase = await createAdminClient()
+    const authClient = await createClient()
 
-    const { data: article, error } = await supabase
+    const { data: { user } } = await authClient.auth.getUser()
+
+    let query = supabase
         .from('articles')
         .select('*')
         .eq('slug', slug)
-        .eq('published', true)
-        .single()
+
+    // Only filter by published if NOT logged in
+    if (!user) {
+        query = query.eq('published', true)
+    }
+
+    const { data: article, error } = await query.single()
 
     if (error) {
         console.error('Error fetching article:', error)
@@ -75,6 +83,17 @@ export default async function ArticlePage({ params }: Props) {
             {/* Hero / Header */}
             <div className="relative pt-32 pb-16">
                 <div className="container mx-auto px-4 max-w-4xl relative z-10">
+                    {/* Draft Preview Indicator */}
+                    {!article.published && (
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-yellow-100 px-4 py-1.5 text-sm font-medium text-yellow-800 border border-yellow-200 shadow-sm">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                            </span>
+                            Mode Preview (Draft)
+                        </div>
+                    )}
+
                     <Link
                         href="/articles"
                         className="group inline-flex items-center text-sm font-medium text-gray-500 hover:text-orange-600 mb-8 transition-colors"

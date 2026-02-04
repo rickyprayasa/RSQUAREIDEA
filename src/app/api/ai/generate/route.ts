@@ -111,10 +111,12 @@ INSTRUKSI KHUSUS (VISUAL & FORMULA):
 2. **ILUSTRASI GAMBAR**: Berikan saran di mana gambar harus diletakkan untuk memperjelas penjelasan. Gunakan format placeholder ini:
    \`\`\`html
    <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg text-blue-800 my-4 flex items-start gap-3">
-     <span class="text-2xl mt-1">🖼️</span>
-     <div>
-       <strong>Saran Ilustrasi:</strong> [Deskripsi detail gambar yang sebaiknya dimasukkan di sini, misal: Screenshot tabel data sebelum difilter]
-     </div>
+     <p class="m-0 flex items-start gap-3">
+       <span class="text-2xl mt-1">🖼️</span>
+       <span>
+         <strong>Saran Ilustrasi:</strong> [Deskripsi detail...]
+       </span>
+     </p>
    </div>
    \`\`\`
    Berikan minimal 1-2 saran ilustrasi per artikel.`;

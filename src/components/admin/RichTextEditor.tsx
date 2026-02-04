@@ -12,7 +12,7 @@ import {
     Bold, Italic, List, ListOrdered, Image as ImageIcon,
     Link as LinkIcon, Heading1, Heading2, Quote, Undo, Redo,
     Sparkles, Wand2, Check, Loader2, X, Underline,
-    Youtube as YoutubeIcon, Link2
+    Youtube as YoutubeIcon, Link2, Code, Layout
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 // useCompletion removed - using custom fetch instead
@@ -41,6 +41,54 @@ const ToolbarButton = ({ onClick, isActive, disabled, children, title }: any) =>
     </button>
 )
 
+import { Node, mergeAttributes } from '@tiptap/core'
+
+/**
+ * Custom Node for Excel Formulas (Dark UI)
+ */
+const FormulaNode = Node.create({
+    name: 'formula',
+    group: 'block',
+    content: 'text*', // Contains only text
+    draggable: true,
+
+    parseHTML() {
+        return [
+            {
+                tag: 'div',
+                getAttrs: (node) => (node as HTMLElement).classList.contains('bg-slate-900') && null,
+            },
+        ]
+    },
+
+    renderHTML({ HTMLAttributes }) {
+        return ['div', mergeAttributes(HTMLAttributes, { class: 'bg-slate-900 text-slate-50 p-4 rounded-lg font-mono text-sm shadow-sm overflow-x-auto my-4 border border-slate-700' }), 0]
+    },
+})
+
+/**
+ * Custom Node for Illustrations (Blue UI)
+ */
+const IllustrationNode = Node.create({
+    name: 'illustration',
+    group: 'block',
+    content: 'block+', // Contains paragraphs/blocks
+    draggable: true,
+
+    parseHTML() {
+        return [
+            {
+                tag: 'div',
+                getAttrs: (node) => (node as HTMLElement).classList.contains('bg-blue-50') && null,
+            },
+        ]
+    },
+
+    renderHTML({ HTMLAttributes }) {
+        return ['div', mergeAttributes(HTMLAttributes, { class: 'bg-blue-50 border border-blue-200 p-4 rounded-lg text-blue-800 my-4' }), 0]
+    },
+})
+
 export function RichTextEditor({ content, onChange, editable = true }: RichTextEditorProps) {
     const [linkUrl, setLinkUrl] = useState('')
     const [showAIModal, setShowAIModal] = useState(false)
@@ -67,6 +115,8 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
             StarterKit,
             Image,
             UnderlineExtension,
+            FormulaNode,
+            IllustrationNode,
             Youtube.configure({
                 controls: false,
             }),
@@ -322,6 +372,24 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                             title="Quote"
                         >
                             <Quote className="h-4 w-4" />
+                        </ToolbarButton>
+                    </div>
+
+                    {/* Custom Blocks */}
+                    <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-1">
+                        <ToolbarButton
+                            onClick={() => editor.chain().focus().toggleNode('formula', 'paragraph').run()}
+                            isActive={editor.isActive('formula')}
+                            title="Formula Style (Dark)"
+                        >
+                            <Code className="h-4 w-4" />
+                        </ToolbarButton>
+                        <ToolbarButton
+                            onClick={() => editor.chain().focus().toggleWrap('illustration').run()}
+                            isActive={editor.isActive('illustration')}
+                            title="Illustration Style (Blue)"
+                        >
+                            <Layout className="h-4 w-4" />
                         </ToolbarButton>
                     </div>
 

@@ -64,13 +64,33 @@ export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
                 })
             })
 
-            const data = await response.json()
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}))
+                throw new Error(data.error || 'Failed to generate excerpt')
+            }
 
-            if (data.error) throw new Error(data.error)
+            if (!response.body) throw new Error('No response body')
 
-            if (data.text) {
-                // Strip HTML tags if present (e.g. <p>...</p>)
-                const cleanText = data.text.replace(/<[^>]*>?/gm, '')
+            // Read the stream
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder()
+            let done = false
+            let fullText = ''
+
+            while (!done) {
+                const { value, done: doneReading } = await reader.read()
+                done = doneReading
+                const chunkValue = decoder.decode(value, { stream: !done })
+                fullText += chunkValue
+            }
+
+            if (fullText) {
+                // Strip HTML tags if present (e.g. <p>...</p>) since excerpt should be plain text usually
+                // But if the AI returns HTML as per system instruction, we might want to strip it.
+                // The system instruction generally enforces HTML for 'generate' command.
+                // However, for excerpt, we probably just want plain text. 
+                // Let's strip tags just in case.
+                const cleanText = fullText.replace(/<[^>]*>?/gm, '').trim()
                 setFormData(prev => ({ ...prev, excerpt: cleanText }))
                 toast.success('Excerpt berhasil dibuat!')
             }
