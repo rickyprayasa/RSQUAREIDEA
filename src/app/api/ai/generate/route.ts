@@ -1,5 +1,5 @@
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { generateText } from 'ai';
+import { streamText } from 'ai';
 
 export const maxDuration = 60;
 
@@ -141,16 +141,14 @@ INSTRUKSI KHUSUS (VISUAL & FORMULA):
             });
         }
 
-        // Use generateText instead of streamText for simpler response handling
-        const { text } = await generateText({
+        // Use streamText to prevent Vercel 504 timeouts on long generations
+        const result = await streamText({
             model: zai('glm-4.7'),
             messages: messages,
         });
 
-        console.log("Generation complete, length:", text.length);
-
-        // Return as JSON response
-        return Response.json({ text });
+        // Return stream response
+        return result.toTextStreamResponse();
     } catch (error) {
         console.error("AI Error:", error);
         return Response.json({ error: "Failed to generate content." }, { status: 500 });

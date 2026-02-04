@@ -90,7 +90,7 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
         immediatelyRender: false // Fix hydration mismatch
     })
 
-    // Custom generate function using fetch
+    // Custom generate function using fetch with streaming support
     const generateContent = async (cmd: string = 'generate', promptOverride?: string) => {
         if (!editor) return
 
@@ -119,30 +119,43 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                 })
             })
 
-            const data = await response.json()
-
-            if (data.error) {
-                alert('AI Error: ' + data.error)
-                return
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}))
+                throw new Error(data.error || 'Failed to generate content')
             }
 
-            if (data.text) {
-                console.log("Inserting AI content:", data.text.substring(0, 100))
+            if (!response.body) throw new Error('No response body')
+
+            // Read the stream
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder()
+            let done = false
+            let fullText = ''
+
+            while (!done) {
+                const { value, done: doneReading } = await reader.read()
+                done = doneReading
+                const chunkValue = decoder.decode(value, { stream: !done })
+                fullText += chunkValue
+            }
+
+            if (fullText) {
+                console.log("AI content received, length:", fullText.length)
 
                 if (cmd === 'fix_format' || cmd === 'fix_grammar') {
                     // Replace entire content
-                    editor.commands.setContent(data.text)
+                    editor.commands.setContent(fullText)
                     toast.success(cmd === 'fix_format' ? 'Format artikel berhasil dirapikan!' : 'Typo dan ejaan berhasil diperbaiki!')
                 } else {
-                    editor.chain().focus().insertContent(data.text).run()
+                    editor.chain().focus().insertContent(fullText).run()
                 }
 
                 setShowAIModal(false)
                 setAiInput('')
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('AI Generation Error:', error)
-            alert('Failed to generate content')
+            alert('AI Error: ' + (error.message || 'Failed to generate content'))
         } finally {
             setIsGenerating(false)
         }
