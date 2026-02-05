@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RichTextEditor } from './RichTextEditor'
-import { Loader2, Save, ArrowLeft, Image as ImageIcon, Sparkles, ChevronRight, ChevronLeft, LayoutPanelLeft } from 'lucide-react'
+import { Loader2, Save, ArrowLeft, Image as ImageIcon, Sparkles, ChevronRight, ChevronLeft, LayoutPanelLeft, Lightbulb, Eye, ExternalLink } from 'lucide-react'
 import { ImageUpload } from './ImageUpload'
 import Link from 'next/link'
 import { useCompletion } from '@ai-sdk/react'
@@ -41,8 +41,111 @@ export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
         published: article?.published || false,
     })
 
-    // Manual SEO Generation
+    // Manual SEO Generation & Idea Suggester
     const [isExcerptLoading, setIsExcerptLoading] = useState(false)
+    const [showIdeaModal, setShowIdeaModal] = useState(false)
+    const [isIdeaLoading, setIsIdeaLoading] = useState(false)
+    const [ideasContent, setIdeasContent] = useState('')
+
+    const handleSuggestIdeas = async () => {
+        setIsIdeaLoading(true)
+        setIdeasContent('') // Reset previous
+        try {
+            const response = await fetch('/api/ai/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    command: 'suggest_ideas',
+                    prompt: 'Generate article ideas', // Prompt handled by system instruction mostly
+                })
+            })
+
+            if (!response.ok) {
+                throw new Error('Failed to generate ideas')
+            }
+
+            if (!response.body) throw new Error('No response body')
+
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder()
+            let done = false
+            let fullText = ''
+
+            while (!done) {
+                const { value, done: doneReading } = await reader.read()
+                done = doneReading
+                const chunkValue = decoder.decode(value, { stream: !done })
+                // Update state progressively for streaming effect
+                fullText += chunkValue
+                setIdeasContent(fullText)
+            }
+        } catch (error: any) {
+            console.error("AI Error", error)
+            alert("Gagal cari ide: " + error.message)
+        } finally {
+            setIsIdeaLoading(false)
+        }
+    }
+
+    // Called when user clicks on an idea to select it
+    const handleSelectIdea = async (e: React.MouseEvent<HTMLDivElement>) => {
+        const target = e.target as HTMLElement
+        // Check if clicked on H3 (title) or LI (card)
+        const li = target.closest('li')
+        if (!li) return
+
+        const h3 = li.querySelector('h3')
+        const p = li.querySelector('p')
+        if (!h3) return
+
+        // Extract title text (remove emoji prefix if present)
+        let title = h3.textContent || ''
+        title = title.replace(/^[\u{1F300}-\u{1F9FF}\s]+/u, '').trim() // Remove leading emojis
+
+        // Extract description for context
+        const description = p?.textContent || ''
+
+        // Set the title and close modal
+        setFormData(prev => ({ ...prev, title }))
+        setShowIdeaModal(false)
+        setIdeasContent('') // Reset for next time
+
+        toast.loading('Menulis artikel berdasarkan ide...', { id: 'generate-content' })
+
+        // Auto-generate content
+        try {
+            const response = await fetch('/api/ai/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    command: 'generate',
+                    context: `Buatkan artikel lengkap dengan judul: "${title}"\n\nKonteks ide: ${description}\n\nBuatkan artikel yang komprehensif, menarik, dan bermanfaat untuk target audience RSQUARE (UMKM & Profesional Indonesia). Sertakan tips praktis, contoh, dan jika relevan, rumus Excel/Google Sheets.`
+                })
+            })
+
+            if (!response.ok) throw new Error('Gagal generate artikel')
+            if (!response.body) throw new Error('No response body')
+
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder()
+            let done = false
+            let fullContent = ''
+
+            while (!done) {
+                const { value, done: doneReading } = await reader.read()
+                done = doneReading
+                const chunkValue = decoder.decode(value, { stream: !done })
+                fullContent += chunkValue
+                // Update content progressively for real-time feel
+                setFormData(prev => ({ ...prev, content: fullContent }))
+            }
+
+            toast.success('Artikel berhasil dibuat! Silakan review & edit.', { id: 'generate-content' })
+        } catch (error: any) {
+            console.error("AI Error", error)
+            toast.error('Gagal membuat artikel: ' + error.message, { id: 'generate-content' })
+        }
+    }
 
     const handleGenerateExcerpt = async () => {
         if (!formData.title && !formData.content) {
@@ -205,6 +308,20 @@ export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
                         <LayoutPanelLeft className="h-5 w-5" />
                     </button>
                     <div className="h-6 w-px bg-gray-200 mx-1" />
+                    {/* Preview Button */}
+                    {formData.slug && (
+                        <a
+                            href={`/articles/${formData.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors border flex items-center gap-2 bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                            title="Preview artikel di tab baru"
+                        >
+                            <Eye className="h-4 w-4" />
+                            Preview
+                            <ExternalLink className="h-3 w-3 opacity-50" />
+                        </a>
+                    )}
                     <button
                         type="button"
                         onClick={handlePublish}
@@ -231,17 +348,33 @@ export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
             {/* Main Content Area - Split View */}
             <div className="flex-1 flex overflow-hidden">
                 {/* Editor (Left) */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-8 max-w-5xl mx-auto w-full">
-                    <div className="space-y-6">
-                        <input
-                            type="text"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleChange}
-                            placeholder="Judul Artikel..."
-                            className="w-full px-0 py-2 border-none bg-transparent focus:ring-0 outline-none text-4xl font-bold placeholder-gray-300 text-gray-900"
-                            required
-                        />
+                <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full">
+                    {/* Title - Fixed at top */}
+                    <div className="px-6 lg:px-8 pt-6 lg:pt-8 pb-4 shrink-0 bg-gray-50/50">
+                        <div className="relative group">
+                            <input
+                                type="text"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleChange}
+                                placeholder="Judul Artikel..."
+                                className="w-full px-0 py-2 border-none bg-transparent focus:ring-0 outline-none text-4xl font-bold placeholder-gray-300 text-gray-900 pr-12"
+                                required
+                            />
+                            {/* Idea Button */}
+                            <button
+                                type="button"
+                                onClick={() => setShowIdeaModal(true)}
+                                className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-yellow-500 hover:bg-yellow-50 rounded-full"
+                                title="Bantu Cari Ide Artikel"
+                            >
+                                <Lightbulb className="h-6 w-6" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* RichTextEditor - Has its own internal scroll */}
+                    <div className="flex-1 px-6 lg:px-8 pb-6 min-h-0">
                         <RichTextEditor
                             content={formData.content || ''}
                             onChange={handleContentChange}
@@ -344,6 +477,102 @@ export function ArticleEditor({ article, isNew = false }: ArticleEditorProps) {
                     )}
                 </AnimatePresence>
             </div>
-        </form>
+
+            {/* Idea Suggestions Modal */}
+            <AnimatePresence>
+                {showIdeaModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+                        onClick={() => setShowIdeaModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-yellow-100 rounded-lg text-yellow-600">
+                                        <Lightbulb className="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-900">Ide Artikel RSQUARE</h3>
+                                        <p className="text-sm text-gray-500">Cari inspirasi topik artikel yang relevan untuk audiensmu.</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setShowIdeaModal(false)} className="text-gray-400 hover:text-gray-600">
+                                    <span className="sr-only">Close</span>
+                                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+                                {!ideasContent && !isIdeaLoading ? (
+                                    <div className="text-center py-12">
+                                        <Lightbulb className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                                        <h4 className="text-lg font-medium text-gray-900 mb-2">Butuh Inspirasi?</h4>
+                                        <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+                                            AI akan menganalisis brand RSQUARE dan memberikan 5 ide artikel menarik seputar Excel, Spreadsheet, dan Produktivitas Bisnis.
+                                        </p>
+                                        <button
+                                            onClick={handleSuggestIdeas}
+                                            className="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-full transition-colors shadow-lg shadow-yellow-400/20 active:scale-95"
+                                        >
+                                            Generate Ide Sekarang
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {/* Clickable Ideas List */}
+                                        <div
+                                            onClick={handleSelectIdea}
+                                            className="prose prose-orange max-w-none [&_li]:cursor-pointer [&_li]:transition-all [&_li:hover]:scale-[1.02] [&_li:hover]:shadow-md [&_li:hover]:border-orange-300"
+                                            dangerouslySetInnerHTML={{ __html: ideasContent }}
+                                        />
+                                        {!isIdeaLoading && ideasContent && (
+                                            <p className="text-center text-sm text-gray-400 mt-4">
+                                                👆 Klik salah satu ide untuk langsung menggunakannya sebagai judul artikel
+                                            </p>
+                                        )}
+                                        {isIdeaLoading && (
+                                            <div className="flex items-center gap-2 text-gray-500 py-4 animate-pulse">
+                                                <Loader2 className="h-5 w-5 animate-spin text-orange-500" />
+                                                <span className="font-medium">Sedang memikirkan ide cemerlang...</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-4 border-t border-gray-100 bg-white flex justify-end gap-2">
+                                <button
+                                    onClick={() => setShowIdeaModal(false)}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors"
+                                >
+                                    Tutup
+                                </button>
+                                {ideasContent && !isIdeaLoading && (
+                                    <button
+                                        onClick={handleSuggestIdeas}
+                                        className="px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+                                    >
+                                        <Sparkles className="h-4 w-4 text-yellow-500" />
+                                        Buat Ide Baru
+                                    </button>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+        </form >
     )
 }

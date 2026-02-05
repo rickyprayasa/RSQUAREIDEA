@@ -6,7 +6,7 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import UnderlineExtension from '@tiptap/extension-underline'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import React from 'react'
 import {
     Bold, Italic, List, ListOrdered, Image as ImageIcon,
@@ -134,11 +134,19 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-lg max-w-none focus:outline-none min-h-[300px] px-4 py-4',
+                class: 'prose prose-lg max-w-none focus:outline-none px-4 py-4',
             },
         },
         immediatelyRender: false // Fix hydration mismatch
     })
+
+    // Sync external content changes to the editor (for auto-generated content)
+    useEffect(() => {
+        if (editor && content !== editor.getHTML()) {
+            // Only update if content actually differs to avoid cursor issues
+            editor.commands.setContent(content, { emitUpdate: false })
+        }
+    }, [content, editor])
 
     // Custom generate function using fetch with streaming support
     const generateContent = async (cmd: string = 'generate', promptOverride?: string) => {
@@ -266,11 +274,27 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
     }
 
     return (
-        <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
-            {/* Toolbar */}
+        <div className="border border-gray-200 rounded-2xl bg-white shadow-sm flex flex-col h-full">
+            {/* Toolbar - Fixed at top of editor */}
             {editable && (
-                <div className="border-b border-gray-100 bg-gray-50/50 p-2 flex flex-wrap gap-1 items-center sticky top-0 z-10 backdrop-blur-sm">
-                    {/* ... existing buttons ... */}
+                <div className="border-b border-gray-100 bg-gray-50/95 p-2 flex flex-wrap gap-1 items-center z-10 backdrop-blur-md rounded-t-2xl shrink-0">
+                    {/* Undo / Redo */}
+                    <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-1">
+                        <ToolbarButton
+                            onClick={() => editor.chain().focus().undo().run()}
+                            disabled={!editor.can().undo()}
+                            title="Undo (Ctrl+Z)"
+                        >
+                            <Undo className="h-4 w-4" />
+                        </ToolbarButton>
+                        <ToolbarButton
+                            onClick={() => editor.chain().focus().redo().run()}
+                            disabled={!editor.can().redo()}
+                            title="Redo (Ctrl+Y)"
+                        >
+                            <Redo className="h-4 w-4" />
+                        </ToolbarButton>
+                    </div>
 
                     {/* Text Formatting */}
                     <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-1">
@@ -603,8 +627,8 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                 )}
             </AnimatePresence>
 
-            {/* Editor Area */}
-            <div className="bg-white min-h-[500px]">
+            {/* Editor Area - Scrollable content */}
+            <div className="flex-1 bg-white overflow-y-auto custom-scrollbar rounded-b-2xl">
                 <EditorContent editor={editor} />
             </div>
         </div>

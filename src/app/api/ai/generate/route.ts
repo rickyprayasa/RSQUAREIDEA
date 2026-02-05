@@ -2,7 +2,7 @@ import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { streamText } from 'ai';
 
 export const maxDuration = 60;
-export const runtime = 'edge';
+// export const runtime = 'edge'; // Switch to Node.js for better stability/debugging
 
 // Initialize Z.Ai (Zhipu AI) using OpenAI-compatible provider
 const zai = createOpenAICompatible({
@@ -17,9 +17,22 @@ export async function POST(req: Request) {
     const { prompt, command, context, imageUrl } = await req.json();
 
     // Base system instruction with emphasis on natural Bahasa Indonesia
-    let systemInstruction = `Kamu adalah asisten penulis konten profesional untuk blog berbahasa Indonesia. 
+    let systemInstruction = `Kamu adalah asisten penulis konten profesional untuk blog berbahasa Indonesia milik RSQUARE.
 
-ATURAN PENTING:
+KNOWLEDGE BASE RSQUARE (Wajib Dipahami):
+- **Brand Name**: RSQUARE (baca: Ar-Square).
+- **Produk Utama**: Template Google Sheets Premium & Gratis (Business, Finance, Productivity).
+- **Layanan**: Jasa Kustomisasi Spreadsheet, Dashboarding, Data Visualization.
+- **Target Audience**: UMKM, Pebisnis Online, HRD, Admin, Sales, dan Profesional Indonesia yang ingin kerja lebih efisien.
+- **Unique Selling Point (USP)**:
+  1. Sekali bayar, gratis update seumur hidup (Tanpa langganan bulanan!).
+  2. Desain estetik, modern, dan user-friendly (Dashboard Rapi).
+  3. Rumus otomatis canggih tapi mudah digunakan (Automated).
+  4. Full support Bahasa Indonesia.
+- **Tagline**: "Ubah Data Rumit Menjadi Keputusan Cerdas".
+- **Tone & Voice**: Professional tapi santai (seperti konsultan teman), Empati pada masalah administrasi yang ribet, Solutif, dan Optimis.
+
+ATURAN PENTING BAHASA:
 - Gunakan Bahasa Indonesia yang NATURAL, RAMAH, dan MUDAH DIPAHAMI
 - Hindari bahasa yang kaku atau terlalu formal seperti terjemahan mesin
 - Tulis seperti sedang berbicara dengan teman yang ingin belajar
@@ -73,6 +86,29 @@ PERBAIKAN YANG HARUS DILAKUKAN:
 7. JANGAN mengubah makna kalimat atau gaya bahasa (tetap santai/casual jika aslinya demikian).
 
 RETURN: Kode HTML lengkap yang isinya sudah dikoreksi.`;
+    } else if (command === 'suggest_ideas') {
+        systemInstruction += `
+
+TUGAS: Berikan 5 ide artikel blog yang potensial dan menarik untuk target audience RSQUARE (UMKM & Profesional).
+
+KRITERIA IDE:
+1. Relevan dengan Google Sheets, Excel, Produktivitas, atau Manajemen Bisnis/Keuangan.
+2. Menjawab masalah nyata (pain points) yang sering dialami admin/pebisnis (misal: stok berantakan, laporan keuangan pusing, gaji karyawan ribet).
+3. Judul harus "Clicky" tapi tidak clickbait murahan. Gunakan teknik copywriting (misal: Menggunakan Angka, Menjanjikan Kemudahan, Menakut-nakuti kesalahan fatal).
+4. Variasikan topik: Tutorial Teknis, Tips Bisnis, Studi Kasus, atau Inspirasi Produktivitas.
+
+FORMAT OUTPUT (HTML):
+Berikan output berupa list HTML <ul> yang rapi tanpa bullet point default (gunakan emoji sebagai bullet).
+Contoh format:
+<ul class="space-y-4">
+  <li class="p-4 bg-orange-50 rounded-lg border border-orange-100">
+    <h3 class="font-bold text-gray-900 text-lg mb-1">🎯 [Judul Artikel]</h3>
+    <p class="text-gray-600 text-sm">[Deskripsi singkat premis artikel dan kenapa ini penting]</p>
+  </li>
+  ...
+</ul>
+
+Langsung berikan listnya saja.`;
     } else if (command === 'generate') {
         systemInstruction += `
 
