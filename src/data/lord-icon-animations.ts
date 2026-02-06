@@ -1,10 +1,15 @@
 export const lordIconAnimations = [
     "https://cdn.lordicon.com/lvrvwtij.json",
     "https://cdn.lordicon.com/xlayapaf.json",
+    "https://cdn.lordicon.com/abhwievu.json",
+    "https://cdn.lordicon.com/hlpsxaub.json",
     "https://cdn.lordicon.com/edplgash.json",
+    "https://cdn.lordicon.com/olaidovj.json",
     "https://cdn.lordicon.com/ymgusxed.json",
-    "https://cdn.lordicon.com/ddgirohb.json",
+    "https://cdn.lordicon.com/gsrqivny.json",
     "https://cdn.lordicon.com/ajzwsrcs.json",
+    "https://cdn.lordicon.com/tvzhtfne.json",
+    "https://cdn.lordicon.com/ddgirohb.json",
     "https://cdn.lordicon.com/dznelzdk.json",
     "https://cdn.lordicon.com/czcsywgo.json",
     "https://cdn.lordicon.com/sgtmgpft.json",
@@ -22,5 +27,11 @@ export const lordIconAnimations = [
     "https://cdn.lordicon.com/howkgief.json",
     "https://cdn.lordicon.com/kqhavcsj.json",
     "https://cdn.lordicon.com/kzsctedl.json",
-    "https://cdn.lordicon.com/pggdibmr.json"
+    "https://cdn.lordicon.com/pggdibmr.json",
+    "https://cdn.lordicon.com/dznelzdk.json",
+    "https://cdn.lordicon.com/uvhtrvux.json",
+    "https://cdn.lordicon.com/xowcggal.json",
+    "https://cdn.lordicon.com/tdbbbqzo.json",
+    "https://cdn.lordicon.com/msefvjrw.json",
+    "https://cdn.lordicon.com/ueabarxn.json"
 ];

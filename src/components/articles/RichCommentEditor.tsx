@@ -13,7 +13,7 @@ const LordIconExtension = Node.create({
     group: 'inline',
     inline: true,
     draggable: true,
-    atom: true, // It's a single unit, cursor can't go "inside"
+    atom: true,
 
     addAttributes() {
         return {
@@ -22,6 +22,12 @@ const LordIconExtension = Node.create({
             },
             colors: {
                 default: '',
+            },
+            trigger: {
+                default: 'loop',
+            },
+            style: {
+                default: 'width: 48px; height: 48px',
             },
         }
     },
@@ -35,21 +41,25 @@ const LordIconExtension = Node.create({
     },
 
     renderHTML({ HTMLAttributes }) {
-        return ['lord-icon', mergeAttributes(HTMLAttributes)]
+        // Force inclusion of trigger and style even if they match defaults
+        const attrs = mergeAttributes(
+            {
+                trigger: 'loop',
+                style: 'width: 48px; height: 48px; display: inline-block;'
+            },
+            HTMLAttributes
+        )
+        return ['lord-icon', attrs]
     },
 
     addNodeView() {
         return ReactNodeViewRenderer(({ node }) => {
             return (
-                <NodeViewWrapper className="inline-flex align-middle mx-0.5 select-none leading-none">
-                    <div className="w-[24px] h-[24px]">
-                        {/* 
-                           We use the ClientLordIcon wrapper, but we need to ensure 
-                           it renders correctly inside the editor 
-                        */}
+                <NodeViewWrapper className="inline-flex align-middle mx-1 select-none leading-none">
+                    <div className="w-[48px] h-[48px]">
                         <ClientLordIcon
                             src={node.attrs.src}
-                            trigger="loop"
+                            trigger={node.attrs.trigger}
                             colors={node.attrs.colors}
                             style={{ width: '100%', height: '100%' }}
                         />
