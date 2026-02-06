@@ -144,11 +144,12 @@ interface ClientLordIconProps {
     trigger?: string
     delay?: string | number
     colors?: string
+    state?: string
     style?: React.CSSProperties
     className?: string
 }
 
-export function ClientLordIcon({ src, trigger = 'hover', delay = 0, colors, style, className }: ClientLordIconProps) {
+export function ClientLordIcon({ src, trigger = 'hover', delay = 0, colors, state, style, className }: ClientLordIconProps) {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -165,6 +166,7 @@ export function ClientLordIcon({ src, trigger = 'hover', delay = 0, colors, styl
             trigger={trigger}
             delay={delay}
             colors={colors}
+            state={state}
             style={style}
             className={className}
         />
