@@ -6,6 +6,7 @@ import './globals.css'
 import { CartProvider } from '@/contexts/CartContext'
 import { TrackingScripts } from '@/components/TrackingScripts'
 import { AnalyticsProvider } from '@/components/AnalyticsProvider'
+import { Toaster } from 'sonner'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -96,6 +97,7 @@ export default function RootLayout({
             {children}
           </AnalyticsProvider>
         </CartProvider>
+        <Toaster position="top-center" richColors closeButton />
       </body>
     </html>
   )

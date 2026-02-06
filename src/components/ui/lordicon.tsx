@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 // Icon JSON imports - We'll use CDN URLs for simplicity
 const ICON_URLS: Record<string, string> = {
@@ -51,8 +51,8 @@ const ICON_URLS: Record<string, string> = {
     'info': 'https://cdn.lordicon.com/yqzmiobz.json',
 
     // Files & Documents
-    'file': 'https://cdn.lordicon.com/foxhetpf.json',
-    'spreadsheet': 'https://cdn.lordicon.com/ghhwiltn.json',
+    'file': 'https://cdn.lordicon.com/wloilxuq.json',
+    'spreadsheet': 'https://cdn.lordicon.com/wloilxuq.json',
     'download': 'https://cdn.lordicon.com/ternnbni.json',
 
     // Social
@@ -149,7 +149,7 @@ interface ClientLordIconProps {
     className?: string
 }
 
-export function ClientLordIcon({ src, trigger = 'hover', delay = 0, colors, state, style, className }: ClientLordIconProps) {
+const ClientLordIconComponent = ({ src, trigger = 'hover', delay = 0, colors, state, style, className }: ClientLordIconProps) => {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -172,6 +172,25 @@ export function ClientLordIcon({ src, trigger = 'hover', delay = 0, colors, stat
         />
     )
 }
+
+function arePropsEqual(prev: ClientLordIconProps, next: ClientLordIconProps) {
+    return (
+        prev.src === next.src &&
+        prev.trigger === next.trigger &&
+        prev.delay === next.delay &&
+        prev.colors === next.colors &&
+        prev.state === next.state &&
+        prev.className === next.className &&
+        // Shallow compare style objects
+        (prev.style === next.style || (
+            !!prev.style && !!next.style &&
+            Object.keys(prev.style).length === Object.keys(next.style).length &&
+            Object.keys(prev.style).every(key => prev.style![key as any] === next.style![key as any])
+        ))
+    )
+}
+
+export const ClientLordIcon = React.memo(ClientLordIconComponent, arePropsEqual)
 
 // Animated Button wrapper with icon animation on hover
 interface AnimatedButtonProps {

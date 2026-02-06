@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ClientLordIcon } from '@/components/ui/lordicon'
 import { CommentEmojiPicker } from './CommentEmojiPicker'
 import { RichCommentEditor } from './RichCommentEditor'
+import { checkCommentSafety } from '@/app/actions/comment-actions'
 
 interface Comment {
     id: string
@@ -25,6 +26,8 @@ interface Comment {
     dislikes_count?: number
     user_vote?: 'like' | 'dislike' | null
     replies?: Comment[]
+    avatar_url?: string | null
+    gender?: string | null
 }
 
 interface ArticleCommentsProps {
@@ -255,14 +258,22 @@ const CommentItem = ({
                 ${!comment.approved ? 'opacity-60 border-red-200' : ''}
             `}>
                 <div className="flex items-start gap-3 md:gap-4">
-                    <div className="p-1.5 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full shrink-0">
-                        <ClientLordIcon
-                            src="https://cdn.lordicon.com/hroklero.json"
-                            trigger="morph"
-                            state="morph-group"
-                            style={{ width: '24px', height: '24px' }}
+                    {comment.avatar_url ? (
+                        <img
+                            src={comment.avatar_url}
+                            alt="Avatar"
+                            className="w-8 h-8 md:w-9 md:h-9 rounded-full object-cover bg-gray-100 border border-white shadow-sm shrink-0"
                         />
-                    </div>
+                    ) : (
+                        <div className="p-1.5 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full shrink-0">
+                            <ClientLordIcon
+                                src={getGenderIcon(comment.gender || undefined)}
+                                trigger="hover"
+                                state="hover-looking-around"
+                                style={{ width: '24px', height: '24px' }}
+                            />
+                        </div>
+                    )}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <span className="font-semibold text-gray-900 text-sm md:text-base">{comment.name}</span>
@@ -430,6 +441,7 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
     const [isAdmin, setIsAdmin] = useState(isAdminProp || false)
     const [customName, setCustomName] = useState('')
     const [avatarError, setAvatarError] = useState(false)
+    const [sessionId, setSessionId] = useState<string>('')
 
     // Interaction States
     const [replyingToId, setReplyingToId] = useState<string | null>(null)
@@ -444,6 +456,9 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
 
     // Delete Modal State
     const [deleteId, setDeleteId] = useState<string | null>(null)
+
+    // Warning Modal State
+    const [warningMessage, setWarningMessage] = useState<string | null>(null)
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -489,6 +504,9 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
             if (user) {
                 const myVote = relevantLikes.find(l => l.user_id === user.id)
                 if (myVote) userVote = myVote.is_like ? 'like' : 'dislike'
+            } else if (sessionId) {
+                const myVote = relevantLikes.find(l => l.session_id === sessionId)
+                if (myVote) userVote = myVote.is_like ? 'like' : 'dislike'
             }
 
             return {
@@ -524,6 +542,16 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
         }
         init()
 
+        // Persistent Session ID for Public Likes
+        const storedSession = localStorage.getItem('comment_session_id')
+        if (storedSession) {
+            setSessionId(storedSession)
+        } else {
+            const newSession = crypto.randomUUID()
+            localStorage.setItem('comment_session_id', newSession)
+            setSessionId(newSession)
+        }
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null)
         })
@@ -557,10 +585,8 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
     }
 
     const handleVote = async (commentId: string, currentVote: 'like' | 'dislike' | null, action: 'like' | 'dislike') => {
-        if (!user) {
-            toast.error('Silakan login untuk berinteraksi')
-            return
-        }
+        // ALLOW public voting now
+        // if (!user) { ... }
         const previousComments = [...comments]
         let newVote: 'like' | 'dislike' | null = null
         let likeDiff = 0
@@ -596,13 +622,50 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
 
         try {
             if (newVote === null) {
-                await supabase.from('article_comment_likes').delete().eq('comment_id', commentId).eq('user_id', user.id)
+                // Delete vote
+                let query = supabase.from('article_comment_likes').delete().eq('comment_id', commentId)
+                if (user) query = query.eq('user_id', user.id)
+                else query = query.eq('session_id', sessionId)
+                await query
             } else {
-                await supabase.from('article_comment_likes').upsert({
-                    comment_id: commentId,
-                    user_id: user.id,
-                    is_like: newVote === 'like'
-                }, { onConflict: 'comment_id, user_id' })
+                // Manual Upsert: Try Update first, then Insert
+                // This is required because Supabase .upsert() doesn't support targeting partial indexes (WHERE ...) easily
+
+                let updateQuery = supabase.from('article_comment_likes')
+                    .update({ is_like: newVote === 'like' })
+                    .eq('comment_id', commentId)
+
+                if (user) updateQuery = updateQuery.eq('user_id', user.id)
+                else updateQuery = updateQuery.eq('session_id', sessionId)
+
+                const { data: updated, error: updateError } = await updateQuery.select()
+
+                if (updateError) throw updateError
+
+                if (!updated || updated.length === 0) {
+                    // No record found, so Insert
+                    const payload: any = {
+                        comment_id: commentId,
+                        is_like: newVote === 'like'
+                    }
+                    if (user) payload.user_id = user.id
+                    else payload.session_id = sessionId
+
+                    const { data: insertedData, error: insertError } = await supabase
+                        .from('article_comment_likes')
+                        .insert(payload)
+                        .select()
+
+                    // Log insert result for debugging
+                    if (insertError) {
+                        console.error('Insert error:', insertError)
+                        if (insertError.code !== '23505') throw insertError
+                    } else if (!insertedData || insertedData.length === 0) {
+                        console.error('Insert returned no data - RLS may be blocking!', { payload, sessionId })
+                    } else {
+                        console.log('Like VERIFIED inserted with id:', insertedData[0].id, 'session_id:', sessionId)
+                    }
+                }
             }
         } catch (error) {
             console.error('Error:', error)
@@ -633,6 +696,14 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
         try {
             const displayName = customName.trim() || user.user_metadata?.full_name || 'Pengguna'
 
+            // AI Safety Check
+            const { safe, reason } = await checkCommentSafety(targetContent)
+            if (!safe) {
+                if (!parentId) setSubmitting(false)
+                setWarningMessage(reason || 'Komentar mengandung konten yang tidak diizinkan.')
+                return
+            }
+
             const { data, error } = await supabase
                 .from('article_comments')
                 .insert({
@@ -641,7 +712,9 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
                     name: displayName,
                     email: user.email,
                     content: targetContent,
-                    approved: true
+                    approved: true,
+                    avatar_url: user.user_metadata?.avatar_url || null,
+                    gender: user.user_metadata?.gender || null
                 })
                 .select()
                 .single()
@@ -906,6 +979,52 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
                                         Ya, Hapus
                                     </button>
                                 </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Warning Modal */}
+            <AnimatePresence>
+                {warningMessage && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setWarningMessage(null)}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 overflow-hidden"
+                        >
+                            <div className="flex flex-col items-center text-center">
+                                <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center mb-4 ring-4 ring-amber-50">
+                                    <ClientLordIcon
+                                        src="https://cdn.lordicon.com/ygvjgdmk.json"
+                                        trigger="loop"
+                                        style={{ width: '40px', height: '40px' }}
+                                    />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">Komentar Tidak Dapat Dikirim</h3>
+                                <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                                    {warningMessage}
+                                </p>
+                                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 w-full">
+                                    <p className="text-xs text-amber-700 font-medium">
+                                        💡 Tips: Gunakan bahasa yang sopan dan hindari konten berbahaya seperti kata kasar, promosi judi, narkoba, dan ujaran kebencian.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setWarningMessage(null)}
+                                    className="w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all shadow-lg shadow-orange-200"
+                                >
+                                    Mengerti, Saya Akan Perbaiki
+                                </button>
                             </div>
                         </motion.div>
                     </div>
