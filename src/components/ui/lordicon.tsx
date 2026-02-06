@@ -184,8 +184,8 @@ function arePropsEqual(prev: ClientLordIconProps, next: ClientLordIconProps) {
         // Shallow compare style objects
         (prev.style === next.style || (
             !!prev.style && !!next.style &&
-            Object.keys(prev.style).length === Object.keys(next.style).length &&
-            Object.keys(prev.style).every(key => prev.style![key as any] === next.style![key as any])
+            Object.keys(prev.style as React.CSSProperties).length === Object.keys(next.style as React.CSSProperties).length &&
+            Object.keys(prev.style as React.CSSProperties).every(key => (prev.style as Record<string, unknown>)[key] === (next.style as Record<string, unknown>)[key])
         ))
     )
 }
