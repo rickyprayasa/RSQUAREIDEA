@@ -359,7 +359,9 @@ const CommentItem = ({
                         className={`ml-8 md:ml-12 ${overflowVisible ? 'overflow-visible' : 'overflow-hidden'}`}
                         onAnimationComplete={(definition) => {
                             // Only set overflow visible when expanding
-                            if (definition === 'visible' || (typeof definition === 'object' && definition.opacity === 1)) {
+                            if (definition === 'visible') {
+                                setOverflowVisible(true)
+                            } else if (typeof definition === 'object' && !Array.isArray(definition) && (definition as any).opacity === 1) {
                                 setOverflowVisible(true)
                             }
                         }}
