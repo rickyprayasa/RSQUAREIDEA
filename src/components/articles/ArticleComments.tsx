@@ -492,7 +492,7 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
         const commentIds = commentsData.map(c => c.id)
         const { data: likesData } = await supabase
             .from('article_comment_likes')
-            .select('comment_id, user_id, is_like')
+            .select('comment_id, user_id, session_id, is_like')
             .in('comment_id', commentIds)
 
         const processedComments = commentsData.map(c => {
