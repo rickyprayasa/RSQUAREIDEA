@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { ArticleBackground } from '@/components/ui/ArticleBackground'
 import { ClientLordIcon } from '@/components/ui/lordicon'
 import { ViewCounter } from '@/components/articles/ViewCounter'
+import { ArticleComments } from '@/components/articles/ArticleComments'
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -260,6 +261,9 @@ export default async function ArticlePage({ params }: Props) {
                             </div>
                         </Link>
                     </div>
+
+                    {/* Comments Section */}
+                    <ArticleComments articleId={article.id} />
                 </div>
             </article>
         </div>

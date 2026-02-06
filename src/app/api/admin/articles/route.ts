@@ -6,6 +6,7 @@ export async function GET() {
     try {
         const supabase = await createAdminClient()
 
+        // Fetch articles with views
         const { data: articles, error } = await supabase
             .from('articles')
             .select('*')
@@ -16,7 +17,28 @@ export async function GET() {
             return NextResponse.json({ error: 'Failed to fetch articles' }, { status: 500 })
         }
 
-        return NextResponse.json({ articles })
+        // Fetch comment counts for each article
+        const articleIds = articles?.map(a => a.id) || []
+
+        const { data: commentCounts, error: countError } = await supabase
+            .from('article_comments')
+            .select('article_id')
+            .in('article_id', articleIds)
+            .eq('approved', true)
+
+        // Count comments per article
+        const commentCountMap: Record<string, number> = {}
+        commentCounts?.forEach(c => {
+            commentCountMap[c.article_id] = (commentCountMap[c.article_id] || 0) + 1
+        })
+
+        // Add comment counts to articles
+        const articlesWithStats = articles?.map(article => ({
+            ...article,
+            comment_count: commentCountMap[article.id] || 0
+        }))
+
+        return NextResponse.json({ articles: articlesWithStats })
     } catch (error) {
         console.error('Error in articles API:', error)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

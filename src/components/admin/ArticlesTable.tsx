@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Plus, FileText, Pencil, Calendar, Eye } from 'lucide-react'
+import { Plus, FileText, Pencil, Calendar, Eye, MessageCircle } from 'lucide-react'
 import { DeleteArticleButton } from './DeleteArticleButton'
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
@@ -15,7 +15,8 @@ interface Article {
     published: boolean
     created_at: string
     thumbnail_url: string | null
-    // Add other fields as needed
+    views?: number
+    comment_count?: number
 }
 
 interface ArticlesTableProps {
@@ -80,11 +81,22 @@ export function ArticlesTable({ articles }: ArticlesTableProps) {
                                                 {format(new Date(article.created_at), 'd MMM yyyy', { locale: id })}
                                             </div>
                                         </div>
+                                        {/* Analytics */}
+                                        <div className="flex items-center gap-3 mt-2">
+                                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                <Eye className="h-3 w-3" />
+                                                <span>{article.views || 0}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                <MessageCircle className="h-3 w-3" />
+                                                <span>{article.comment_count || 0}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-end mt-3 pt-3 border-t border-gray-100 gap-1">
                                     <Link
-                                        href={`/articles/${article.slug}`} // Public link preview
+                                        href={`/articles/${article.slug}`}
                                         target="_blank"
                                         className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                     >
@@ -114,6 +126,18 @@ export function ArticlesTable({ articles }: ArticlesTableProps) {
                                     <tr className="bg-gray-50 border-b border-gray-100">
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                            <div className="flex items-center justify-center gap-1">
+                                                <Eye className="h-3.5 w-3.5" />
+                                                Views
+                                            </div>
+                                        </th>
+                                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                            <div className="flex items-center justify-center gap-1">
+                                                <MessageCircle className="h-3.5 w-3.5" />
+                                                Comments
+                                            </div>
+                                        </th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                                         <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
                                     </tr>
@@ -142,6 +166,18 @@ export function ArticlesTable({ articles }: ArticlesTableProps) {
                                                 <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${article.published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
                                                     }`}>
                                                     {article.published ? 'Published' : 'Draft'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-lg">
+                                                    <Eye className="h-3.5 w-3.5" />
+                                                    {article.views || 0}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 text-purple-700 text-sm font-medium rounded-lg">
+                                                    <MessageCircle className="h-3.5 w-3.5" />
+                                                    {article.comment_count || 0}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-500">
@@ -177,3 +213,4 @@ export function ArticlesTable({ articles }: ArticlesTableProps) {
         </div>
     )
 }
+
