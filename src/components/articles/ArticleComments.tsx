@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { formatDistanceToNow } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
-import { Loader2 } from 'lucide-react'
+import { Loader2, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ClientLordIcon } from '@/components/ui/lordicon'
@@ -272,6 +272,24 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
                             </p>
                             <p className="text-xs text-gray-500">Berkomentar sebagai</p>
                         </div>
+                        {!isAdmin && (
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    await supabase.auth.signOut()
+                                    window.location.reload()
+                                }}
+                                className="ml-auto p-2 text-gray-400 hover:text-red-500 transition-colors group"
+                                title="Logout / Ganti Akun"
+                            >
+                                <ClientLordIcon
+                                    src="https://cdn.lordicon.com/rhyfwlig.json"
+                                    trigger="hover"
+                                    colors="primary:#9ca3af,secondary:#ef4444"
+                                    style={{ width: '35px', height: '35px' }}
+                                />
+                            </button>
+                        )}
                     </div>
                     <div className="mb-4">
                         <textarea
@@ -359,7 +377,7 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
                                 className={`bg-white rounded-xl p-5 border shadow-sm hover:shadow-md transition-shadow ${comment.pinned ? 'border-orange-200 ring-1 ring-orange-100' :
-                                        comment.approved === false ? 'border-red-200 opacity-60' : 'border-gray-100'
+                                    comment.approved === false ? 'border-red-200 opacity-60' : 'border-gray-100'
                                     }`}
                             >
                                 <div className="flex items-start gap-4">
@@ -404,8 +422,8 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
                                                 <button
                                                     onClick={() => handleTogglePin(comment.id, comment.pinned || false)}
                                                     className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors ${comment.pinned
-                                                            ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-                                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                        ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                         }`}
                                                 >
                                                     📌 {comment.pinned ? 'Unpin' : 'Pin'}
@@ -413,8 +431,8 @@ export function ArticleComments({ articleId, isAdmin: isAdminProp }: ArticleComm
                                                 <button
                                                     onClick={() => handleToggleApproval(comment.id, comment.approved !== false)}
                                                     className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors ${comment.approved === false
-                                                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                         }`}
                                                 >
                                                     {comment.approved === false ? '👁 Show' : '🙈 Hide'}

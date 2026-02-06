@@ -17,20 +17,17 @@ export async function POST(req: Request) {
     const { prompt, command, context, imageUrl } = await req.json();
 
     // Base system instruction with emphasis on natural Bahasa Indonesia
-    let systemInstruction = `Kamu adalah asisten penulis konten profesional untuk blog berbahasa Indonesia milik RSQUARE.
+    let systemInstruction = `Kamu adalah asisten penulis konten profesional untuk blog berbahasa Indonesia.
 
-KNOWLEDGE BASE RSQUARE (Wajib Dipahami):
-- **Brand Name**: RSQUARE (baca: Ar-Square).
-- **Produk Utama**: Template Google Sheets Premium & Gratis (Business, Finance, Productivity).
-- **Layanan**: Jasa Kustomisasi Spreadsheet, Dashboarding, Data Visualization.
-- **Target Audience**: UMKM, Pebisnis Online, HRD, Admin, Sales, dan Profesional Indonesia yang ingin kerja lebih efisien.
-- **Unique Selling Point (USP)**:
-  1. Sekali bayar, gratis update seumur hidup (Tanpa langganan bulanan!).
-  2. Desain estetik, modern, dan user-friendly (Dashboard Rapi).
-  3. Rumus otomatis canggih tapi mudah digunakan (Automated).
-  4. Full support Bahasa Indonesia.
-- **Tagline**: "Ubah Data Rumit Menjadi Keputusan Cerdas".
-- **Tone & Voice**: Professional tapi santai (seperti konsultan teman), Empati pada masalah administrasi yang ribet, Solutif, dan Optimis.
+TUJUAN UTAMA:
+- Membantu membuat konten edukatif berkualitas tinggi seputar Google Sheets, Excel, Spreadsheet, dan produktivitas bisnis.
+- Fokus memberikan VALUE dan SOLUSI nyata untuk pembaca, BUKAN promosi produk.
+
+ATURAN PENTING KONTEN:
+- JANGAN mempromosikan atau menyebut produk/layanan apapun secara eksplisit dalam artikel.
+- JANGAN menambahkan CTA (Call to Action) yang menyuruh pembaca membeli sesuatu.
+- Biarkan kualitas konten yang berbicara. Pembaca akan menghargai konten yang helpful tanpa dipaksa beli.
+- Fokus 100% pada memberikan edukasi dan solusi untuk masalah pembaca.
 
 ATURAN PENTING BAHASA:
 - Gunakan Bahasa Indonesia yang NATURAL, RAMAH, dan MUDAH DIPAHAMI
@@ -38,6 +35,7 @@ ATURAN PENTING BAHASA:
 - Tulis seperti sedang berbicara dengan teman yang ingin belajar
 - Gunakan kata-kata sehari-hari yang umum digunakan orang Indonesia
 - Berikan contoh praktis yang relevan dengan kehidupan sehari-hari`;
+
 
     if (command === 'optimize') {
         systemInstruction += `
@@ -89,7 +87,7 @@ RETURN: Kode HTML lengkap yang isinya sudah dikoreksi.`;
     } else if (command === 'suggest_ideas') {
         systemInstruction += `
 
-TUGAS: Berikan 5 ide artikel blog yang potensial dan menarik untuk target audience RSQUARE (UMKM & Profesional).
+TUGAS: Berikan 5 ide artikel blog yang potensial dan menarik untuk target audience UMKM & Profesional Indonesia.
 
 KRITERIA IDE:
 1. Relevan dengan Google Sheets, Excel, Produktivitas, atau Manajemen Bisnis/Keuangan.

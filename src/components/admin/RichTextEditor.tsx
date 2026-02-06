@@ -6,13 +6,17 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import UnderlineExtension from '@tiptap/extension-underline'
-import { useState, useEffect } from 'react'
+import Highlight from '@tiptap/extension-highlight'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import { FontFamily } from '@tiptap/extension-font-family'
+import { useState, useEffect, useRef } from 'react'
 import React from 'react'
 import {
     Bold, Italic, List, ListOrdered, Image as ImageIcon,
     Link as LinkIcon, Heading1, Heading2, Quote, Undo, Redo,
     Sparkles, Wand2, Check, Loader2, X, Underline,
-    Youtube as YoutubeIcon, Link2, Code, Layout
+    Youtube as YoutubeIcon, Link2, Code, Layout, Highlighter, Palette, Eraser
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 // useCompletion removed - using custom fetch instead
@@ -41,39 +45,75 @@ const ToolbarButton = ({ onClick, isActive, disabled, children, title }: any) =>
     </button>
 )
 
-import { Node, mergeAttributes } from '@tiptap/core'
+import { Node as TiptapNode, mergeAttributes } from '@tiptap/core'
 
 /**
  * Custom Node for Excel Formulas (Dark UI)
  */
-const FormulaNode = Node.create({
+const BASE_FORMULA_CLASSES = 'p-4 rounded-lg font-mono text-sm shadow-sm overflow-x-auto my-4 border'
+
+const FormulaNode = TiptapNode.create({
     name: 'formula',
     group: 'block',
     content: 'text*', // Contains only text
     draggable: true,
 
+    addAttributes() {
+        return {
+            theme: {
+                default: 'dark',
+                parseHTML: element => element.getAttribute('data-theme'),
+                renderHTML: attributes => {
+                    return {
+                        'data-theme': attributes.theme,
+                    }
+                },
+            },
+            class: {
+                default: 'bg-slate-900 text-slate-50 border-slate-700',
+            }
+        }
+    },
+
     parseHTML() {
         return [
             {
                 tag: 'div',
-                getAttrs: (node) => (node as HTMLElement).classList.contains('bg-slate-900') && null,
+                getAttrs: (node) => (node as HTMLElement).classList.contains('font-mono') && null,
             },
         ]
     },
 
     renderHTML({ HTMLAttributes }) {
-        return ['div', mergeAttributes(HTMLAttributes, { class: 'bg-slate-900 text-slate-50 p-4 rounded-lg font-mono text-sm shadow-sm overflow-x-auto my-4 border border-slate-700' }), 0]
+        return ['div', mergeAttributes(HTMLAttributes, { class: BASE_FORMULA_CLASSES }), 0]
     },
 })
 
 /**
- * Custom Node for Illustrations (Blue UI)
+ * Custom Node for Illustrations (Dynamic Colors)
  */
-const IllustrationNode = Node.create({
+const IllustrationNode = TiptapNode.create({
     name: 'illustration',
     group: 'block',
     content: 'block+', // Contains paragraphs/blocks
     draggable: true,
+
+    addAttributes() {
+        return {
+            theme: {
+                default: 'blue',
+                parseHTML: element => element.getAttribute('data-theme'),
+                renderHTML: attributes => {
+                    return {
+                        'data-theme': attributes.theme,
+                    }
+                },
+            },
+            class: {
+                default: 'bg-blue-50 border-blue-200 text-blue-800',
+            }
+        }
+    },
 
     parseHTML() {
         return [
@@ -85,7 +125,7 @@ const IllustrationNode = Node.create({
     },
 
     renderHTML({ HTMLAttributes }) {
-        return ['div', mergeAttributes(HTMLAttributes, { class: 'bg-blue-50 border border-blue-200 p-4 rounded-lg text-blue-800 my-4' }), 0]
+        return ['div', mergeAttributes(HTMLAttributes, { class: 'p-4 rounded-lg my-4 border' }), 0]
     },
 })
 
@@ -99,6 +139,69 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
     const [aiInput, setAiInput] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
 
+    // Color picker states
+    const [showHighlightPicker, setShowHighlightPicker] = useState(false)
+    const [showFormulaPicker, setShowFormulaPicker] = useState(false)
+    const [showIllustrationPicker, setShowIllustrationPicker] = useState(false)
+    const [showFontColorPicker, setShowFontColorPicker] = useState(false)
+    const [showFontFamilyPicker, setShowFontFamilyPicker] = useState(false)
+
+    const highlightPickerRef = useRef<HTMLDivElement>(null)
+    const formulaPickerRef = useRef<HTMLDivElement>(null)
+    const illustrationPickerRef = useRef<HTMLDivElement>(null)
+    const fontColorPickerRef = useRef<HTMLDivElement>(null)
+    const fontFamilyPickerRef = useRef<HTMLDivElement>(null)
+
+    // Highlight colors
+    const highlightColors = [
+        { name: 'Kuning', color: '#fef08a', class: 'bg-yellow-200' },
+        { name: 'Hijau', color: '#bbf7d0', class: 'bg-green-200' },
+        { name: 'Biru', color: '#bfdbfe', class: 'bg-blue-200' },
+        { name: 'Pink', color: '#fbcfe8', class: 'bg-pink-200' },
+        { name: 'Oranye', color: '#fed7aa', class: 'bg-orange-200' },
+        { name: 'Ungu', color: '#ddd6fe', class: 'bg-purple-200' },
+    ]
+
+    // Formula background colors
+    const formulaColors = [
+        { name: 'Dark (Default)', key: 'dark', class: 'bg-slate-900 text-slate-50 border-slate-700' },
+        { name: 'Green', key: 'green', class: 'bg-emerald-900 text-emerald-50 border-emerald-700' },
+        { name: 'Blue', key: 'blue', class: 'bg-blue-900 text-blue-50 border-blue-700' },
+        { name: 'Purple', key: 'purple', class: 'bg-purple-900 text-purple-50 border-purple-700' },
+        { name: 'Red', key: 'red', class: 'bg-red-900 text-red-50 border-red-700' },
+        { name: 'Orange', key: 'orange', class: 'bg-orange-900 text-orange-50 border-orange-700' },
+    ]
+
+    // Illustration colors
+    const illustrationColors = [
+        { name: 'Blue (Default)', key: 'blue', class: 'bg-blue-50 border-blue-200 text-blue-800' },
+        { name: 'Green', key: 'green', class: 'bg-green-50 border-green-200 text-green-800' },
+        { name: 'Yellow', key: 'yellow', class: 'bg-yellow-50 border-yellow-200 text-yellow-800' },
+        { name: 'Red', key: 'red', class: 'bg-red-50 border-red-200 text-red-800' },
+        { name: 'Purple', key: 'purple', class: 'bg-purple-50 border-purple-200 text-purple-800' },
+        { name: 'Gray', key: 'gray', class: 'bg-gray-50 border-gray-200 text-gray-800' },
+    ]
+
+    // Font Colors
+    const fontColors = [
+        { name: 'Black', color: '#000000' },
+        { name: 'Dark Gray', color: '#334155' },
+        { name: 'Gray', color: '#64748b' },
+        { name: 'Red', color: '#dc2626' },
+        { name: 'Blue', color: '#2563eb' },
+        { name: 'Green', color: '#16a34a' },
+        { name: 'Purple', color: '#9333ea' },
+        { name: 'Orange', color: '#ea580c' },
+    ]
+
+    // Font Families
+    const fontFamilies = [
+        { name: 'Default', value: 'Inter, sans-serif' },
+        { name: 'Serif', value: 'Georgia, serif' },
+        { name: 'Monospace', value: 'monospace' },
+        { name: 'Cursive', value: 'cursive' },
+    ]
+
     // URL Modal State
     const [urlModal, setUrlModal] = useState<{
         isOpen: boolean
@@ -110,11 +213,40 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
         url: ''
     })
 
+    // Close color pickers when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (highlightPickerRef.current && !highlightPickerRef.current.contains(e.target as Node)) {
+                setShowHighlightPicker(false)
+            }
+            if (formulaPickerRef.current && !formulaPickerRef.current.contains(e.target as Node)) {
+                setShowFormulaPicker(false)
+            }
+            if (illustrationPickerRef.current && !illustrationPickerRef.current.contains(e.target as Node)) {
+                setShowIllustrationPicker(false)
+            }
+            if (fontColorPickerRef.current && !fontColorPickerRef.current.contains(e.target as Node)) {
+                setShowFontColorPicker(false)
+            }
+            if (fontFamilyPickerRef.current && !fontFamilyPickerRef.current.contains(e.target as Node)) {
+                setShowFontFamilyPicker(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
     const editor = useEditor({
         extensions: [
             StarterKit,
             Image,
             UnderlineExtension,
+            Highlight.configure({
+                multicolor: true,
+            }),
+            TextStyle,
+            Color,
+            FontFamily,
             FormulaNode,
             IllustrationNode,
             Youtube.configure({
@@ -319,6 +451,134 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                         >
                             <Underline className="h-4 w-4" />
                         </ToolbarButton>
+
+                        <ToolbarButton
+                            onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+                            title="Clear Format"
+                        >
+                            <Eraser className="h-4 w-4" />
+                        </ToolbarButton>
+
+                        {/* Highlight Color Picker */}
+                        <div className="relative" ref={highlightPickerRef}>
+                            <ToolbarButton
+                                onClick={() => setShowHighlightPicker(!showHighlightPicker)}
+                                isActive={editor.isActive('highlight')}
+                                title="Highlight"
+                            >
+                                <Highlighter className="h-4 w-4" />
+                            </ToolbarButton>
+                            {showHighlightPicker && (
+                                <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 min-w-[120px]">
+                                    <p className="text-xs text-gray-500 mb-2 font-medium">Highlight</p>
+                                    <div className="grid grid-cols-3 gap-1">
+                                        {highlightColors.map((c) => (
+                                            <button
+                                                key={c.color}
+                                                type="button"
+                                                onClick={() => {
+                                                    editor.chain().focus().toggleHighlight({ color: c.color }).run()
+                                                    setShowHighlightPicker(false)
+                                                }}
+                                                className={`w-7 h-7 rounded-md border border-gray-200 hover:scale-110 transition-transform ${c.class}`}
+                                                title={c.name}
+                                            />
+                                        ))}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            editor.chain().focus().unsetHighlight().run()
+                                            setShowHighlightPicker(false)
+                                        }}
+                                        className="w-full mt-2 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded transition-colors flex items-center justify-center gap-1"
+                                    >
+                                        <X className="h-3 w-3" /> Hapus
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Font Color Picker */}
+                        <div className="relative" ref={fontColorPickerRef}>
+                            <ToolbarButton
+                                onClick={() => setShowFontColorPicker(!showFontColorPicker)}
+                                isActive={editor.isActive('textStyle', { color: /.*/ })}
+                                title="Warna Font"
+                            >
+                                <Palette className="h-4 w-4" />
+                            </ToolbarButton>
+                            {showFontColorPicker && (
+                                <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 min-w-[120px]">
+                                    <p className="text-xs text-gray-500 mb-2 font-medium">Warna Font</p>
+                                    <div className="grid grid-cols-4 gap-1">
+                                        {fontColors.map((c) => (
+                                            <button
+                                                key={c.color}
+                                                type="button"
+                                                onClick={() => {
+                                                    editor.chain().focus().setColor(c.color).run()
+                                                    setShowFontColorPicker(false)
+                                                }}
+                                                className="w-6 h-6 rounded-full border border-gray-200 hover:scale-110 transition-transform"
+                                                style={{ backgroundColor: c.color }}
+                                                title={c.name}
+                                            />
+                                        ))}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            editor.chain().focus().unsetColor().run()
+                                            setShowFontColorPicker(false)
+                                        }}
+                                        className="w-full mt-2 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded transition-colors flex items-center justify-center gap-1"
+                                    >
+                                        <X className="h-3 w-3" /> Reset
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Font Family Picker */}
+                        <div className="relative" ref={fontFamilyPickerRef}>
+                            <button
+                                type="button"
+                                onClick={() => setShowFontFamilyPicker(!showFontFamilyPicker)}
+                                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 text-xs font-medium border border-transparent hover:border-gray-200 transition-all w-24 text-left truncate"
+                                title="Font Family"
+                            >
+                                {fontFamilies.find(f => editor.isActive('textStyle', { fontFamily: f.value }))?.name || 'Font'}
+                            </button>
+                            {showFontFamilyPicker && (
+                                <div className="absolute top-full left-0 mt-1 p-1 bg-white rounded-lg shadow-xl border border-gray-200 z-50 min-w-[140px]">
+                                    {fontFamilies.map((font) => (
+                                        <button
+                                            key={font.value}
+                                            type="button"
+                                            onClick={() => {
+                                                editor.chain().focus().setFontFamily(font.value).run()
+                                                setShowFontFamilyPicker(false)
+                                            }}
+                                            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
+                                            style={{ fontFamily: font.value }}
+                                        >
+                                            {font.name}
+                                        </button>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            editor.chain().focus().unsetFontFamily().run()
+                                            setShowFontFamilyPicker(false)
+                                        }}
+                                        className="w-full text-left px-3 py-2 text-xs text-gray-500 border-t border-gray-100 hover:bg-gray-50 rounded-b transition-colors"
+                                    >
+                                        Reset Default
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Headings */}
@@ -401,20 +661,91 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
 
                     {/* Custom Blocks */}
                     <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-1">
-                        <ToolbarButton
-                            onClick={() => editor.chain().focus().toggleNode('formula', 'paragraph').run()}
-                            isActive={editor.isActive('formula')}
-                            title="Formula Style (Dark)"
-                        >
-                            <Code className="h-4 w-4" />
-                        </ToolbarButton>
-                        <ToolbarButton
-                            onClick={() => editor.chain().focus().toggleWrap('illustration').run()}
-                            isActive={editor.isActive('illustration')}
-                            title="Illustration Style (Blue)"
-                        >
-                            <Layout className="h-4 w-4" />
-                        </ToolbarButton>
+                        <div className="relative" ref={formulaPickerRef}>
+                            <ToolbarButton
+                                onClick={() => setShowFormulaPicker(!showFormulaPicker)}
+                                isActive={editor.isActive('formula')}
+                                title="Formula Style"
+                            >
+                                <Code className="h-4 w-4" />
+                            </ToolbarButton>
+
+                            {showFormulaPicker && (
+                                <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 min-w-[150px]">
+                                    <p className="text-xs text-gray-500 mb-2 font-medium">Style Formula</p>
+                                    <div className="space-y-1">
+                                        {formulaColors.map((theme) => (
+                                            <button
+                                                key={theme.key}
+                                                type="button"
+                                                onClick={() => {
+                                                    // Toggle node with specific theme attributes
+                                                    if (editor.isActive('formula', { theme: theme.key })) {
+                                                        editor.chain().focus().toggleNode('formula', 'paragraph').run()
+                                                    } else {
+                                                        // Update attributes if already formula, or convert to formula
+                                                        editor.chain().focus()
+                                                            .toggleNode('formula', 'paragraph', {
+                                                                theme: theme.key,
+                                                                class: theme.class
+                                                            })
+                                                            .run()
+                                                    }
+                                                    setShowFormulaPicker(false)
+                                                }}
+                                                className={`w-full text-left px-2 py-1.5 rounded text-xs flex items-center gap-2 hover:bg-gray-50 transition-colors ${editor.isActive('formula', { theme: theme.key }) ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-700'
+                                                    }`}
+                                            >
+                                                <span className={`w-3 h-3 rounded-full border border-gray-200 ${theme.class.split(' ')[0].replace('bg-', 'bg-')}`}></span>
+                                                {theme.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="relative" ref={illustrationPickerRef}>
+                            <ToolbarButton
+                                onClick={() => setShowIllustrationPicker(!showIllustrationPicker)}
+                                isActive={editor.isActive('illustration')}
+                                title="Illustration Style"
+                            >
+                                <Layout className="h-4 w-4" />
+                            </ToolbarButton>
+
+                            {showIllustrationPicker && (
+                                <div className="absolute top-full right-0 mt-1 p-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 min-w-[150px]">
+                                    <p className="text-xs text-gray-500 mb-2 font-medium">Style Illustration</p>
+                                    <div className="space-y-1">
+                                        {illustrationColors.map((theme) => (
+                                            <button
+                                                key={theme.key}
+                                                type="button"
+                                                onClick={() => {
+                                                    const chain = editor.chain().focus()
+                                                    if (editor.isActive('illustration')) {
+                                                        if (editor.isActive('illustration', { theme: theme.key })) {
+                                                            chain.toggleWrap('illustration').run()
+                                                        } else {
+                                                            chain.updateAttributes('illustration', { theme: theme.key, class: theme.class }).run()
+                                                        }
+                                                    } else {
+                                                        chain.toggleWrap('illustration', { theme: theme.key, class: theme.class }).run()
+                                                    }
+                                                    setShowIllustrationPicker(false)
+                                                }}
+                                                className={`w-full text-left px-2 py-1.5 rounded text-xs flex items-center gap-2 hover:bg-gray-50 transition-colors ${editor.isActive('illustration', { theme: theme.key }) ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-700'
+                                                    }`}
+                                            >
+                                                <span className={`w-3 h-3 rounded-full border border-gray-200 ${theme.class.split(' ')[0].replace('bg-', 'bg-')}`}></span>
+                                                {theme.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* AI Buttons */}
