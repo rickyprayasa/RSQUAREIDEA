@@ -60,11 +60,46 @@
   }
 }
 
+/* Tiptap Image Alignment Fixes */
+img[style*="text-align: center"],
+img[style*="text-align:center"] {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+img[style*="text-align: right"],
+img[style*="text-align:right"] {
+  display: block;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+img[style*="text-align: left"],
+img[style*="text-align:left"] {
+  display: block;
+  margin-right: auto;
+  margin-left: 0;
+}
+
+/* Auto-style images in content */
+.ProseMirror img,
+.prose img {
+  @apply rounded-xl shadow-lg border border-gray-100 my-6;
+  transition: all 0.3s ease;
+}
+
+.ProseMirror img:hover,
+.prose img:hover {
+  @apply shadow-xl scale-[1.01];
+}
+
 /* Shimmer animation for gradient text */
 @keyframes shimmer {
   0% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: -100% 50%;
   }
@@ -79,9 +114,11 @@
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -97,6 +134,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -109,9 +147,12 @@
 
 /* Button hover glow effect */
 @keyframes glow-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(249, 115, 22, 0.5);
   }
@@ -123,9 +164,12 @@
 
 /* Icon bounce animation */
 @keyframes icon-bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-3px);
   }
@@ -148,15 +192,19 @@
 .animation-delay-100 {
   animation-delay: 100ms;
 }
+
 .animation-delay-200 {
   animation-delay: 200ms;
 }
+
 .animation-delay-300 {
   animation-delay: 300ms;
 }
+
 .animation-delay-400 {
   animation-delay: 400ms;
 }
+
 .animation-delay-500 {
   animation-delay: 500ms;
 }

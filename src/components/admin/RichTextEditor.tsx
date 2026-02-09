@@ -10,13 +10,15 @@ import Highlight from '@tiptap/extension-highlight'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import { FontFamily } from '@tiptap/extension-font-family'
+import TextAlign from '@tiptap/extension-text-align'
 import { useState, useEffect, useRef } from 'react'
 import React from 'react'
 import {
     Bold, Italic, List, ListOrdered, Image as ImageIcon,
     Link as LinkIcon, Heading1, Heading2, Quote, Undo, Redo,
     Sparkles, Wand2, Check, Loader2, X, Underline,
-    Youtube as YoutubeIcon, Link2, Code, Layout, Highlighter, Palette, Eraser
+    Youtube as YoutubeIcon, Link2, Code, Layout, Highlighter, Palette, Eraser,
+    AlignLeft, AlignCenter, AlignRight
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 // useCompletion removed - using custom fetch instead
@@ -213,6 +215,9 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
         url: ''
     })
 
+    // Save cursor position before opening image modal
+    const [savedSelection, setSavedSelection] = useState<{ from: number; to: number } | null>(null)
+
     // Close color pickers when clicking outside
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -236,6 +241,22 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
+    // Context Menu State for Image Alignment
+    const [contextMenu, setContextMenu] = useState<{
+        x: number
+        y: number
+        show: boolean
+    }>({ x: 0, y: 0, show: false })
+
+    // Close context menu on click outside
+    useEffect(() => {
+        const handleClick = () => setContextMenu({ ...contextMenu, show: false })
+        if (contextMenu.show) {
+            document.addEventListener('click', handleClick)
+        }
+        return () => document.removeEventListener('click', handleClick)
+    }, [contextMenu.show])
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -258,6 +279,9 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
             Placeholder.configure({
                 placeholder: 'Mulai menulis cerita Anda...',
             }),
+            TextAlign.configure({
+                types: ['heading', 'paragraph', 'image'],
+            }),
         ],
         content,
         editable,
@@ -268,6 +292,35 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
             attributes: {
                 class: 'prose prose-lg max-w-none focus:outline-none px-4 py-4',
             },
+            handleDOMEvents: {
+                contextmenu: (view, event) => {
+                    const target = event.target as HTMLElement
+                    // Check if target is an image
+                    if (target.tagName === 'IMG' && target.closest('.ProseMirror')) {
+                        event.preventDefault()
+
+                        // Select the image node
+                        const pos = view.posAtDOM(target, 0)
+                        if (pos !== undefined) {
+                            const { tr } = view.state
+                            // @ts-ignore
+                            const selectionClass = view.state.selection.constructor as any
+                            if (selectionClass && selectionClass.fromJSON) {
+                                tr.setSelection(selectionClass.fromJSON(view.state.doc, { type: 'node', anchor: pos }))
+                                view.dispatch(tr)
+                            }
+                        }
+
+                        setContextMenu({
+                            x: event.clientX,
+                            y: event.clientY,
+                            show: true
+                        })
+                        return true
+                    }
+                    return false
+                }
+            }
         },
         immediatelyRender: false // Fix hydration mismatch
     })
@@ -365,13 +418,28 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
     }
 
     const addImage = () => {
+        // Save current cursor/selection position before opening modal
+        if (editor) {
+            const { from, to } = editor.state.selection
+            setSavedSelection({ from, to })
+        }
         setShowImageModal(true)
     }
 
     const handleImageUpload = (url: string) => {
-        if (url) {
-            editor?.chain().focus().setImage({ src: url }).run()
+        if (url && editor) {
+            // Restore cursor position before inserting image
+            if (savedSelection) {
+                editor.chain()
+                    .focus()
+                    .setTextSelection(savedSelection.from)
+                    .setImage({ src: url })
+                    .run()
+            } else {
+                editor.chain().focus().setImage({ src: url }).run()
+            }
             setShowImageModal(false)
+            setSavedSelection(null)
         }
     }
 
@@ -617,6 +685,31 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                         </ToolbarButton>
                     </div>
 
+                    {/* Alignment */}
+                    <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-1">
+                        <ToolbarButton
+                            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                            isActive={editor.isActive({ textAlign: 'left' })}
+                            title="Rata Kiri"
+                        >
+                            <AlignLeft className="h-4 w-4" />
+                        </ToolbarButton>
+                        <ToolbarButton
+                            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                            isActive={editor.isActive({ textAlign: 'center' })}
+                            title="Rata Tengah"
+                        >
+                            <AlignCenter className="h-4 w-4" />
+                        </ToolbarButton>
+                        <ToolbarButton
+                            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                            isActive={editor.isActive({ textAlign: 'right' })}
+                            title="Rata Kanan"
+                        >
+                            <AlignRight className="h-4 w-4" />
+                        </ToolbarButton>
+                    </div>
+
                     {/* Insert */}
                     <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-1">
                         <ToolbarButton
@@ -859,7 +952,7 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                                     <ImageIcon className="h-5 w-5 text-blue-500" />
                                     Upload Gambar
                                 </h3>
-                                <button onClick={() => setShowImageModal(false)} className="text-gray-400 hover:text-gray-600">
+                                <button onClick={() => { setShowImageModal(false); setSavedSelection(null) }} className="text-gray-400 hover:text-gray-600">
                                     <X className="h-5 w-5" />
                                 </button>
                             </div>
@@ -962,7 +1055,56 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
             <div className="flex-1 bg-white overflow-y-auto custom-scrollbar rounded-b-2xl">
                 <EditorContent editor={editor} />
             </div>
-        </div>
+
+
+            {/* Custom Context Menu */}
+            {
+                contextMenu.show && (
+                    <div
+                        className="fixed z-[100] bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[160px] animate-in fade-in zoom-in-95 duration-100"
+                        style={{ top: contextMenu.y, left: contextMenu.x }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Image Position</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                editor?.chain().focus().setTextAlign('left').run()
+                                setContextMenu({ ...contextMenu, show: false })
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-orange-600 flex items-center gap-2"
+                        >
+                            <AlignLeft className="h-4 w-4" />
+                            Rata Kiri
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                editor?.chain().focus().setTextAlign('center').run()
+                                setContextMenu({ ...contextMenu, show: false })
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-orange-600 flex items-center gap-2"
+                        >
+                            <AlignCenter className="h-4 w-4" />
+                            Rata Tengah
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                editor?.chain().focus().setTextAlign('right').run()
+                                setContextMenu({ ...contextMenu, show: false })
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-orange-600 flex items-center gap-2"
+                        >
+                            <AlignRight className="h-4 w-4" />
+                            Rata Kanan
+                        </button>
+                    </div>
+                )
+            }
+        </div >
     )
 }
 
