@@ -9,8 +9,9 @@ import { ArticleBackground } from '@/components/ui/ArticleBackground'
 import { ClientLordIcon } from '@/components/ui/lordicon'
 import { ViewCounter } from '@/components/articles/ViewCounter'
 import { ArticleComments } from '@/components/articles/ArticleComments'
-import { getArticleRating } from '@/app/actions/article-rating'
-import { ArticleRating } from '@/components/articles/ArticleRating'
+// TODO: Fix missing article-rating files
+// import { getArticleRating } from '@/app/actions/article-rating'
+// import { ArticleRating } from '@/components/articles/ArticleRating'
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -76,7 +77,9 @@ export default async function ArticlePage({ params }: Props) {
     }
 
     // Fetch rating data
-    const ratingData = await getArticleRating(article.id)
+    // TODO: Fix missing article-rating action
+    const ratingData = { userRating: null, average: 0, count: 0 }
+    // const ratingData = await getArticleRating(article.id)
 
     const words = article.content?.split(' ').length || 0
     const readTime = Math.ceil(words / 200)
@@ -310,14 +313,15 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
 
                     {/* Rating Section before comments */}
-                    <div className="mb-12 mt-12">
+                    {/* TODO: Fix missing ArticleRating component */}
+                    {/* <div className="mb-12 mt-12">
                         <ArticleRating
                             articleId={article.id}
                             initialUserRating={ratingData.userRating}
                             initialAverage={ratingData.average}
                             initialCount={ratingData.count}
                         />
-                    </div>
+                    </div> */}
 
                     {/* Comments Section */}
                     <ArticleComments articleId={article.id} />

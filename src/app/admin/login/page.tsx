@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Lock, Mail, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Lock, Mail, Eye, EyeOff, Loader2, Shield, AlertTriangle } from 'lucide-react'
 
 export default function AdminLoginPage() {
     const router = useRouter()
@@ -12,10 +12,16 @@ export default function AdminLoginPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const [rateLimitInfo, setRateLimitInfo] = useState<{
+        blocked: boolean
+        resetTime?: number
+        remaining?: number
+    } | null>(null)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
+        setRateLimitInfo(null)
         setLoading(true)
 
         try {
@@ -28,6 +34,14 @@ export default function AdminLoginPage() {
             const data = await res.json()
 
             if (!res.ok) {
+                // Check if rate limited
+                if (res.status === 429 || data.blocked) {
+                    setRateLimitInfo({
+                        blocked: true,
+                        resetTime: data.resetTime,
+                        remaining: data.remaining,
+                    })
+                }
                 setError(data.error || 'Login gagal')
                 return
             }
@@ -69,9 +83,29 @@ export default function AdminLoginPage() {
                     onSubmit={handleSubmit}
                 >
                     {error && (
-                        <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm border border-red-100">
-                            {error}
-                        </div>
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`p-4 rounded-xl text-sm border flex items-start gap-3 ${
+                                rateLimitInfo?.blocked
+                                    ? 'bg-yellow-50 text-yellow-800 border-yellow-200'
+                                    : 'bg-red-50 text-red-600 border-red-100'
+                            }`}
+                        >
+                            {rateLimitInfo?.blocked ? (
+                                <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                            ) : (
+                                <Shield className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                            )}
+                            <div>
+                                <p className="font-semibold">{error}</p>
+                                {rateLimitInfo?.blocked && rateLimitInfo.resetTime && (
+                                    <p className="text-xs mt-1 opacity-75">
+                                        Silakan tunggu sampai {new Date(rateLimitInfo.resetTime).toLocaleTimeString('id-ID')}
+                                    </p>
+                                )}
+                            </div>
+                        </motion.div>
                     )}
 
                     <div className="space-y-4">

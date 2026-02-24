@@ -23,6 +23,10 @@ import {
     BarChart3,
     Store,
     FileText,
+    Download,
+    Shield,
+    Key,
+    LogOut,
     type LucideIcon
 } from 'lucide-react'
 import { useState } from 'react'
@@ -90,6 +94,10 @@ const navGroups: NavGroup[] = [
 
 // Bottom navigation
 const bottomNav: NavItem[] = [
+    { name: 'Security', href: '/admin/security', icon: Shield, color: 'from-blue-500 to-cyan-500' },
+    { name: 'Ganti Password', href: '/admin/change-password', icon: Key, color: 'from-purple-500 to-violet-500' },
+    { name: 'Sessions', href: '/admin/sessions', icon: LogOut, color: 'from-orange-500 to-red-500' },
+    { name: 'Updates', href: '/admin/updates', icon: Download, color: 'from-green-500 to-emerald-500' },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, color: 'from-indigo-500 to-purple-500' },
     { name: 'Pengaturan', href: '/admin/settings', icon: Settings, color: 'from-gray-500 to-slate-500' },
 ]
