@@ -15,7 +15,41 @@ export async function POST(request: NextRequest) {
 
         const supabase = await createClient()
 
-        // Get Duitku config from settings
+        // First, check order status from our database (updated by callback)
+        const { data: order } = await supabase
+            .from('orders')
+            .select('id, status, amount, customer_name, customer_email')
+            .eq('order_number', orderNumber)
+            .single()
+
+        // If order is already completed in our DB (callback already processed), return immediately
+        if (order && order.status === 'completed') {
+            // Fetch order items with download URLs
+            const { data: orderItems } = await supabase
+                .from('order_items')
+                .select('product_id, product_title, price, products(title, download_url, image, slug)')
+                .eq('order_id', order.id)
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const items = orderItems?.map((item: any) => ({
+                id: item.product_id,
+                title: item.product_title || item.products?.title || 'Template',
+                downloadUrl: item.products?.download_url || null,
+                image: item.products?.image || null,
+                price: item.price || 0,
+            })) || []
+
+            return NextResponse.json({
+                success: true,
+                status: 'completed',
+                statusCode: '00',
+                statusMessage: 'SUCCESS',
+                amount: order.amount?.toString(),
+                items,
+            })
+        }
+
+        // If not completed in DB, check with Duitku API
         const { data: settings } = await supabase
             .from('site_settings')
             .select('key, value')
@@ -51,9 +85,44 @@ export async function POST(request: NextRequest) {
             '02': 'cancelled',
         }
 
+        const status = statusMap[result.data?.statusCode || '01'] || 'pending'
+
+        // If Duitku says completed but our DB hasn't been updated yet (rare race condition),
+        // update DB and return items
+        if (status === 'completed' && order) {
+            await supabase
+                .from('orders')
+                .update({ status: 'completed' })
+                .eq('order_number', orderNumber)
+
+            const { data: orderItems } = await supabase
+                .from('order_items')
+                .select('product_id, product_title, price, products(title, download_url, image, slug)')
+                .eq('order_id', order.id)
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const items = orderItems?.map((item: any) => ({
+                id: item.product_id,
+                title: item.product_title || item.products?.title || 'Template',
+                downloadUrl: item.products?.download_url || null,
+                image: item.products?.image || null,
+                price: item.price || 0,
+            })) || []
+
+            return NextResponse.json({
+                success: true,
+                status: 'completed',
+                statusCode: result.data?.statusCode,
+                statusMessage: result.data?.statusMessage,
+                reference: result.data?.reference,
+                amount: result.data?.amount,
+                items,
+            })
+        }
+
         return NextResponse.json({
             success: true,
-            status: statusMap[result.data?.statusCode || '01'] || 'pending',
+            status,
             statusCode: result.data?.statusCode,
             statusMessage: result.data?.statusMessage,
             reference: result.data?.reference,

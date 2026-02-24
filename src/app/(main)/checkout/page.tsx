@@ -75,6 +75,7 @@ function CheckoutContent() {
     const [errorDialog, setErrorDialog] = useState({ isOpen: false, title: '', message: '' })
     const [duitkuEnabled, setDuitkuEnabled] = useState(false)
     const [duitkuLoading, setDuitkuLoading] = useState(false)
+    const [isDuitkuReturn, setIsDuitkuReturn] = useState(false)
     const [expandedSection, setExpandedSection] = useState<'auto' | 'manual' | null>('auto')
 
     const [formData, setFormData] = useState({
@@ -113,12 +114,56 @@ function CheckoutContent() {
 
         if (status === 'check' && order) {
             setOrderNumber(order)
-            setConfirmationSent(true)
+            setIsDuitkuReturn(true)
             setStep(3)
             // Clear cart as order is placed
             clearCart()
         }
     }, [searchParams, clearCart])
+
+    // Poll Duitku order status when returning from Duitku payment
+    useEffect(() => {
+        if (!isDuitkuReturn || !orderNumber || paymentConfirmed) return
+
+        const checkDuitkuStatus = async () => {
+            try {
+                const res = await fetch('/api/duitku/check-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderNumber }),
+                })
+                const data = await res.json()
+
+                if (data.success && data.status === 'completed') {
+                    setPaymentConfirmed(true)
+
+                    // Load purchased items from API response
+                    if (data.items && data.items.length > 0) {
+                        setPurchasedItems(data.items.map((item: { id: number; title: string; downloadUrl: string | null; image: string | null; price: number }) => ({
+                            id: item.id,
+                            title: item.title,
+                            downloadUrl: item.downloadUrl || '',
+                            image: item.image || '',
+                            price: item.price,
+                            discountPrice: 0,
+                            slug: '',
+                        })))
+                    }
+                } else if (data.success && data.status === 'cancelled') {
+                    setPaymentRejected(true)
+                }
+            } catch (error) {
+                console.error('Error checking Duitku status:', error)
+            }
+        }
+
+        // Check immediately
+        checkDuitkuStatus()
+
+        // Then poll every 5 seconds until confirmed
+        const interval = setInterval(checkDuitkuStatus, 5000)
+        return () => clearInterval(interval)
+    }, [isDuitkuReturn, orderNumber, paymentConfirmed])
 
     useEffect(() => {
         // Fetch payment methods and QRIS settings
@@ -1388,22 +1433,38 @@ function CheckoutContent() {
                                 </div>
                             )}
                             {/* Confirmation Sent - Waiting */}
-                            {confirmationSent && !paymentConfirmed && !paymentRejected && (
+                            {(confirmationSent || isDuitkuReturn) && !paymentConfirmed && !paymentRejected && (
                                 <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl p-6 mb-6 max-w-lg mx-auto">
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-200">
                                             <Clock className="h-6 w-6 text-white" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-amber-800 text-lg mb-1">Menunggu Verifikasi</h3>
-                                            <p className="text-sm text-amber-700 mb-3">
-                                                Konfirmasi pembayaran Kamu sedang diverifikasi oleh tim RSQUARE.
-                                                Halaman ini akan otomatis terupdate setelah pembayaran dikonfirmasi.
-                                            </p>
-                                            <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 rounded-lg text-sm text-amber-700">
-                                                <Clock className="h-4 w-4" />
-                                                <span>Estimasi verifikasi: 1x24 jam kerja</span>
-                                            </div>
+                                            {isDuitkuReturn ? (
+                                                <>
+                                                    <h3 className="font-bold text-amber-800 text-lg mb-1">Memproses Pembayaran...</h3>
+                                                    <p className="text-sm text-amber-700 mb-3">
+                                                        Pembayaran otomatis Kamu sedang diverifikasi.
+                                                        Halaman ini akan otomatis terupdate dalam beberapa detik.
+                                                    </p>
+                                                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 rounded-lg text-sm text-amber-700">
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                        <span>Mengecek status pembayaran...</span>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <h3 className="font-bold text-amber-800 text-lg mb-1">Menunggu Verifikasi</h3>
+                                                    <p className="text-sm text-amber-700 mb-3">
+                                                        Konfirmasi pembayaran Kamu sedang diverifikasi oleh tim RSQUARE.
+                                                        Halaman ini akan otomatis terupdate setelah pembayaran dikonfirmasi.
+                                                    </p>
+                                                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 rounded-lg text-sm text-amber-700">
+                                                        <Clock className="h-4 w-4" />
+                                                        <span>Estimasi verifikasi: 1x24 jam kerja</span>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -1438,7 +1499,7 @@ function CheckoutContent() {
                                 </button>
                             </div>
                             {/* Save order info hint */}
-                            {confirmationSent && orderNumber && (
+                            {(confirmationSent || isDuitkuReturn) && orderNumber && (
                                 <div className="text-center mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 max-w-md mx-auto">
                                     <p className="text-sm text-gray-600 mb-2">
                                         Simpan nomor pesanan untuk mengecek status:

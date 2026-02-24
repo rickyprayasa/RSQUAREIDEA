@@ -9,6 +9,8 @@ import { ArticleBackground } from '@/components/ui/ArticleBackground'
 import { ClientLordIcon } from '@/components/ui/lordicon'
 import { ViewCounter } from '@/components/articles/ViewCounter'
 import { ArticleComments } from '@/components/articles/ArticleComments'
+import { getArticleRating } from '@/app/actions/article-rating'
+import { ArticleRating } from '@/components/articles/ArticleRating'
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -73,13 +75,58 @@ export default async function ArticlePage({ params }: Props) {
         notFound()
     }
 
+    // Fetch rating data
+    const ratingData = await getArticleRating(article.id)
+
     const words = article.content?.split(' ').length || 0
     const readTime = Math.ceil(words / 200)
+
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: article.title,
+        image: article.thumbnail_url ? [article.thumbnail_url] : [],
+        description: article.excerpt || article.title,
+        author: {
+            '@type': 'Organization',
+            name: 'RSQUARE',
+            url: 'https://rsquareidea.my.id'
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'RSQUARE IDEA',
+            logo: {
+                '@type': 'ImageObject',
+                url: 'https://rsquareidea.my.id/icon.png'
+            }
+        },
+        datePublished: article.created_at,
+        dateModified: article.updated_at || article.created_at,
+        mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `https://rsquareidea.my.id/articles/${slug}`
+        },
+        aggregateRating: ratingData.count > 0 ? {
+            '@type': 'AggregateRating',
+            ratingValue: ratingData.average,
+            reviewCount: ratingData.count,
+            bestRating: '5',
+            worstRating: '1'
+        } : undefined
+    }
 
     return (
         <div className="min-h-screen relative overflow-hidden">
             <ViewCounter slug={slug} />
             <ArticleBackground />
+
+            {/* Structured Data for SEO */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify(jsonLd)
+                }}
+            />
 
             {/* Hero / Header */}
             <div className="relative pt-32 pb-16">
@@ -260,6 +307,16 @@ export default async function ArticlePage({ params }: Props) {
                                 />
                             </div>
                         </Link>
+                    </div>
+
+                    {/* Rating Section before comments */}
+                    <div className="mb-12 mt-12">
+                        <ArticleRating
+                            articleId={article.id}
+                            initialUserRating={ratingData.userRating}
+                            initialAverage={ratingData.average}
+                            initialCount={ratingData.count}
+                        />
                     </div>
 
                     {/* Comments Section */}
