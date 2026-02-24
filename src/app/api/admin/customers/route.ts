@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getSession } from '@/lib/auth'
 import { isLocalhost } from '@/lib/isLocalhost'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
-        const user = await getSession()
-        if (!user) {
+        const supabase = await createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
-
-        const supabase = await createClient()
 
         // Get customers
         const { data: customers, error } = await supabase

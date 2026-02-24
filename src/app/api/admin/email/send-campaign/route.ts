@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getSession } from '@/lib/auth'
 import nodemailer from 'nodemailer'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 interface Customer {
     id: number
@@ -115,8 +117,10 @@ function getCampaignEmailHtml(customerName: string, feedbackUrl: string, product
 
 export async function POST(request: NextRequest) {
     try {
-        const user = await getSession()
-        if (!user) {
+        const supabase = await createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -125,8 +129,6 @@ export async function POST(request: NextRequest) {
         if (!customers || customers.length === 0) {
             return NextResponse.json({ error: 'Tidak ada pelanggan yang dipilih' }, { status: 400 })
         }
-
-        const supabase = await createClient()
 
         // Fetch SMTP configuration from database (same as test-email)
         const { data: settingsData } = await supabase

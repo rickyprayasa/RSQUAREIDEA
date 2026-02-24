@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getSession } from '@/lib/auth'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
     try {
-        const user = await getSession()
-        if (!user) {
+        const supabase = await createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
         const { searchParams } = new URL(request.url)
         const customerId = searchParams.get('customer_id')
-
-        const supabase = await createClient()
 
         let query = supabase
             .from('customer_transactions')
@@ -36,8 +38,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const user = await getSession()
-        if (!user) {
+        const supabase = await createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -47,8 +51,6 @@ export async function POST(request: NextRequest) {
         if (!customer_id || !product_name) {
             return NextResponse.json({ error: 'Customer ID dan nama produk wajib diisi' }, { status: 400 })
         }
-
-        const supabase = await createClient()
 
         // Insert transaction
         const { data: transaction, error } = await supabase
@@ -101,8 +103,10 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
     try {
-        const user = await getSession()
-        if (!user) {
+        const supabase = await createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
@@ -112,8 +116,6 @@ export async function DELETE(request: NextRequest) {
         if (!id) {
             return NextResponse.json({ error: 'Transaction ID required' }, { status: 400 })
         }
-
-        const supabase = await createClient()
 
         // Get transaction to find customer_id
         const { data: transaction } = await supabase

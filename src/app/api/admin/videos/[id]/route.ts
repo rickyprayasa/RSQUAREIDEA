@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getSession } from '@/lib/auth'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function PUT(
-    request: NextRequest, 
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = await getSession()
-        if (!user) {
+        const supabase = await createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
         const { id } = await params
         const data = await request.json()
-        const supabase = await createClient()
         
         const { data: video, error } = await supabase
             .from('video_tutorials')
@@ -45,17 +48,18 @@ export async function PUT(
 }
 
 export async function DELETE(
-    request: NextRequest, 
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = await getSession()
-        if (!user) {
+        const supabase = await createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
         const { id } = await params
-        const supabase = await createClient()
         
         const { error } = await supabase
             .from('video_tutorials')
