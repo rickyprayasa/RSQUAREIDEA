@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import nodemailer from 'nodemailer'
 
 interface EmailData {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
-        const supabase = await createClient()
+        const supabase = await createAdminClient()
 
         // Get email settings from site_settings table
         const { data: settingsData } = await supabase
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'SMTP not configured' }, { status: 500 })
         }
 
-        // Create transporter
+        // Create transporter with Zoho-compatible settings
         const transporter = nodemailer.createTransport({
             host: smtpHost,
             port: smtpPort,
@@ -117,7 +117,27 @@ export async function POST(request: NextRequest) {
                 user: smtpUser,
                 pass: smtpPassword,
             },
+            tls: {
+                rejectUnauthorized: false,
+            },
         })
+
+        // Verify SMTP connection first
+        try {
+            await transporter.verify()
+            console.log('SMTP connection verified successfully')
+        } catch (verifyError) {
+            console.error('SMTP connection failed:', {
+                host: smtpHost,
+                port: smtpPort,
+                user: smtpUser,
+                error: verifyError instanceof Error ? verifyError.message : verifyError,
+            })
+            return NextResponse.json({
+                error: 'SMTP connection failed',
+                details: verifyError instanceof Error ? verifyError.message : 'Unknown error'
+            }, { status: 500 })
+        }
 
         // Format download links for HTML
         const downloadLinksHtml = downloadLinks
@@ -152,7 +172,7 @@ export async function POST(request: NextRequest) {
         const textBody = `Halo ${customerName},\n\nTerima kasih telah melakukan pembelian di RSQUARE!\n\nPesanan Kamu dengan nomor ${orderNumber} telah dikonfirmasi.\n\nBerikut adalah link download template yang Kamu beli:\n\n${downloadLinksText}\n\nTotal Pembayaran: Rp ${totalAmount.toLocaleString('id-ID')}\n\nSalam hangat,\nTim RSQUARE`
 
         // Send email
-        await transporter.sendMail({
+        const info = await transporter.sendMail({
             from: `"${fromName}" <${fromEmail}>`,
             to,
             subject,
@@ -160,10 +180,23 @@ export async function POST(request: NextRequest) {
             html: htmlBody,
         })
 
-        return NextResponse.json({ success: true, message: 'Email sent successfully' })
+        console.log('Email sent successfully:', {
+            to,
+            orderNumber,
+            messageId: info.messageId,
+            response: info.response,
+        })
+
+        return NextResponse.json({ success: true, message: 'Email sent successfully', messageId: info.messageId })
     } catch (error) {
-        console.error('Error sending email:', error)
-        return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
+        console.error('Error sending email:', {
+            message: error instanceof Error ? error.message : error,
+            stack: error instanceof Error ? error.stack : undefined,
+        })
+        return NextResponse.json({
+            error: 'Failed to send email',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 })
     }
 }
 
