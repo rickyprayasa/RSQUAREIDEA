@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { isLocalhost } from '@/lib/isLocalhost'
 import { notifyQrisConfirmation } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
     try {
         const data = await request.json()
-        
+
         // Check if running on localhost
         const localhost = await isLocalhost()
         if (localhost) {
@@ -21,11 +21,11 @@ export async function POST(request: NextRequest) {
                 confirmationId: testConfirmationId,
                 proofImage: data.proofImage,
             }).catch(console.error)
-            
-            return NextResponse.json({ 
-                confirmation: { id: testConfirmationId, status: 'pending' }, 
-                success: true, 
-                testMode: true 
+
+            return NextResponse.json({
+                confirmation: { id: testConfirmationId, status: 'pending' },
+                success: true,
+                testMode: true
             })
         }
 
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url)
         const orderNumber = searchParams.get('orderNumber')
 
-        const supabase = await createClient()
+        const supabase = await createAdminClient()
 
         let query = supabase
             .from('qris_confirmations')
@@ -110,28 +110,66 @@ export async function GET(request: NextRequest) {
         }
 
         const { data: confirmations, error } = await query
-        
+
         // IF no manual confirmation found, check if the order is already completed (e.g. by Duitku)
         if ((!confirmations || confirmations.length === 0) && orderNumber) {
             const { data: order } = await supabase
                 .from('orders')
-                .select('id, status, amount, customer_name, customer_email')
+                .select('id, status, amount, customer_name, customer_email, product_id')
                 .eq('order_number', orderNumber)
                 .single()
 
             if (order && order.status === 'completed') {
-                // Return a synthetic "approved" confirmation so the frontend treats it as done
+                // Fetch download links for this completed order
+                const downloadLinks: { title: string; url: string }[] = []
+
+                const { data: orderItems } = await supabase
+                    .from('order_items')
+                    .select('product_id, product_title, products(download_url, title)')
+                    .eq('order_id', order.id)
+
+                if (orderItems && orderItems.length > 0) {
+                    for (const item of orderItems) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const product = item.products as any
+                        if (product?.download_url) {
+                            downloadLinks.push({
+                                title: item.product_title || product.title || 'Template',
+                                url: product.download_url
+                            })
+                        }
+                    }
+                }
+
+                // Fallback: try product_id from orders table
+                if (downloadLinks.length === 0 && order.product_id) {
+                    const { data: product } = await supabase
+                        .from('products')
+                        .select('download_url, title')
+                        .eq('id', order.product_id)
+                        .single()
+
+                    if (product?.download_url) {
+                        downloadLinks.push({
+                            title: product.title || 'Template',
+                            url: product.download_url
+                        })
+                    }
+                }
+
+                // Return a synthetic "approved" confirmation with download links
                 return NextResponse.json({
                     confirmations: [{
-                        id: 0, // Synthetic ID
+                        id: 0,
                         order_id: order.id,
                         order_number: orderNumber,
                         customer_name: order.customer_name,
                         customer_email: order.customer_email,
                         amount: order.amount,
-                        status: 'approved', // Force approved status
+                        status: 'approved',
                         proof_image: null,
-                        created_at: new Date().toISOString()
+                        created_at: new Date().toISOString(),
+                        downloadLinks,
                     }]
                 })
             }
