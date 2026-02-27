@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { verifyCallback } from '@/lib/duitku'
 
 export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData()
-        
+
         const merchantCode = formData.get('merchantCode') as string
         const amount = formData.get('amount') as string
         const merchantOrderId = formData.get('merchantOrderId') as string
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Bad Parameter' }, { status: 400 })
         }
 
-        const supabase = await createClient()
+        const supabase = await createAdminClient()
 
         // Get Duitku API key from settings
         const { data: settings } = await supabase
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         if (resultCode === '00' && order) {
             // Get download links from order_items
             const downloadLinks: { title: string; url: string }[] = []
-            
+
             const { data: orderItems } = await supabase
                 .from('order_items')
                 .select('product_id, product_title, products(download_url, title)')

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { checkTransactionStatus } from '@/lib/duitku'
 
 export async function POST(request: NextRequest) {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const supabase = await createClient()
+        const supabase = await createAdminClient()
 
         // First, check order status from our database (updated by callback)
         const { data: order } = await supabase
