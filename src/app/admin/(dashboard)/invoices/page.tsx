@@ -23,8 +23,10 @@ import {
     Pencil,
     XCircle,
     Receipt,
-    ChevronDown
+    ChevronDown,
+    Eye
 } from 'lucide-react'
+import { DEFAULT_TERMS } from '@/lib/invoice-pdf'
 
 interface InvoiceItem {
     name: string
@@ -40,6 +42,7 @@ interface Invoice {
     customer_email: string
     customer_phone: string | null
     description: string | null
+    app_type: string | null
     items: InvoiceItem[]
     subtotal: number
     tax_percent: number
@@ -51,6 +54,7 @@ interface Invoice {
     paid_at: string | null
     sent_at: string | null
     notes: string | null
+    terms_conditions: string | null
     delivery_status: 'pending' | 'delivered'
     delivery_url: string | null
     delivery_file_url: string | null
@@ -86,16 +90,19 @@ export default function InvoicesPage() {
 
     // Create form state
     const [form, setForm] = useState({
+        id: undefined as number | undefined,
         request_id: '',
         customer_name: '',
         customer_email: '',
         customer_phone: '',
         description: '',
+        app_type: '',
         items: [{ name: '', qty: 1, price: 0 }] as InvoiceItem[],
         tax_percent: 0,
         discount: 0,
         due_date: '',
         notes: '',
+        terms_conditions: DEFAULT_TERMS,
     })
 
     // Deliver form state
@@ -166,16 +173,19 @@ export default function InvoicesPage() {
                 showToast('Invoice berhasil dibuat!', 'success')
                 setShowCreate(false)
                 setForm({
+                    id: undefined,
                     request_id: '',
                     customer_name: '',
                     customer_email: '',
                     customer_phone: '',
                     description: '',
+                    app_type: '',
                     items: [{ name: '', qty: 1, price: 0 }],
                     tax_percent: 0,
                     discount: 0,
                     due_date: '',
                     notes: '',
+                    terms_conditions: DEFAULT_TERMS,
                 })
                 await fetchInvoices()
             } else {
@@ -202,10 +212,10 @@ export default function InvoicesPage() {
                 await fetchInvoices()
             } else {
                 const d = await res.json()
-                showToast(d.error || 'Gagal mengirim invoice', 'error')
+                showToast(d.details || d.error || 'Gagal mengirim invoice', 'error')
             }
-        } catch {
-            showToast('Gagal mengirim invoice', 'error')
+        } catch (error: any) {
+            showToast(error?.message || 'Gagal mengirim invoice', 'error')
         } finally {
             setSending(false)
         }
@@ -359,7 +369,24 @@ export default function InvoicesPage() {
                     <p className="text-gray-500 mt-1">Kelola invoice untuk request aplikasi</p>
                 </div>
                 <button
-                    onClick={() => setShowCreate(true)}
+                    onClick={() => {
+                        setForm({
+                            id: undefined,
+                            request_id: '',
+                            customer_name: '',
+                            customer_email: '',
+                            customer_phone: '',
+                            description: '',
+                            app_type: '',
+                            items: [{ name: '', qty: 1, price: 0 }],
+                            tax_percent: 0,
+                            discount: 0,
+                            due_date: '',
+                            notes: '',
+                            terms_conditions: DEFAULT_TERMS,
+                        })
+                        setShowCreate(true)
+                    }}
                     className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium shadow-lg shadow-orange-500/20"
                 >
                     <Plus className="h-5 w-5" />
@@ -544,11 +571,21 @@ export default function InvoicesPage() {
                                     )}
                                 </div>
 
-                                {/* Description */}
-                                {selectedInvoice.description && (
-                                    <div className="mb-6">
-                                        <p className="text-sm text-gray-500 mb-1">Deskripsi</p>
-                                        <p className="p-3 bg-gray-50 rounded-xl text-gray-700 text-sm">{selectedInvoice.description}</p>
+                                {/* App Type & Description */}
+                                {(selectedInvoice.app_type || selectedInvoice.description) && (
+                                    <div className="mb-6 flex gap-4">
+                                        {selectedInvoice.app_type && (
+                                            <div>
+                                                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Jenis Aplikasi</p>
+                                                <span className="inline-block px-3 py-1.5 bg-orange-50 text-orange-700 rounded-lg text-sm font-medium border border-orange-200">{selectedInvoice.app_type}</span>
+                                            </div>
+                                        )}
+                                        {selectedInvoice.description && (
+                                            <div className="flex-1">
+                                                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Deskripsi</p>
+                                                <p className="text-sm text-gray-700">{selectedInvoice.description}</p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -644,52 +681,108 @@ export default function InvoicesPage() {
                                     </div>
                                 )}
 
+                                {/* PDF Preview */}
+                                {/* PDF Preview Make it a 2-column grid to squeeze Edit button */}
+                                <div className="pt-4 border-t flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setForm({
+                                                id: selectedInvoice.id,
+                                                request_id: selectedInvoice.request_id?.toString() || '',
+                                                customer_name: selectedInvoice.customer_name,
+                                                customer_email: selectedInvoice.customer_email,
+                                                customer_phone: selectedInvoice.customer_phone || '',
+                                                description: selectedInvoice.description || '',
+                                                app_type: selectedInvoice.app_type || '',
+                                                items: selectedInvoice.items || [{ name: '', qty: 1, price: 0 }],
+                                                tax_percent: selectedInvoice.tax_percent,
+                                                discount: selectedInvoice.discount,
+                                                due_date: selectedInvoice.due_date ? selectedInvoice.due_date.split('T')[0] : '',
+                                                notes: selectedInvoice.notes || '',
+                                                terms_conditions: selectedInvoice.terms_conditions || DEFAULT_TERMS,
+                                            })
+                                            setSelectedInvoice(null)
+                                            setShowCreate(true)
+                                        }}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-orange-100 text-orange-700 rounded-xl font-medium hover:bg-orange-200 transition-colors border border-orange-200"
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                        Edit Invoice
+                                    </button>
+                                    <button
+                                        onClick={() => window.open(`/api/admin/request-invoices/pdf?id=${selectedInvoice.id}`, '_blank')}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors border border-gray-200"
+                                    >
+                                        <Eye className="h-5 w-5" />
+                                        Preview PDF
+                                    </button>
+                                </div>
+
                                 {/* Actions */}
-                                <div className="flex flex-wrap gap-3 pt-4 border-t">
-                                    {selectedInvoice.status === 'draft' && (
-                                        <button
-                                            onClick={() => sendInvoice(selectedInvoice.id)}
-                                            disabled={sending}
-                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors disabled:opacity-50"
-                                        >
-                                            {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                                            Kirim Invoice
-                                        </button>
+                                <div className="flex flex-col gap-3">
+                                    {/* Primary Invoice Sequence Actions */}
+                                    {(selectedInvoice.status === 'draft' || selectedInvoice.status === 'sent') && (
+                                        <div className="flex gap-3">
+                                            {selectedInvoice.status === 'draft' ? (
+                                                <button
+                                                    onClick={() => sendInvoice(selectedInvoice.id)}
+                                                    disabled={sending}
+                                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors disabled:opacity-50"
+                                                >
+                                                    {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                                                    Kirim Invoice
+                                                </button>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        onClick={() => sendInvoice(selectedInvoice.id)}
+                                                        disabled={sending}
+                                                        className="flex-1 flex items-center justify-center gap-2 px-3 py-3 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl font-medium hover:bg-blue-100 transition-colors disabled:opacity-50"
+                                                    >
+                                                        {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                                        Kirim Ulang Email
+                                                    </button>
+                                                    <button
+                                                        onClick={() => markAsPaid(selectedInvoice.id)}
+                                                        disabled={actionLoading}
+                                                        className="flex-1 flex items-center justify-center gap-2 px-3 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors disabled:opacity-50"
+                                                    >
+                                                        <Check className="h-4 w-4" />
+                                                        Tandai Lunas
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
                                     )}
-                                    {(selectedInvoice.status === 'sent') && (
-                                        <button
-                                            onClick={() => markAsPaid(selectedInvoice.id)}
-                                            disabled={actionLoading}
-                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors disabled:opacity-50"
-                                        >
-                                            <Check className="h-5 w-5" />
-                                            Tandai Lunas
-                                        </button>
-                                    )}
-                                    {selectedInvoice.status !== 'cancelled' && selectedInvoice.delivery_status !== 'delivered' && (
-                                        <button
-                                            onClick={() => {
-                                                setShowDeliver(true)
-                                                setDeliverForm({
-                                                    delivery_url: selectedInvoice.delivery_url || '',
-                                                    delivery_file_url: selectedInvoice.delivery_file_url || '',
-                                                    message: '',
-                                                })
-                                            }}
-                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 text-white rounded-xl font-medium hover:bg-emerald-600 transition-colors"
-                                        >
-                                            <Package className="h-5 w-5" />
-                                            Kirim Aplikasi
-                                        </button>
-                                    )}
-                                    {selectedInvoice.status !== 'cancelled' && selectedInvoice.status !== 'paid' && (
-                                        <button
-                                            onClick={() => cancelInvoice(selectedInvoice.id)}
-                                            disabled={actionLoading}
-                                            className="flex items-center justify-center gap-2 px-4 py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors disabled:opacity-50"
-                                        >
-                                            <XCircle className="h-5 w-5" />
-                                        </button>
+
+                                    {/* Delivery and Cancellation */}
+                                    {selectedInvoice.status !== 'cancelled' && (
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    setShowDeliver(true)
+                                                    setDeliverForm({
+                                                        delivery_url: selectedInvoice.delivery_url || '',
+                                                        delivery_file_url: selectedInvoice.delivery_file_url || '',
+                                                        message: '',
+                                                    })
+                                                }}
+                                                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${selectedInvoice.delivery_status === 'delivered' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}
+                                            >
+                                                <Package className="h-4 w-4" />
+                                                {selectedInvoice.delivery_status === 'delivered' ? 'Kirim Ulang Aplikasi' : 'Kirim Aplikasi'}
+                                            </button>
+                                            {selectedInvoice.status !== 'paid' && (
+                                                <button
+                                                    onClick={() => cancelInvoice(selectedInvoice.id)}
+                                                    disabled={actionLoading}
+                                                    title="Batalkan Invoice"
+                                                    className="flex-none flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-500 border border-red-200 rounded-xl font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
+                                                >
+                                                    <XCircle className="h-5 w-5" />
+                                                </button>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -722,7 +815,7 @@ export default function InvoicesPage() {
 
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Link Aplikasi (URL)</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Link Google Sheet / Web (URL)</label>
                                         <div className="relative">
                                             <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                             <input
@@ -735,7 +828,7 @@ export default function InvoicesPage() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Link Download File</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Link Download Source Code / ZIP (opsional)</label>
                                         <div className="relative">
                                             <Download className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                             <input
@@ -754,7 +847,7 @@ export default function InvoicesPage() {
                                             placeholder="Instruksi penggunaan, catatan tambahan..."
                                             value={deliverForm.message}
                                             onChange={e => setDeliverForm(prev => ({ ...prev, message: e.target.value }))}
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-y"
                                         />
                                     </div>
                                 </div>
@@ -793,7 +886,7 @@ export default function InvoicesPage() {
                         >
                             <div className="p-6">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-bold text-gray-900">Buat Invoice Baru</h2>
+                                    <h2 className="text-xl font-bold text-gray-900">{form.id ? 'Edit Invoice' : 'Buat Invoice Baru'}</h2>
                                     <button onClick={() => setShowCreate(false)} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
                                         <X className="h-5 w-5" />
                                     </button>
@@ -846,15 +939,30 @@ export default function InvoicesPage() {
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi Pekerjaan</label>
-                                        <textarea
-                                            rows={2}
-                                            value={form.description}
-                                            onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
-                                            placeholder="Deskripsi singkat pekerjaan..."
-                                        />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Jenis Aplikasi</label>
+                                            <select
+                                                value={form.app_type}
+                                                onChange={e => setForm(prev => ({ ...prev, app_type: e.target.value }))}
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm bg-white"
+                                            >
+                                                <option value="">Pilih jenis aplikasi</option>
+                                                <option value="Google Sheets Templates">Google Sheets Templates</option>
+                                                <option value="Google Web Apps">Google Web Apps</option>
+                                                <option value="Full Stack Development">Full Stack Development</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi Pekerjaan</label>
+                                            <input
+                                                type="text"
+                                                value={form.description}
+                                                onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                                                placeholder="Deskripsi singkat (opsional)"
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Items */}
@@ -944,6 +1052,18 @@ export default function InvoicesPage() {
                                         />
                                     </div>
 
+                                    {/* Terms & Conditions */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Syarat & Ketentuan</label>
+                                        <textarea
+                                            rows={3}
+                                            value={form.terms_conditions}
+                                            onChange={e => setForm(prev => ({ ...prev, terms_conditions: e.target.value }))}
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
+                                            placeholder="Syarat dan ketentuan (otomatis tampil di invoice)..."
+                                        />
+                                    </div>
+
                                     {/* Calculated Total */}
                                     <div className="bg-gray-50 rounded-xl p-4 space-y-2">
                                         <div className="flex justify-between text-sm">
@@ -982,7 +1102,7 @@ export default function InvoicesPage() {
                                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-medium disabled:opacity-50"
                                     >
                                         {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Receipt className="h-4 w-4" />}
-                                        Buat Invoice
+                                        {form.id ? 'Simpan Perubahan' : 'Buat Invoice'}
                                     </button>
                                 </div>
                             </div>

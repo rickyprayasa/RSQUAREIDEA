@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import nodemailer from 'nodemailer'
+import { generateInvoicePDF } from '@/lib/invoice-pdf'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -64,19 +65,37 @@ export async function POST(request: NextRequest) {
             tls: { rejectUnauthorized: false },
         })
 
+        // Fetch active payment methods for PDF
+        const { data: payments } = await adminSupabase
+            .from('payment_settings')
+            .select('name, bank_name, account_number, account_name')
+            .eq('is_active', true)
+            .eq('type', 'internal')
+
+        const paymentMethods = (payments || []).map(p => ({
+            name: p.name,
+            bankName: p.bank_name,
+            accountNumber: p.account_number,
+            accountName: p.account_name,
+        }))
+
+        // Generate PDF attachment
+        const pdfBuffer = generateInvoicePDF(invoice, paymentMethods)
+
         // Build items table HTML
         const items = (invoice.items || []) as { name: string; qty: number; price: number }[]
         const itemsHtml = items.map((item, idx) => `
             <tr>
-                <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6; color: #4b5563;">${idx + 1}</td>
-                <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6; color: #111827; font-weight: 500;">${item.name}</td>
-                <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6; color: #4b5563; text-align: center;">${item.qty}</td>
-                <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6; color: #4b5563; text-align: right;">Rp ${item.price.toLocaleString('id-ID')}</td>
-                <td style="padding: 12px 16px; border-bottom: 1px solid #f3f4f6; color: #111827; font-weight: 600; text-align: right;">Rp ${(item.qty * item.price).toLocaleString('id-ID')}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #f3f4f6; color: #6b7280; text-align: center; font-size: 13px;">${idx + 1}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #f3f4f6; color: #111827; font-weight: 500; font-size: 14px;">${item.name}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #f3f4f6; color: #4b5563; text-align: center; font-size: 13px;">${item.qty}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #f3f4f6; color: #4b5563; text-align: right; font-size: 13px;">Rp ${item.price.toLocaleString('id-ID')}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #f3f4f6; color: #111827; font-weight: 600; text-align: right; font-size: 14px;">Rp ${(item.qty * item.price).toLocaleString('id-ID')}</td>
             </tr>
         `).join('')
 
         const dueDateStr = invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'
+        const createdDateStr = new Date(invoice.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
 
         const htmlBody = `
 <!DOCTYPE html>
@@ -85,101 +104,207 @@ export async function POST(request: NextRequest) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-    <div style="max-width: 640px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <!-- Header -->
-        <div style="background: linear-gradient(135deg, #f97316, #ea580c); padding: 30px 40px; text-align: center;">
-            <img src="https://nagujrwbifmpcwhotzut.supabase.co/storage/v1/object/public/Logo%20RSQUARE/RSQUARE.png" alt="RSQUARE" style="height: 60px; width: auto; margin-bottom: 16px;">
-            <h1 style="color: #ffffff; font-size: 28px; margin: 0; font-weight: 700;">INVOICE</h1>
-            <p style="color: rgba(255,255,255,0.9); font-size: 16px; margin: 8px 0 0;">${invoice.invoice_number}</p>
-        </div>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+    <div style="max-width: 640px; margin: 0 auto; background-color: #f3f4f6;">
+        <!-- Spacer -->
+        <div style="height: 40px;"></div>
 
-        <!-- Content -->
-        <div style="padding: 40px;">
-            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
-                Halo <strong>${invoice.customer_name}</strong>,
-            </p>
-            <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
-                Berikut adalah invoice untuk layanan yang Anda request di RSQUARE.
-            </p>
+        <!-- Main Card -->
+        <div style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 0 16px;">
 
-            ${invoice.description ? `
-            <div style="background-color: #f9fafb; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;">
-                <p style="color: #6b7280; font-size: 13px; margin: 0 0 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Deskripsi Pekerjaan</p>
-                <p style="color: #374151; font-size: 15px; margin: 0; line-height: 1.5;">${invoice.description}</p>
-            </div>
-            ` : ''}
-
-            <!-- Items Table -->
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-                <thead>
-                    <tr style="background-color: #1f2937;">
-                        <th style="padding: 12px 16px; text-align: left; color: #ffffff; font-size: 13px; font-weight: 600;">#</th>
-                        <th style="padding: 12px 16px; text-align: left; color: #ffffff; font-size: 13px; font-weight: 600;">Item</th>
-                        <th style="padding: 12px 16px; text-align: center; color: #ffffff; font-size: 13px; font-weight: 600;">Qty</th>
-                        <th style="padding: 12px 16px; text-align: right; color: #ffffff; font-size: 13px; font-weight: 600;">Harga</th>
-                        <th style="padding: 12px 16px; text-align: right; color: #ffffff; font-size: 13px; font-weight: 600;">Jumlah</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${itemsHtml}
-                </tbody>
+            <!-- Top Geometric Bars (Matching PDF) -->
+            <table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 60%; background-color: #ea580c; height: 6px;"></td>
+                    <td style="width: 40%; background-color: #1f2937; height: 6px;"></td>
+                </tr>
+                <tr>
+                    <td style="width: 60%; background-color: #1f2937; height: 3px;"></td>
+                    <td style="width: 40%; background-color: #ffffff; height: 3px;"></td>
+                </tr>
             </table>
 
-            <!-- Totals -->
-            <div style="border-top: 2px solid #e5e7eb; padding-top: 16px;">
-                <div style="display: flex; justify-content: space-between; padding: 6px 0;">
-                    <span style="color: #6b7280;">Subtotal</span>
-                    <span style="color: #111827; font-weight: 500;">Rp ${(invoice.subtotal || 0).toLocaleString('id-ID')}</span>
-                </div>
-                ${invoice.tax_percent > 0 ? `
-                <div style="display: flex; justify-content: space-between; padding: 6px 0;">
-                    <span style="color: #6b7280;">Pajak (${invoice.tax_percent}%)</span>
-                    <span style="color: #111827;">Rp ${(invoice.tax_amount || 0).toLocaleString('id-ID')}</span>
-                </div>
-                ` : ''}
-                ${invoice.discount > 0 ? `
-                <div style="display: flex; justify-content: space-between; padding: 6px 0;">
-                    <span style="color: #6b7280;">Diskon</span>
-                    <span style="color: #ef4444;">- Rp ${(invoice.discount || 0).toLocaleString('id-ID')}</span>
-                </div>
-                ` : ''}
-                <div style="display: flex; justify-content: space-between; padding: 12px 0; margin-top: 8px; border-top: 2px solid #111827;">
-                    <span style="color: #111827; font-size: 18px; font-weight: 700;">Total</span>
-                    <span style="color: #f97316; font-size: 18px; font-weight: 700;">Rp ${(invoice.total || 0).toLocaleString('id-ID')}</span>
-                </div>
+            <!-- Header Area with Diagonal Graphic -->
+            <div style="background-color: #ffffff;">
+                <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                    <tr>
+                        <!-- Left Logo (White BG) -->
+                        <td style="width: 50%; padding: 24px 10px 24px 40px; vertical-align: middle;">
+                            <img src="https://nagujrwbifmpcwhotzut.supabase.co/storage/v1/object/public/Logo%20RSQUARE/RSQUARE.png" alt="RSQUARE" style="height: 48px; width: auto;">
+                            <div style="color: #6b7280; font-size: 10px; margin-top: 6px; font-weight: 600; letter-spacing: 0.5px;">SOLUSI DIGITAL & OTOMATISASI BISNIS</div>
+                        </td>
+
+                        <!-- Right Title (Diagonal simulation + Orange Background) -->
+                        <td style="width: 50%; vertical-align: middle; padding: 0; background-color: #ea580c; background: linear-gradient(110deg, #ffffff 15%, #1f2937 15%, #1f2937 25%, #ea580c 25%);">
+                            <div style="padding: 24px 40px 24px 20px; text-align: right;">
+                                <h1 style="color: #ffffff; font-size: 28px; margin: 0; font-weight: 800; letter-spacing: 1px;">INVOICE</h1>
+                                <div style="color: #ffffff; font-size: 14px; font-weight: 700; margin-top: 4px;">${invoice.invoice_number}</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
-            <!-- Due Date -->
-            <div style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 16px 20px; margin-top: 24px;">
-                <p style="color: #9a3412; font-size: 14px; margin: 0; font-weight: 600;">
-                    📅 Jatuh Tempo: ${dueDateStr}
+            <!-- Dark Date Bar beneath the header -->
+            <table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="background-color: #1f2937; padding: 12px 40px; text-align: right; color: rgba(255,255,255,0.7); font-size: 12px;">
+                        Tanggal: <strong style="color: #ffffff; margin-left: 4px;">${createdDateStr}</strong>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Content -->
+            <div style="padding: 32px 40px 40px;">
+                <!-- Greeting -->
+                <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 0 0 8px;">
+                    Halo <strong style="color: #111827;">${invoice.customer_name}</strong>,
                 </p>
+                <p style="color: #6b7280; font-size: 15px; line-height: 1.7; margin: 0 0 28px;">
+                    Terima kasih atas kepercayaan Anda. Berikut adalah invoice untuk layanan yang telah kami sediakan. Invoice ini juga dilampirkan dalam format PDF untuk arsip Anda.
+                </p>
+
+                <!-- Customer & Invoice Info -->
+                <table cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 28px;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: top; padding-right: 16px;">
+                            <p style="color: #9ca3af; font-size: 10px; font-weight: 700; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 1px;">Pelanggan</p>
+                            <p style="color: #111827; font-size: 15px; font-weight: 600; margin: 0 0 4px;">${invoice.customer_name}</p>
+                            <p style="color: #6b7280; font-size: 13px; margin: 0 0 2px;">${invoice.customer_email}</p>
+                            ${invoice.customer_phone ? `<p style="color: #6b7280; font-size: 13px; margin: 0;">${invoice.customer_phone}</p>` : ''}
+                        </td>
+                        <td style="width: 50%; vertical-align: top; padding-left: 16px;">
+                            <p style="color: #9ca3af; font-size: 10px; font-weight: 700; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 1px;">Detail Invoice</p>
+                            <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                                <tr>
+                                    <td style="color: #6b7280; font-size: 13px; padding: 2px 0;">Jatuh Tempo</td>
+                                    <td style="color: #111827; font-size: 13px; padding: 2px 0; text-align: right; font-weight: 500;">${dueDateStr}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+
+                <!-- Items Table -->
+                <table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-bottom: 4px;">
+                    <thead>
+                        <tr style="background-color: #1f2937;">
+                            <th style="padding: 14px 16px; text-align: center; color: #ffffff; font-size: 12px; font-weight: 600; border-radius: 8px 0 0 0; width: 40px;">#</th>
+                            <th style="padding: 14px 16px; text-align: left; color: #ffffff; font-size: 12px; font-weight: 600;">Item</th>
+                            <th style="padding: 14px 16px; text-align: center; color: #ffffff; font-size: 12px; font-weight: 600; width: 50px;">Qty</th>
+                            <th style="padding: 14px 16px; text-align: right; color: #ffffff; font-size: 12px; font-weight: 600;">Harga</th>
+                            <th style="padding: 14px 16px; text-align: right; color: #ffffff; font-size: 12px; font-weight: 600; border-radius: 0 8px 0 0;">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+
+                <!-- Totals -->
+                <div style="border-top: 2px solid #e5e7eb; padding-top: 16px; margin-bottom: 28px;">
+                    <table cellpadding="0" cellspacing="0" style="width: 50%; margin-left: auto;">
+                        <tr>
+                            <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">Subtotal</td>
+                            <td style="padding: 6px 0; text-align: right; color: #111827; font-size: 14px; font-weight: 500;">Rp ${(invoice.subtotal || 0).toLocaleString('id-ID')}</td>
+                        </tr>
+                        ${invoice.tax_percent > 0 ? `
+                        <tr>
+                            <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">Pajak (${invoice.tax_percent}%)</td>
+                            <td style="padding: 6px 0; text-align: right; color: #111827; font-size: 14px;">Rp ${(invoice.tax_amount || 0).toLocaleString('id-ID')}</td>
+                        </tr>
+                        ` : ''}
+                        ${invoice.discount > 0 ? `
+                        <tr>
+                            <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">Diskon</td>
+                            <td style="padding: 6px 0; text-align: right; color: #ef4444; font-size: 14px;">- Rp ${(invoice.discount || 0).toLocaleString('id-ID')}</td>
+                        </tr>
+                        ` : ''}
+                        <tr>
+                            <td colspan="2" style="padding: 8px 0 0;"><div style="border-top: 2px solid #111827;"></div></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px 0 0; color: #111827; font-size: 18px; font-weight: 800;">TOTAL</td>
+                            <td style="padding: 12px 0 0; text-align: right; color: #f97316; font-size: 20px; font-weight: 800;">Rp ${(invoice.total || 0).toLocaleString('id-ID')}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Payment Method -->
+                <div style="background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 1px solid #fed7aa; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                    <p style="color: #9a3412; font-size: 10px; font-weight: 700; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 1px;">💳 Metode Pembayaran</p>
+                    <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                        <tr>
+                            <td style="color: #92400e; font-size: 13px; padding: 3px 0; width: 120px;">Bank</td>
+                            <td style="color: #78350f; font-size: 14px; padding: 3px 0; font-weight: 600;">Bank BCA</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #92400e; font-size: 13px; padding: 3px 0;">No. Rekening</td>
+                            <td style="color: #78350f; font-size: 14px; padding: 3px 0; font-weight: 600;">7690434543</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #92400e; font-size: 13px; padding: 3px 0;">Atas Nama</td>
+                            <td style="color: #78350f; font-size: 14px; padding: 3px 0; font-weight: 600;">Ricky Prayasa</td>
+                        </tr>
+                    </table>
+                    <p style="color: #92400e; font-size: 12px; margin: 12px 0 0; font-style: italic;">Pembayaran juga dapat dilakukan melalui QRIS. Hubungi kami untuk detail lebih lanjut.</p>
+                </div>
+
+                <!-- Due Date Alert -->
+                <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; text-align: center;">
+                    <p style="color: #991b1b; font-size: 14px; margin: 0; font-weight: 600;">
+                        📅 Jatuh Tempo Pembayaran: <strong>${dueDateStr}</strong>
+                    </p>
+                </div>
+
+                ${invoice.notes ? `
+                <!-- Notes -->
+                <div style="margin-bottom: 20px;">
+                    <p style="color: #9ca3af; font-size: 10px; font-weight: 700; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 1px;">Catatan</p>
+                    <p style="color: #4b5563; font-size: 13px; margin: 0; line-height: 1.6;">${invoice.notes}</p>
+                </div>
+                ` : ''}
+
+                <!-- PDF Notice -->
+                <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px 20px; text-align: center;">
+                    <p style="color: #1e40af; font-size: 13px; margin: 0;">
+                        📎 Invoice dalam format PDF telah dilampirkan di email ini untuk arsip Anda.
+                    </p>
+                </div>
             </div>
 
-            ${invoice.notes ? `
-            <div style="margin-top: 24px;">
-                <p style="color: #6b7280; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Catatan:</p>
-                <p style="color: #4b5563; font-size: 14px; margin: 0; line-height: 1.5;">${invoice.notes}</p>
+            <!-- Customer Care -->
+            <div style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #9ca3af; font-size: 10px; font-weight: 700; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 1px;">Customer Care</p>
+                <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: top;">
+                            <p style="color: #6b7280; font-size: 13px; margin: 0 0 4px;">📱 WhatsApp: <a href="https://wa.me/6285659674001" style="color: #f97316; text-decoration: none; font-weight: 500;">+62 856 5967 4001</a></p>
+                            <p style="color: #6b7280; font-size: 13px; margin: 0;">📧 Email: <a href="mailto:info@rsquareidea.my.id" style="color: #f97316; text-decoration: none; font-weight: 500;">info@rsquareidea.my.id</a></p>
+                        </td>
+                        <td style="width: 50%; vertical-align: top; text-align: right;">
+                            <p style="color: #6b7280; font-size: 13px; margin: 0 0 4px;">🌐 <a href="https://www.rsquareidea.my.id" style="color: #f97316; text-decoration: none; font-weight: 500;">www.rsquareidea.my.id</a></p>
+                            <p style="color: #6b7280; font-size: 13px; margin: 0;">🕐 Senin - Sabtu, 09:00 - 17:00 WIB</p>
+                        </td>
+                    </tr>
+                </table>
             </div>
-            ` : ''}
 
-            <p style="color: #4b5563; font-size: 14px; line-height: 1.6; margin-top: 32px;">
-                Jika ada pertanyaan, jangan ragu untuk menghubungi kami melalui email atau WhatsApp.
-            </p>
+            <!-- Footer -->
+            <div style="background-color: #1f2937; padding: 20px 40px; text-align: center;">
+                <p style="color: rgba(255,255,255,0.6); font-size: 12px; margin: 0 0 4px;">© ${new Date().getFullYear()} RSQUARE — Solusi Digital & Otomatisasi Bisnis</p>
+                <p style="color: rgba(255,255,255,0.4); font-size: 11px; margin: 0;">Bumi Arum Regency Blok Akasia no.21, Rancaekek, Bandung 40394</p>
+            </div>
         </div>
 
-        <!-- Footer -->
-        <div style="background-color: #f9fafb; padding: 24px 40px; text-align: center; border-top: 1px solid #f3f4f6;">
-            <p style="color: #9ca3af; font-size: 14px; margin-bottom: 8px;">&copy; ${new Date().getFullYear()} RSQUARE. All rights reserved.</p>
-            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0;">RSQUARE Solusi Digital & Otomatisasi Bisnis</p>
-            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0;">Bumi Arum Regency Blok Akasia no.21, Rancaekek, Bandung</p>
-        </div>
+        <!-- Spacer -->
+        <div style="height: 40px;"></div>
     </div>
 </body>
 </html>`
 
-        const textBody = `Invoice ${invoice.invoice_number}\n\nHalo ${invoice.customer_name},\n\nBerikut invoice untuk layanan yang Anda request.\n\nTotal: Rp ${(invoice.total || 0).toLocaleString('id-ID')}\nJatuh Tempo: ${dueDateStr}\n\nSalam,\nTim RSQUARE`
+        const textBody = `Invoice ${invoice.invoice_number}\n\nHalo ${invoice.customer_name},\n\nBerikut invoice untuk layanan yang Anda request.\n\nTotal: Rp ${(invoice.total || 0).toLocaleString('id-ID')}\nJatuh Tempo: ${dueDateStr}\n\nMetode Pembayaran:\nBank BCA\nNo. Rekening: 7690434543\nAtas Nama: Ricky Prayasa\n\nCustomer Care:\nWhatsApp: +62 856 5967 4001\nEmail: info@rsquareidea.my.id\n\nSalam,\nTim RSQUARE`
 
         await transporter.sendMail({
             from: `"${fromName}" <${fromEmail}>`,
@@ -187,6 +312,13 @@ export async function POST(request: NextRequest) {
             subject: `Invoice ${invoice.invoice_number} - RSQUARE`,
             text: textBody,
             html: htmlBody,
+            attachments: [
+                {
+                    filename: `${invoice.invoice_number}.pdf`,
+                    content: pdfBuffer,
+                    contentType: 'application/pdf',
+                },
+            ],
         })
 
         // Update invoice status to 'sent'

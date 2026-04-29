@@ -72,14 +72,14 @@ export async function POST(request: NextRequest) {
         if (deliveryUrl) {
             linksHtml.push(`
                 <a href="${deliveryUrl}" style="display: block; background: linear-gradient(135deg, #f97316, #ea580c); color: #ffffff; padding: 16px 24px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 16px; text-align: center; margin-bottom: 12px;">
-                    🔗 Akses Aplikasi
+                    🔗 Buka Google Sheet / Aplikasi Web
                 </a>
             `)
         }
         if (deliveryFileUrl) {
             linksHtml.push(`
                 <a href="${deliveryFileUrl}" style="display: block; background-color: #1f2937; color: #ffffff; padding: 16px 24px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 16px; text-align: center;">
-                    ⬇️ Download File Aplikasi
+                    ⬇️ Download Source Code / ZIP
                 </a>
             `)
         }
@@ -91,13 +91,55 @@ export async function POST(request: NextRequest) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-    <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <!-- Header -->
-        <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 30px 40px; text-align: center;">
-            <img src="https://nagujrwbifmpcwhotzut.supabase.co/storage/v1/object/public/Logo%20RSQUARE/RSQUARE.png" alt="RSQUARE" style="height: 60px; width: auto; margin-bottom: 16px;">
-            <h1 style="color: #ffffff; font-size: 24px; margin: 0; font-weight: 700;">🎉 Aplikasi Anda Sudah Siap!</h1>
-        </div>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+    <div style="max-width: 640px; margin: 0 auto; background-color: #f3f4f6;">
+        <!-- Spacer -->
+        <div style="height: 40px;"></div>
+
+        <!-- Main Card -->
+        <div style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 0 16px;">
+
+            <!-- Top Geometric Bars (Matching PDF) -->
+            <table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 60%; background-color: #ea580c; height: 6px;"></td>
+                    <td style="width: 40%; background-color: #1f2937; height: 6px;"></td>
+                </tr>
+                <tr>
+                    <td style="width: 60%; background-color: #1f2937; height: 3px;"></td>
+                    <td style="width: 40%; background-color: #ffffff; height: 3px;"></td>
+                </tr>
+            </table>
+
+            <!-- Header Area with Diagonal Graphic -->
+            <div style="background-color: #ffffff;">
+                <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                    <tr>
+                        <!-- Left Logo (White BG) -->
+                        <td style="width: 50%; padding: 24px 10px 24px 40px; vertical-align: middle;">
+                            <img src="https://nagujrwbifmpcwhotzut.supabase.co/storage/v1/object/public/Logo%20RSQUARE/RSQUARE.png" alt="RSQUARE" style="height: 48px; width: auto;">
+                            <div style="color: #6b7280; font-size: 10px; margin-top: 6px; font-weight: 600; letter-spacing: 0.5px;">SOLUSI DIGITAL & OTOMATISASI BISNIS</div>
+                        </td>
+
+                        <!-- Right Title (Diagonal simulation + Orange Background) -->
+                        <td style="width: 50%; vertical-align: middle; padding: 0; background-color: #ea580c; background: linear-gradient(110deg, #ffffff 15%, #1f2937 15%, #1f2937 25%, #ea580c 25%);">
+                            <div style="padding: 24px 40px 24px 10px; text-align: right;">
+                                <h1 style="color: #ffffff; font-size: 20px; line-height: 1.2; margin: 0; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">APLIKASI SIAP</h1>
+                                <div style="color: #ffffff; font-size: 12px; font-weight: 700; margin-top: 6px;">INV: ${invoice.invoice_number}</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Dark Date Bar beneath the header -->
+            <table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="background-color: #1f2937; padding: 12px 40px; text-align: right; color: rgba(255,255,255,0.7); font-size: 12px;">
+                        Tanggal Pengiriman: <strong style="color: #ffffff; margin-left: 4px;">${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                    </td>
+                </tr>
+            </table>
 
         <!-- Content -->
         <div style="padding: 40px;">

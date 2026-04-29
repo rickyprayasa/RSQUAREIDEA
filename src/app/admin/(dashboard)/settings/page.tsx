@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { AnimatePresence } from 'framer-motion'
 import { motion } from 'framer-motion'
 import {
     Settings,
@@ -34,7 +35,10 @@ import {
     Copy,
     Bell,
     Send,
-    MessageCircle
+    MessageCircle,
+    Building,
+    Plus,
+    Trash2
 } from 'lucide-react'
 import jsQR from 'jsqr'
 
@@ -181,6 +185,56 @@ export default function SettingsPage() {
     const [products, setProducts] = useState<{ id: number; title: string; slug: string }[]>([])
     const [copiedUrl, setCopiedUrl] = useState(false)
 
+    // Payment methods state
+    const [paymentMethods, setPaymentMethods] = useState<{ id: number; name: string; type: string; bankName: string | null; accountNumber: string | null; accountName: string | null; isActive: boolean }[]>([])
+    const [loadingPayments, setLoadingPayments] = useState(false)
+    const [showAddPayment, setShowAddPayment] = useState(false)
+    const [paymentForm, setPaymentForm] = useState({ name: '', bankName: '', accountNumber: '', accountName: '' })
+    const [savingPayment, setSavingPayment] = useState(false)
+    const [deletingPaymentId, setDeletingPaymentId] = useState<number | null>(null)
+
+    const fetchPaymentMethods = async () => {
+        setLoadingPayments(true)
+        try {
+            const res = await fetch('/api/admin/payments')
+            const data = await res.json()
+            if (data.payments) setPaymentMethods(data.payments)
+        } catch (err) { console.error(err) }
+        finally { setLoadingPayments(false) }
+    }
+
+    const addPaymentMethod = async () => {
+        if (!paymentForm.name) return
+        setSavingPayment(true)
+        try {
+            await fetch('/api/admin/payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'internal', name: paymentForm.name, bankName: paymentForm.bankName, accountNumber: paymentForm.accountNumber, accountName: paymentForm.accountName, isActive: true }),
+            })
+            setPaymentForm({ name: '', bankName: '', accountNumber: '', accountName: '' })
+            setShowAddPayment(false)
+            fetchPaymentMethods()
+        } catch (err) { console.error(err) }
+        finally { setSavingPayment(false) }
+    }
+
+    const togglePaymentMethod = async (id: number, currentStatus: boolean) => {
+        try {
+            await fetch(`/api/admin/payments/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive: !currentStatus }) })
+            fetchPaymentMethods()
+        } catch (err) { console.error(err) }
+    }
+
+    const deletePaymentMethod = async (id: number) => {
+        setDeletingPaymentId(id)
+        try {
+            await fetch(`/api/admin/payments/${id}`, { method: 'DELETE' })
+            fetchPaymentMethods()
+        } catch (err) { console.error(err) }
+        finally { setDeletingPaymentId(null) }
+    }
+
     // Function to decode QR code from image
     const decodeQRFromImage = async (imageUrl: string): Promise<string | null> => {
         return new Promise((resolve) => {
@@ -239,6 +293,12 @@ export default function SettingsPage() {
             })
             .catch(console.error)
     }, [])
+
+    // Auto-fetch payment methods when switching to payment tab
+    useEffect(() => {
+        if (activeTab === 'payment') fetchPaymentMethods()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeTab])
 
     const handleChange = (key: keyof SettingsData, value: string) => {
         setSettings(prev => ({ ...prev, [key]: value }))
@@ -832,6 +892,102 @@ export default function SettingsPage() {
                                 </div>
                             </div>
                         )}
+
+                        {/* Manual Payment Methods CRUD */}
+                        <div className="pt-4 border-t border-gray-200">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-green-500 rounded-lg">
+                                        <Building className="h-5 w-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">Metode Pembayaran Manual</h4>
+                                        <p className="text-sm text-gray-600">Transfer bank untuk invoice & checkout</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => { setShowAddPayment(true); if (paymentMethods.length === 0) fetchPaymentMethods() }}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors"
+                                >
+                                    <Plus className="h-4 w-4" /> Tambah
+                                </button>
+                            </div>
+
+                            {loadingPayments ? (
+                                <div className="flex items-center justify-center py-6">
+                                    <Loader2 className="h-6 w-6 animate-spin text-green-500" />
+                                </div>
+                            ) : paymentMethods.length === 0 ? (
+                                <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                    <CreditCard className="h-10 w-10 mx-auto text-gray-300 mb-2" />
+                                    <p className="text-sm text-gray-500">Belum ada metode pembayaran</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {paymentMethods.map(pm => (
+                                        <div key={pm.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${pm.isActive ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                    <Building className="h-4 w-4 text-blue-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900 text-sm">{pm.name}</p>
+                                                    {pm.bankName && <p className="text-xs text-gray-500">{pm.bankName} - {pm.accountNumber}</p>}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <button onClick={() => togglePaymentMethod(pm.id, pm.isActive)} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${pm.isActive ? 'bg-green-500' : 'bg-gray-300'}`}>
+                                                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${pm.isActive ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                                                </button>
+                                                <button onClick={() => deletePaymentMethod(pm.id)} disabled={deletingPaymentId === pm.id} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                                    {deletingPaymentId === pm.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Add Payment Modal */}
+                            <AnimatePresence>
+                                {showAddPayment && (
+                                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowAddPayment(false)} />
+                                        <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                                            <div className="p-6">
+                                                <h3 className="text-lg font-bold text-gray-900 mb-4">Tambah Metode Pembayaran</h3>
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <label className="text-sm font-medium text-gray-700 mb-1 block">Nama</label>
+                                                        <input type="text" value={paymentForm.name} onChange={e => setPaymentForm(p => ({ ...p, name: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Bank Jago" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-sm font-medium text-gray-700 mb-1 block">Nama Bank</label>
+                                                        <input type="text" value={paymentForm.bankName} onChange={e => setPaymentForm(p => ({ ...p, bankName: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Jago Syariah" />
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="text-sm font-medium text-gray-700 mb-1 block">No. Rekening</label>
+                                                            <input type="text" value={paymentForm.accountNumber} onChange={e => setPaymentForm(p => ({ ...p, accountNumber: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="1234567890" />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-sm font-medium text-gray-700 mb-1 block">Atas Nama</label>
+                                                            <input type="text" value={paymentForm.accountName} onChange={e => setPaymentForm(p => ({ ...p, accountName: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="John Doe" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-3 mt-6">
+                                                    <button onClick={() => setShowAddPayment(false)} className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 font-medium text-sm">Batal</button>
+                                                    <button onClick={addPaymentMethod} disabled={savingPayment || !paymentForm.name} className="flex-1 px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+                                                        {savingPayment ? <><Loader2 className="h-4 w-4 animate-spin" /> Menyimpan...</> : <><Plus className="h-4 w-4" /> Tambah</>}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    </div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 )}
 
@@ -1207,8 +1363,8 @@ export default function SettingsPage() {
                                                 setTimeout(() => setCopiedUrl(false), 2000)
                                             }}
                                             className={`px-4 py-3 rounded-xl font-medium transition-all ${copiedUrl
-                                                    ? 'bg-green-500 text-white'
-                                                    : 'bg-yellow-500 text-white hover:bg-yellow-600'
+                                                ? 'bg-green-500 text-white'
+                                                : 'bg-yellow-500 text-white hover:bg-yellow-600'
                                                 }`}
                                         >
                                             {copiedUrl ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}

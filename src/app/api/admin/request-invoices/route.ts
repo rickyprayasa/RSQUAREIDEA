@@ -75,34 +75,68 @@ export async function POST(request: NextRequest) {
         const discount = data.discount || 0
         const total = subtotal + taxAmount - discount
 
-        const { data: invoice, error } = await supabase
-            .from('request_invoices')
-            .insert({
-                request_id: data.request_id,
-                invoice_number: invoiceNumber,
-                customer_name: data.customer_name,
-                customer_email: data.customer_email,
-                customer_phone: data.customer_phone || null,
-                description: data.description || null,
-                items,
-                subtotal,
-                tax_percent: taxPercent,
-                tax_amount: taxAmount,
-                discount,
-                total,
-                due_date: data.due_date || null,
-                notes: data.notes || null,
-                status: 'draft',
-            })
-            .select()
-            .single()
+        let invoiceResult;
 
-        if (error) {
-            console.error('Error creating invoice:', error)
-            return NextResponse.json({ error: error.message }, { status: 500 })
+        if (data.id) {
+            const { data: updatedInvoice, error } = await supabase
+                .from('request_invoices')
+                .update({
+                    customer_name: data.customer_name,
+                    customer_email: data.customer_email,
+                    customer_phone: data.customer_phone || null,
+                    description: data.description || null,
+                    app_type: data.app_type || null,
+                    items,
+                    subtotal,
+                    tax_percent: taxPercent,
+                    tax_amount: taxAmount,
+                    discount,
+                    total,
+                    due_date: data.due_date || null,
+                    notes: data.notes || null,
+                    terms_conditions: data.terms_conditions || null,
+                })
+                .eq('id', data.id)
+                .select()
+                .single()
+
+            if (error) {
+                console.error('Error updating invoice:', error)
+                return NextResponse.json({ error: error.message }, { status: 500 })
+            }
+            invoiceResult = updatedInvoice;
+        } else {
+            const { data: newInvoice, error } = await supabase
+                .from('request_invoices')
+                .insert({
+                    request_id: data.request_id,
+                    invoice_number: invoiceNumber,
+                    customer_name: data.customer_name,
+                    customer_email: data.customer_email,
+                    customer_phone: data.customer_phone || null,
+                    description: data.description || null,
+                    app_type: data.app_type || null,
+                    items,
+                    subtotal,
+                    tax_percent: taxPercent,
+                    tax_amount: taxAmount,
+                    discount,
+                    total,
+                    due_date: data.due_date || null,
+                    notes: data.notes || null,
+                    terms_conditions: data.terms_conditions || null,
+                    status: 'draft',
+                })
+                .select()
+                .single()
+            if (error) {
+                console.error('Error creating invoice:', error)
+                return NextResponse.json({ error: error.message }, { status: 500 })
+            }
+            invoiceResult = newInvoice;
         }
 
-        return NextResponse.json({ invoice })
+        return NextResponse.json({ invoice: invoiceResult })
     } catch (error) {
         console.error('Error:', error)
         return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 })
