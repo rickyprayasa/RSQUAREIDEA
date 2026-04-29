@@ -27,6 +27,7 @@ import {
     Shield,
     Key,
     LogOut,
+    Receipt,
     type LucideIcon
 } from 'lucide-react'
 import { useState } from 'react'
@@ -68,6 +69,7 @@ const navGroups: NavGroup[] = [
         color: 'from-purple-500 to-violet-500',
         items: [
             { name: 'Pesanan', href: '/admin/orders', icon: ShoppingCart, color: 'from-purple-500 to-violet-500' },
+            { name: 'Invoice', href: '/admin/invoices', icon: Receipt, color: 'from-yellow-500 to-orange-500' },
             { name: 'Pelanggan', href: '/admin/customers', icon: Users, color: 'from-cyan-500 to-blue-500' },
             { name: 'Pembayaran', href: '/admin/payments', icon: CreditCard, color: 'from-teal-500 to-cyan-500' },
         ]

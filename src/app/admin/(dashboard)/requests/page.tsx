@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
     FileSpreadsheet,
@@ -16,7 +17,12 @@ import {
     FileText,
     Play,
     XCircle,
-    Trash2
+    Trash2,
+    Receipt,
+    Package,
+    Send,
+    ExternalLink,
+    Download
 } from 'lucide-react'
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal'
 
@@ -34,6 +40,14 @@ interface TemplateRequest {
     created_at: string
 }
 
+interface RequestInvoice {
+    id: number
+    invoice_number: string
+    status: string
+    total: number
+    delivery_status: string
+}
+
 const statusConfig = {
     pending: { label: 'Menunggu', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
     in_progress: { label: 'Dikerjakan', color: 'bg-blue-100 text-blue-700', icon: Play },
@@ -42,16 +56,30 @@ const statusConfig = {
 }
 
 export default function RequestsPage() {
+    const router = useRouter()
     const [requests, setRequests] = useState<TemplateRequest[]>([])
+    const [invoiceMap, setInvoiceMap] = useState<Record<number, RequestInvoice[]>>({})
     const [loading, setLoading] = useState(true)
     const [selectedRequest, setSelectedRequest] = useState<TemplateRequest | null>(null)
     const [filter, setFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed' | 'rejected'>('all')
     const [deletingId, setDeletingId] = useState<number | null>(null)
     const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; request: TemplateRequest | null }>({ isOpen: false, request: null })
 
+    // Deliver modal state
+    const [showDeliver, setShowDeliver] = useState(false)
+    const [deliverForm, setDeliverForm] = useState({ delivery_url: '', delivery_file_url: '', message: '' })
+    const [deliverLoading, setDeliverLoading] = useState(false)
+    const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' })
+
     useEffect(() => {
         fetchRequests()
+        fetchInvoices()
     }, [])
+
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToast({ show: true, message, type })
+        setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000)
+    }
 
     const fetchRequests = async () => {
         try {
@@ -62,6 +90,25 @@ export default function RequestsPage() {
             console.error('Error:', error)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const fetchInvoices = async () => {
+        try {
+            const res = await fetch('/api/admin/request-invoices')
+            const data = await res.json()
+            if (data.invoices) {
+                const map: Record<number, RequestInvoice[]> = {}
+                for (const inv of data.invoices) {
+                    if (inv.request_id) {
+                        if (!map[inv.request_id]) map[inv.request_id] = []
+                        map[inv.request_id].push(inv)
+                    }
+                }
+                setInvoiceMap(map)
+            }
+        } catch (error) {
+            console.error('Error:', error)
         }
     }
 
@@ -100,6 +147,56 @@ export default function RequestsPage() {
         }
     }
 
+    const handleCreateInvoice = (req: TemplateRequest) => {
+        sessionStorage.setItem('prefill_invoice', JSON.stringify({
+            request_id: req.id,
+            customer_name: req.name,
+            customer_email: req.email,
+            customer_phone: req.phone || '',
+            description: req.template_name + (req.description ? ' - ' + req.description : ''),
+        }))
+        router.push('/admin/invoices?create=1')
+    }
+
+    const handleDeliverApp = async () => {
+        if (!selectedRequest) return
+        const invoices = invoiceMap[selectedRequest.id]
+        const invoiceId = invoices?.[0]?.id
+
+        if (!invoiceId) {
+            showToast('Buat invoice terlebih dahulu sebelum kirim aplikasi', 'error')
+            return
+        }
+
+        setDeliverLoading(true)
+        try {
+            const res = await fetch('/api/admin/request-invoices/deliver', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    invoiceId,
+                    deliveryUrl: deliverForm.delivery_url || null,
+                    deliveryFileUrl: deliverForm.delivery_file_url || null,
+                    message: deliverForm.message || null,
+                }),
+            })
+            if (res.ok) {
+                showToast('Aplikasi berhasil dikirim ke pelanggan!', 'success')
+                setShowDeliver(false)
+                setDeliverForm({ delivery_url: '', delivery_file_url: '', message: '' })
+                setSelectedRequest(null)
+                await fetchInvoices()
+            } else {
+                const d = await res.json()
+                showToast(d.error || 'Gagal mengirim aplikasi', 'error')
+            }
+        } catch {
+            showToast('Gagal mengirim aplikasi', 'error')
+        } finally {
+            setDeliverLoading(false)
+        }
+    }
+
     const filteredRequests = requests.filter(r => filter === 'all' || r.status === filter)
     const pendingCount = requests.filter(r => r.status === 'pending').length
 
@@ -113,6 +210,17 @@ export default function RequestsPage() {
 
     return (
         <div className="space-y-6">
+            {/* Toast */}
+            {toast.show && (
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`fixed top-4 right-4 z-[100] px-6 py-3 rounded-xl shadow-2xl text-white font-medium ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
+                >
+                    {toast.message}
+                </motion.div>
+            )}
+
             <div className="flex items-center justify-between">
                 <div>
                     <div className="flex items-center gap-3">
@@ -155,6 +263,9 @@ export default function RequestsPage() {
                     {filteredRequests.map((req) => {
                         const status = statusConfig[req.status]
                         const StatusIcon = status.icon
+                        const reqInvoices = invoiceMap[req.id] || []
+                        const hasInvoice = reqInvoices.length > 0
+                        const isDelivered = reqInvoices.some(i => i.delivery_status === 'delivered')
 
                         return (
                             <motion.div
@@ -170,12 +281,24 @@ export default function RequestsPage() {
                                         <FileSpreadsheet className="h-5 w-5 text-orange-600" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
+                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                                             <span className="font-semibold text-gray-900">{req.template_name}</span>
                                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${status.color}`}>
                                                 <StatusIcon className="h-3 w-3" />
                                                 {status.label}
                                             </span>
+                                            {hasInvoice && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
+                                                    <Receipt className="h-3 w-3" />
+                                                    Invoice
+                                                </span>
+                                            )}
+                                            {isDelivered && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700">
+                                                    <Package className="h-3 w-3" />
+                                                    Terkirim
+                                                </span>
+                                            )}
                                         </div>
                                         <p className="text-sm text-gray-600 mb-1">{req.name} • {req.email}</p>
                                         {req.description && (
@@ -216,7 +339,7 @@ export default function RequestsPage() {
             )}
 
             {/* Detail Modal */}
-            {selectedRequest && (
+            {selectedRequest && !showDeliver && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -274,6 +397,35 @@ export default function RequestsPage() {
                                     </div>
                                 )}
 
+                                {/* Invoice Info */}
+                                {invoiceMap[selectedRequest.id] && invoiceMap[selectedRequest.id].length > 0 && (
+                                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                                        <p className="text-sm font-semibold text-orange-800 mb-2 flex items-center gap-1.5">
+                                            <Receipt className="h-4 w-4" /> Invoice Terkait
+                                        </p>
+                                        {invoiceMap[selectedRequest.id].map(inv => (
+                                            <div key={inv.id} className="flex items-center justify-between text-sm">
+                                                <span className="text-orange-700 font-medium">{inv.invoice_number}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-orange-600">Rp {(inv.total || 0).toLocaleString('id-ID')}</span>
+                                                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${inv.status === 'paid' ? 'bg-green-100 text-green-700' :
+                                                        inv.status === 'sent' ? 'bg-blue-100 text-blue-700' :
+                                                            'bg-gray-100 text-gray-700'
+                                                        }`}>
+                                                        {inv.status === 'paid' ? 'Lunas' : inv.status === 'sent' ? 'Terkirim' : 'Draft'}
+                                                    </span>
+                                                    {inv.delivery_status === 'delivered' && (
+                                                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                                                            Dikirim
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Status Actions */}
                                 <div className="flex gap-3 pt-4 border-t">
                                     <button
                                         onClick={() => handleUpdateStatus(selectedRequest.id, 'in_progress')}
@@ -296,6 +448,110 @@ export default function RequestsPage() {
                                         <XCircle className="h-5 w-5" />
                                     </button>
                                 </div>
+
+                                {/* Invoice & Delivery Actions */}
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => handleCreateInvoice(selectedRequest)}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors"
+                                    >
+                                        <Receipt className="h-5 w-5" />
+                                        Buat Invoice
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDeliver(true)}
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 text-white rounded-xl font-medium hover:bg-emerald-600 transition-colors"
+                                    >
+                                        <Package className="h-5 w-5" />
+                                        Kirim Aplikasi
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Deliver App Modal */}
+            {showDeliver && selectedRequest && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+                    >
+                        <div className="p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold text-gray-900">Kirim Aplikasi</h2>
+                                <button onClick={() => setShowDeliver(false)} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <p className="text-sm text-gray-500 mb-4">
+                                Kirim link/file aplikasi ke <strong>{selectedRequest.name}</strong> ({selectedRequest.email})
+                            </p>
+
+                            {!(invoiceMap[selectedRequest.id]?.length) && (
+                                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-sm text-amber-800">
+                                    ⚠️ Belum ada invoice untuk request ini. Buat invoice terlebih dahulu agar bisa mengirim aplikasi.
+                                </div>
+                            )}
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Link Aplikasi (URL)</label>
+                                    <div className="relative">
+                                        <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                        <input
+                                            type="url"
+                                            placeholder="https://app.example.com"
+                                            value={deliverForm.delivery_url}
+                                            onChange={e => setDeliverForm(prev => ({ ...prev, delivery_url: e.target.value }))}
+                                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Link Download File</label>
+                                    <div className="relative">
+                                        <Download className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                        <input
+                                            type="url"
+                                            placeholder="https://storage.example.com/file.zip"
+                                            value={deliverForm.delivery_file_url}
+                                            onChange={e => setDeliverForm(prev => ({ ...prev, delivery_file_url: e.target.value }))}
+                                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Pesan (opsional)</label>
+                                    <textarea
+                                        rows={3}
+                                        placeholder="Instruksi penggunaan..."
+                                        value={deliverForm.message}
+                                        onChange={e => setDeliverForm(prev => ({ ...prev, message: e.target.value }))}
+                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    onClick={() => setShowDeliver(false)}
+                                    className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 font-medium"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleDeliverApp}
+                                    disabled={deliverLoading || (!deliverForm.delivery_url && !deliverForm.delivery_file_url) || !(invoiceMap[selectedRequest.id]?.length)}
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 font-medium disabled:opacity-50"
+                                >
+                                    {deliverLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                    Kirim ke Email
+                                </button>
                             </div>
                         </div>
                     </motion.div>
