@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
       img-src 'self' data: blob: https://*.supabase.co https://*.ytimg.com https://img.youtube.com https://*.unsplash.com https://*.githubusercontent.com;
       font-src 'self' https://fonts.gstatic.com;
       connect-src 'self' *.supabase.co *.supabase.in https://cdn.lordicon.com;
-      frame-src 'self' *.youtube.com https://www.google.com;
+      frame-src 'self' *.youtube.com https://www.google.com https://script.google.com https://*.googleusercontent.com;
       media-src 'self' *.supabase.co;
       object-src 'none';
       base-uri 'self';

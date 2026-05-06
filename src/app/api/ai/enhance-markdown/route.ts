@@ -5,6 +5,30 @@ import { createClient } from '@/lib/supabase/server'
 
 export const maxDuration = 30
 
+// Valid Gemini models
+const VALID_MODELS = [
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-8b',
+    'gemini-1.5-pro',
+]
+
+async function getAiModel(supabase: Awaited<ReturnType<typeof createClient>>) {
+    try {
+        const { data } = await supabase
+            .from('site_settings')
+            .select('value')
+            .eq('key', 'ai_model')
+            .single()
+        
+        const model = data?.value || 'gemini-1.5-flash'
+        return VALID_MODELS.includes(model) ? model : 'gemini-1.5-flash'
+    } catch {
+        return 'gemini-1.5-flash'
+    }
+}
+
 export async function POST(request: NextRequest) {
     try {
         // Auth check
@@ -23,6 +47,9 @@ export async function POST(request: NextRequest) {
         if (markdownContent.length > 50000) {
             return NextResponse.json({ error: 'File terlalu besar (maks 50KB teks)' }, { status: 400 })
         }
+
+        // Get AI model from settings
+        const modelName = await getAiModel(supabase)
 
         const systemPrompt = `Kamu adalah asisten AI profesional untuk platform RSQUARE yang menjual template dan aplikasi web berbasis Google Sheets/Apps Script.
 
@@ -48,8 +75,10 @@ PENTING:
 - Format: {"description": "...", "features": ["...", "..."], "title": "..."}
 - Jika konten markdown tidak jelas, tetap buat output terbaik berdasarkan informasi yang ada.`
 
+        console.log(`AI Enhance: Using model ${modelName}`)
+
         const result = await generateText({
-            model: google('gemini-1.5-flash'),
+            model: google(modelName),
             system: systemPrompt,
             prompt: `Berikut konten markdown dari ringkasan aplikasi:\n\n${markdownContent}`,
         })
@@ -64,7 +93,6 @@ PENTING:
             }
             parsed = JSON.parse(cleanText)
         } catch {
-            // If JSON parsing fails, try to extract from the response
             console.error('Failed to parse AI response as JSON:', result.text)
             return NextResponse.json({
                 error: 'AI response format tidak valid. Coba lagi.',
@@ -76,6 +104,7 @@ PENTING:
             description: parsed.description || '',
             features: Array.isArray(parsed.features) ? parsed.features : [],
             title: parsed.title || '',
+            model: modelName,
         })
 
     } catch (error) {

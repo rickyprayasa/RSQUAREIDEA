@@ -38,7 +38,12 @@ import {
     MessageCircle,
     Building,
     Plus,
-    Trash2
+    Trash2,
+    Sparkles,
+    Wand2,
+    Brain,
+    Key,
+    Zap
 } from 'lucide-react'
 import jsQR from 'jsqr'
 
@@ -91,6 +96,9 @@ interface SettingsData {
     duitku_merchant_code: string
     duitku_api_key: string
     duitku_production: string
+    // AI settings
+    ai_provider: string
+    ai_model: string
 }
 
 const defaultSettings: SettingsData = {
@@ -157,6 +165,9 @@ Tim RSQUARE`,
     duitku_merchant_code: '',
     duitku_api_key: '',
     duitku_production: 'false',
+    // AI settings
+    ai_provider: 'google',
+    ai_model: 'gemini-1.5-flash',
 }
 
 const tabs = [
@@ -169,6 +180,7 @@ const tabs = [
     { id: 'saweria', label: 'Saweria', icon: Coffee, color: 'yellow' },
     { id: 'telegram', label: 'Telegram', icon: Bell, color: 'sky' },
     { id: 'duitku', label: 'Duitku', icon: CreditCard, color: 'emerald' },
+    { id: 'ai', label: 'AI', icon: Sparkles, color: 'violet' },
 ]
 
 export default function SettingsPage() {
@@ -417,6 +429,7 @@ export default function SettingsPage() {
         cyan: 'from-cyan-500 to-blue-500',
         pink: 'from-pink-500 to-rose-500',
         yellow: 'from-yellow-500 to-orange-500',
+        violet: 'from-violet-500 to-purple-500',
     }
 
     const activeTabData = tabs.find(t => t.id === activeTab)
@@ -1408,6 +1421,13 @@ export default function SettingsPage() {
                         handleChange={handleChange}
                     />
                 )}
+                {/* AI Tab */}
+                {activeTab === 'ai' && (
+                    <AiSettings
+                        settings={settings}
+                        handleChange={handleChange}
+                    />
+                )}
             </motion.div>
         </div>
     )
@@ -1735,6 +1755,136 @@ function DuitkuSettings({ settings, handleChange }: { settings: SettingsData, ha
     )
 }
 
+function AiSettings({ settings, handleChange }: { settings: SettingsData, handleChange: (key: keyof SettingsData, value: string) => void }) {
+    return (
+        <div className="space-y-4 md:space-y-6">
+            <SectionHeader
+                icon={Brain}
+                title="Pengaturan AI"
+                subtitle="Konfigurasi model AI untuk fitur enhance otomatis"
+                color="violet"
+            />
+
+            <div className="p-4 bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-xl">
+                <div className="flex gap-3">
+                    <Wand2 className="h-5 w-5 text-violet-500 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-violet-800">
+                        <p className="font-medium mb-1">Tentang Fitur AI</p>
+                        <p className="text-violet-600">AI digunakan untuk auto-generate deskripsi dan fitur produk dari file markdown yang diupload. Pilih model Google Gemini yang sesuai dengan kebutuhan Anda.</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Provider */}
+            <div>
+                <label className="text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2 flex items-center gap-1.5 md:gap-2">
+                    <Zap className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500" />
+                    Provider AI
+                </label>
+                <select
+                    value={settings.ai_provider}
+                    onChange={(e) => handleChange('ai_provider', e.target.value)}
+                    className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                >
+                    <option value="google">Google AI Studio (Gemini)</option>
+                </select>
+            </div>
+
+            {/* Model Selector */}
+            <div>
+                <label className="text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2 flex items-center gap-1.5 md:gap-2">
+                    <Brain className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500" />
+                    Model AI
+                </label>
+                <select
+                    value={settings.ai_model}
+                    onChange={(e) => handleChange('ai_model', e.target.value)}
+                    className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                >
+                    <optgroup label="Gemini 2.0 (Terbaru)">
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash — Cepat &amp; powerful (Free tier terbatas)</option>
+                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite — Ringan &amp; hemat kuota</option>
+                    </optgroup>
+                    <optgroup label="Gemini 1.5 (Stabil)">
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash — Stabil, free tier besar ⭐</option>
+                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B — Paling ringan, free tier terbesar</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro — Terbaik, kuota terbatas</option>
+                    </optgroup>
+                </select>
+                <p className="text-xs text-gray-500 mt-1.5">Rekomendasi: <strong>Gemini 1.5 Flash</strong> untuk free tier yang stabil</p>
+            </div>
+
+            {/* Model Info Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                    { model: 'gemini-2.0-flash', name: '2.0 Flash', speed: 'Cepat', quality: 'Tinggi', free: '~15 RPM' },
+                    { model: 'gemini-2.0-flash-lite', name: '2.0 Flash Lite', speed: 'Sangat Cepat', quality: 'Sedang', free: '~30 RPM' },
+                    { model: 'gemini-1.5-flash', name: '1.5 Flash', speed: 'Cepat', quality: 'Tinggi', free: '~15 RPM' },
+                    { model: 'gemini-1.5-flash-8b', name: '1.5 Flash 8B', speed: 'Sangat Cepat', quality: 'Sedang', free: '~30 RPM' },
+                ].map((m) => {
+                    const isActive = settings.ai_model === m.model
+                    return (
+                        <button
+                            key={m.model}
+                            type="button"
+                            onClick={() => handleChange('ai_model', m.model)}
+                            className={`p-3 rounded-xl border-2 text-left transition-all duration-200 ${
+                                isActive
+                                    ? 'border-violet-400 bg-violet-50 ring-2 ring-violet-200'
+                                    : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                            }`}
+                        >
+                            <div className="flex items-center justify-between mb-1.5">
+                                <span className={`text-sm font-semibold ${isActive ? 'text-violet-700' : 'text-gray-700'}`}>
+                                    {m.name}
+                                </span>
+                                {isActive && (
+                                    <span className="w-5 h-5 rounded-full bg-violet-500 flex items-center justify-center">
+                                        <Check className="w-3 h-3 text-white" />
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                                <span className="text-[10px] px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded">⚡ {m.speed}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded">📊 {m.quality}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-700 rounded">🆓 {m.free}</span>
+                            </div>
+                        </button>
+                    )
+                })}
+            </div>
+
+            {/* API Key Info */}
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                    <Key className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-amber-800">
+                        <p className="font-medium mb-1">Konfigurasi API Key</p>
+                        <p className="text-amber-600 mb-2">
+                            API key dikonfigurasi via environment variable <code className="bg-amber-100 px-1.5 py-0.5 rounded text-xs font-mono">GOOGLE_GENERATIVE_AI_API_KEY</code> di file <code className="bg-amber-100 px-1.5 py-0.5 rounded text-xs font-mono">.env.local</code>
+                        </p>
+                        <a
+                            href="https://aistudio.google.com/apikey"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-amber-700 hover:text-amber-900 font-medium underline"
+                        >
+                            Dapatkan API Key dari Google AI Studio →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-3 md:p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                <p className="text-xs text-gray-600">
+                    <strong>Tips:</strong> Jika terkena rate limit, ganti ke model yang lebih ringan (Flash Lite / Flash 8B) atau tunggu beberapa menit. Free tier Google AI Studio memiliki batas 15-30 request per menit.
+                </p>
+            </div>
+        </div>
+    )
+}
+
+
 function SectionHeader({ icon: Icon, title, subtitle, color }: { icon: React.ElementType, title: string, subtitle: string, color: string }) {
     const colors: Record<string, { bg: string, text: string }> = {
         orange: { bg: 'bg-orange-100', text: 'text-orange-600' },
@@ -1746,6 +1896,7 @@ function SectionHeader({ icon: Icon, title, subtitle, color }: { icon: React.Ele
         yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
         sky: { bg: 'bg-sky-100', text: 'text-sky-600' },
         emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600' },
+        violet: { bg: 'bg-violet-100', text: 'text-violet-600' },
     }
     const c = colors[color] || colors.orange
 
