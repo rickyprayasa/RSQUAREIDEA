@@ -93,22 +93,112 @@ export function WebAppFrame({ webapp }: WebAppFrameProps) {
             <div className="flex-1 relative bg-gray-100">
                 {/* Loading Overlay */}
                 {!isLoaded && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10 bg-white">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-gradient-to-br from-slate-50 via-white to-orange-50/30 overflow-hidden">
+                        {/* Background animated blobs */}
+                        <div className="absolute inset-0 pointer-events-none">
+                            <motion.div
+                                animate={{ 
+                                    x: [0, 30, -20, 0], 
+                                    y: [0, -30, 20, 0],
+                                    scale: [1, 1.2, 0.9, 1]
+                                }}
+                                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute top-1/4 left-1/4 w-64 h-64 bg-orange-200/20 rounded-full blur-3xl"
+                            />
+                            <motion.div
+                                animate={{ 
+                                    x: [0, -20, 30, 0], 
+                                    y: [0, 20, -30, 0],
+                                    scale: [1, 0.9, 1.2, 1]
+                                }}
+                                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-blue-200/15 rounded-full blur-3xl"
+                            />
+                        </div>
+
+                        {/* Logo with loading animation */}
                         <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
+                            initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-200"
+                            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                            className="relative mb-8 w-24 h-24 flex items-center justify-center"
                         >
-                            <div className="w-8 h-8 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                            {/* Spinning ring around logo */}
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-0"
+                            >
+                                <svg viewBox="0 0 96 96" className="w-full h-full">
+                                    <defs>
+                                        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stopColor="#f97316" stopOpacity="1" />
+                                            <stop offset="60%" stopColor="#f59e0b" stopOpacity="0.3" />
+                                            <stop offset="100%" stopColor="#f97316" stopOpacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="48" cy="48" r="44" fill="none" stroke="url(#ringGrad)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="200" strokeDashoffset="60" />
+                                </svg>
+                            </motion.div>
+
+                            {/* Logo */}
+                            <motion.img
+                                src="/images/rsquare-logo.png"
+                                alt="RSQUARE"
+                                animate={{ scale: [1, 1.05, 1] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                className="w-14 h-14 object-contain drop-shadow-md"
+                            />
                         </motion.div>
+
+                        {/* Title */}
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="text-center"
+                            transition={{ delay: 0.2, duration: 0.5 }}
+                            className="text-center mb-6"
                         >
-                            <p className="text-base font-semibold text-gray-800">{webapp.title}</p>
-                            <p className="text-sm text-gray-500 mt-1">Memuat aplikasi web...</p>
+                            <p className="text-lg font-bold text-gray-800">{webapp.title}</p>
+                            <p className="text-sm text-gray-400 mt-1">Memuat aplikasi web</p>
+                        </motion.div>
+
+                        {/* Animated progress bar */}
+                        <motion.div
+                            initial={{ opacity: 0, scaleX: 0.8 }}
+                            animate={{ opacity: 1, scaleX: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="w-48 h-1.5 bg-gray-200/80 rounded-full overflow-hidden"
+                        >
+                            <motion.div
+                                animate={{ x: ["-100%", "200%"] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                className="w-1/2 h-full bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full"
+                            />
+                        </motion.div>
+
+                        {/* Animated dots */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.6 }}
+                            className="flex items-center gap-1.5 mt-6"
+                        >
+                            {[0, 1, 2].map((i) => (
+                                <motion.div
+                                    key={i}
+                                    animate={{ 
+                                        y: [0, -6, 0],
+                                        opacity: [0.3, 1, 0.3]
+                                    }}
+                                    transition={{ 
+                                        duration: 0.8, 
+                                        repeat: Infinity, 
+                                        delay: i * 0.15,
+                                        ease: "easeInOut"
+                                    }}
+                                    className="w-1.5 h-1.5 rounded-full bg-orange-400"
+                                />
+                            ))}
                         </motion.div>
                     </div>
                 )}

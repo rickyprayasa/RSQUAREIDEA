@@ -178,7 +178,11 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
     return (
         <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 group shadow-sm border border-gray-200" style={{ minHeight: '300px', maxHeight: '70vh' }}>
+            <div 
+                className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50 group shadow-sm border border-gray-200 cursor-pointer" 
+                style={{ minHeight: '300px', maxHeight: '70vh' }}
+                onClick={() => setIsZoomed(true)}
+            >
                 <AnimatePresence initial={false} custom={direction} mode="wait">
                     <motion.div
                         key={currentIndex}
@@ -200,7 +204,7 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                                 alt={`${title} - Preview ${currentIndex + 1}`}
                                 width={1200}
                                 height={900}
-                                className="max-w-full max-h-[70vh] w-auto h-auto object-contain"
+                                className="max-w-full max-h-[70vh] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
                                 unoptimized
                             />
                         ) : (
@@ -212,11 +216,21 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                     </motion.div>
                 </AnimatePresence>
 
+                {/* Click to zoom overlay hint */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300 pointer-events-none flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100">
+                        <div className="bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                            <ZoomIn className="w-3.5 h-3.5" />
+                            Klik untuk memperbesar
+                        </div>
+                    </div>
+                </div>
+
                 {/* Navigation Arrows */}
                 {images.length > 1 && (
                     <>
                         <button
-                            onClick={() => paginate(-1)}
+                            onClick={(e) => { e.stopPropagation(); paginate(-1); }}
                             disabled={currentIndex === 0}
                             className={`absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center transition-all duration-200 ${
                                 currentIndex === 0 
@@ -227,7 +241,7 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                             <ChevronLeft className="w-5 h-5 text-gray-700" />
                         </button>
                         <button
-                            onClick={() => paginate(1)}
+                            onClick={(e) => { e.stopPropagation(); paginate(1); }}
                             disabled={currentIndex === images.length - 1}
                             className={`absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center transition-all duration-200 ${
                                 currentIndex === images.length - 1 
@@ -242,7 +256,7 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
 
                 {/* Zoom Button */}
                 <button
-                    onClick={() => setIsZoomed(true)}
+                    onClick={(e) => { e.stopPropagation(); setIsZoomed(true); }}
                     className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-white hover:scale-110"
                 >
                     <Maximize2 className="w-4 h-4 text-gray-700" />
