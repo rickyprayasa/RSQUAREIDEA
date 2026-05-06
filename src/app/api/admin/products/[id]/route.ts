@@ -70,6 +70,8 @@ export async function PUT(
                 is_active: data.isActive,
                 is_custom_showcase: data.isCustomShowcase || false,
                 service_type: data.serviceType || null,
+                product_type: data.productType || 'template',
+                webapp_url: data.webappUrl || null,
                 features: data.features,
                 external_links: data.externalLinks,
             })

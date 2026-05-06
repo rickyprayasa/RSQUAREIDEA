@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion, useInView } from 'framer-motion'
-import { ArrowRight, Play, ExternalLink, Youtube, Store } from 'lucide-react'
+import { ArrowRight, Play, ExternalLink, Youtube, Store, Maximize2, Monitor, X as XIcon } from 'lucide-react'
 import { ImageSlider } from './ImageSlider'
 import { useCart } from '@/contexts/CartContext'
 import { LordIcon } from '@/components/ui/lordicon'
@@ -49,6 +49,8 @@ interface ProductDetailProps {
         reviewCount?: number
         isCustomShowcase?: boolean
         serviceType?: string
+        productType?: string
+        webappUrl?: string
     }
 }
 
@@ -192,6 +194,9 @@ export function ProductDetail({ template }: ProductDetailProps) {
     const [videos, setVideos] = useState<VideoTutorial[]>([])
     const [activeVideo, setActiveVideo] = useState<VideoTutorial | null>(null)
     const [cartEnabled, setCartEnabled] = useState(true)
+    const [iframeLoaded, setIframeLoaded] = useState(false)
+    const [iframeExpanded, setIframeExpanded] = useState(false)
+    const isWebApp = template.productType === 'webapp' && template.webappUrl
 
     useEffect(() => {
         // Track product view
@@ -532,19 +537,45 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                 )}
 
                                 {template.demoUrl && template.demoUrl !== '#' && template.demoUrl !== '' ? (
-                                    <a href={template.demoUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-                                        <motion.button
-                                            whileHover={{ scale: 1.02, y: -2 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            className="relative w-full h-14 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold text-lg overflow-hidden group hover:border-orange-300 transition-colors duration-300"
-                                        >
-                                            <span className="relative z-10 flex items-center justify-center gap-2 group-hover:text-orange-600 transition-colors duration-300">
-                                                <Play className="w-5 h-5" />
-                                                Lihat Demo
-                                            </span>
-                                            <div className="absolute inset-0 bg-orange-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                        </motion.button>
-                                    </a>
+                                    isWebApp ? (
+                                        /* Web App - link to /webapp/[slug] page */
+                                        <div className="flex-1 flex gap-2">
+                                            <Link href={`/webapp/${template.slug}`} className="flex-1">
+                                                <motion.div
+                                                    whileHover={{ scale: 1.02, y: -2 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    className="relative w-full h-14 rounded-xl border-2 border-blue-300 text-blue-700 font-semibold text-lg overflow-hidden group hover:border-blue-400 transition-colors duration-300 flex items-center justify-center gap-2 bg-blue-50"
+                                                >
+                                                    <Monitor className="w-5 h-5" />
+                                                    Live Demo
+                                                </motion.div>
+                                            </Link>
+                                            <a href={`/webapp/${template.slug}`} target="_blank" rel="noopener noreferrer">
+                                                <motion.div
+                                                    whileHover={{ scale: 1.05, y: -2 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    className="h-14 w-14 rounded-xl border-2 border-gray-200 text-gray-500 flex items-center justify-center hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300"
+                                                    title="Buka di Tab Baru"
+                                                >
+                                                    <ExternalLink className="w-5 h-5" />
+                                                </motion.div>
+                                            </a>
+                                        </div>
+                                    ) : (
+                                        <a href={template.demoUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+                                            <motion.button
+                                                whileHover={{ scale: 1.02, y: -2 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                className="relative w-full h-14 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold text-lg overflow-hidden group hover:border-orange-300 transition-colors duration-300"
+                                            >
+                                                <span className="relative z-10 flex items-center justify-center gap-2 group-hover:text-orange-600 transition-colors duration-300">
+                                                    <Play className="w-5 h-5" />
+                                                    Lihat Demo
+                                                </span>
+                                                <div className="absolute inset-0 bg-orange-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                            </motion.button>
+                                        </a>
+                                    )
                                 ) : (
                                     <motion.button
                                         disabled
@@ -605,6 +636,101 @@ export function ProductDetail({ template }: ProductDetailProps) {
                     </div>
                 </div>
             </section>
+
+            {/* Web App Live Demo Section */}
+            {isWebApp && (
+                <section id="live-demo" className="py-12 md:py-16">
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="max-w-5xl mx-auto">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                                transition={{ duration: 0.5, delay: 0.15 }}
+                                className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
+                            >
+                                {/* Browser Chrome Header */}
+                                <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="w-3 h-3 rounded-full bg-red-500" />
+                                            <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                                            <div className="w-3 h-3 rounded-full bg-green-500" />
+                                        </div>
+                                        <div className="flex-1 flex items-center gap-2">
+                                            <div className="flex-1 bg-gray-700/60 rounded-lg px-4 py-1.5 flex items-center gap-2">
+                                                <Monitor className="w-3.5 h-3.5 text-gray-400" />
+                                                <span className="text-xs text-gray-300 truncate font-mono">
+                                                    rsquareidea.my.id/webapp/{template.slug}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <a
+                                                href={`/webapp/${template.slug}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                                                title="Buka di Tab Baru"
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                            </a>
+                                            <button
+                                                onClick={() => setIframeExpanded(!iframeExpanded)}
+                                                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                                                title={iframeExpanded ? 'Perkecil' : 'Perbesar'}
+                                            >
+                                                {iframeExpanded ? <XIcon className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* iframe Container */}
+                                <div className={`relative bg-gray-50 transition-all duration-500 ${iframeExpanded ? 'h-[85vh]' : 'h-[500px] md:h-[600px]'}`}>
+                                    {/* Loading Skeleton */}
+                                    {!iframeLoaded && (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10 bg-gray-50">
+                                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                                                <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium text-gray-700">Memuat Web App...</p>
+                                                <p className="text-xs text-gray-400 mt-1">Menyiapkan live demo untuk Anda</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <iframe
+                                        src={template.webappUrl}
+                                        className={`w-full h-full transition-opacity duration-500 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}
+                                        style={{ border: 'none' }}
+                                        title={`${template.title} - Live Demo`}
+                                        onLoad={() => setIframeLoaded(true)}
+                                        allow="clipboard-write"
+                                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+                                    />
+                                </div>
+
+                                {/* Footer Bar */}
+                                <div className="bg-gray-50 border-t border-gray-200 px-4 py-2.5 flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                        <div className={`w-2 h-2 rounded-full ${iframeLoaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`} />
+                                        {iframeLoaded ? 'Live Demo Aktif' : 'Memuat...'}
+                                    </div>
+                                    <a
+                                        href={`/webapp/${template.slug}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                                    >
+                                        Buka Full Screen
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                    </a>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Features Section */}
             {template.features && template.features.length > 0 && (

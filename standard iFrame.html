@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web App Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { height: 100%; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; }
+    
+    /* Loading state */
+    .loader {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9fafb;
+      z-index: 10;
+      transition: opacity 0.3s;
+    }
+    .loader.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #f97316;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* iframe container */
+    .frame-container { position: relative; width: 100%; height: 100%; }
+    iframe { border: none; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div class="frame-container">
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+    </div>
+    <!-- 
+      Replace YOUR_WEB_APP_URL_HERE with your Google Apps Script Web App URL.
+      Example: https://script.google.com/macros/s/AKfycb.../exec
+      
+      If using a custom domain, replace with your custom domain URL.
+      Example: https://app.yourdomain.com
+      
+      NOTE: The Google Apps Script web app must be deployed with:
+      - Execute as: Me
+      - Who has access: Anyone
+      
+      For custom domain proxy, configure your server/Cloudflare to proxy 
+      requests to the GAS URL while preserving headers.
+    -->
+    <iframe 
+      src="YOUR_WEB_APP_URL_HERE" 
+      onload="document.getElementById('loader').classList.add('hidden')"
+      allow="clipboard-write"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+    ></iframe>
+  </div>
+</body>
+</html>

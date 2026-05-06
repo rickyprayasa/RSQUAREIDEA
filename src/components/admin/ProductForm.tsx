@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Loader2, Save, Plus, X, Image as ImageIcon, Link as LinkIcon, Tag, DollarSign, Settings, Sparkles, Youtube } from 'lucide-react'
+import { ArrowLeft, Loader2, Save, Plus, X, Image as ImageIcon, Link as LinkIcon, Tag, DollarSign, Settings, Sparkles, Youtube, Globe, Layout, Code2, MonitorPlay } from 'lucide-react'
 import { ImageUpload } from './ImageUpload'
 import { MultiImageUpload } from './MultiImageUpload'
+import { MarkdownUpload } from './MarkdownUpload'
 
 interface ExternalLink {
     name: string
@@ -31,6 +32,8 @@ interface Product {
     is_active: boolean
     is_custom_showcase?: boolean
     service_type?: string | null
+    product_type?: string | null
+    webapp_url?: string | null
     features: string[] | null
     external_links?: ExternalLink[] | null
 }
@@ -70,6 +73,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         isActive: product?.is_active ?? true,
         isCustomShowcase: product?.is_custom_showcase || false,
         serviceType: product?.service_type || '',
+        productType: product?.product_type || 'template',
+        webappUrl: product?.webapp_url || '',
     })
 
     const [features, setFeatures] = useState<string[]>(
@@ -138,6 +143,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                     ...formData,
                     discountPrice: formData.discountPrice || null,
                     videoTutorialUrl: formData.videoTutorialUrl || null,
+                    webappUrl: formData.webappUrl || null,
                     features,
                     externalLinks,
                 }),
@@ -195,6 +201,115 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                     {/* Tab: Basic Info */}
                     {activeTab === 'basic' && (
                         <div className="space-y-6">
+                            {/* Product Type Selector */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-3">
+                                    Tipe Produk *
+                                </label>
+                                <div className="grid grid-cols-3 gap-3">
+                                    {[
+                                        { value: 'template', label: 'Template', desc: 'Google Sheets / Docs', icon: Layout, color: 'orange' },
+                                        { value: 'webapp', label: 'Web App', desc: 'Google Apps Script', icon: Globe, color: 'blue' },
+                                        { value: 'fullstack', label: 'Full Stack', desc: 'Custom Development', icon: Code2, color: 'purple' },
+                                    ].map((type) => {
+                                        const isSelected = formData.productType === type.value
+                                        const colorClasses = {
+                                            orange: {
+                                                selected: 'border-orange-400 bg-orange-50 ring-2 ring-orange-200',
+                                                icon: 'bg-orange-100 text-orange-600',
+                                                label: 'text-orange-700',
+                                            },
+                                            blue: {
+                                                selected: 'border-blue-400 bg-blue-50 ring-2 ring-blue-200',
+                                                icon: 'bg-blue-100 text-blue-600',
+                                                label: 'text-blue-700',
+                                            },
+                                            purple: {
+                                                selected: 'border-purple-400 bg-purple-50 ring-2 ring-purple-200',
+                                                icon: 'bg-purple-100 text-purple-600',
+                                                label: 'text-purple-700',
+                                            },
+                                        }[type.color]!
+                                        return (
+                                            <button
+                                                key={type.value}
+                                                type="button"
+                                                onClick={() => setFormData(prev => ({ ...prev, productType: type.value }))}
+                                                className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-left hover:scale-[1.02] active:scale-[0.98] ${
+                                                    isSelected
+                                                        ? colorClasses.selected
+                                                        : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2.5 ${
+                                                    isSelected ? colorClasses.icon : 'bg-gray-200 text-gray-400'
+                                                }`}>
+                                                    <type.icon className="w-5 h-5" />
+                                                </div>
+                                                <p className={`text-sm font-semibold ${
+                                                    isSelected ? colorClasses.label : 'text-gray-700'
+                                                }`}>
+                                                    {type.label}
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-0.5">{type.desc}</p>
+                                                {isSelected && (
+                                                    <div className={`absolute top-2.5 right-2.5 w-5 h-5 rounded-full flex items-center justify-center ${colorClasses.icon}`}>
+                                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Web App URL - Only shown for webapp type */}
+                            {formData.productType === 'webapp' && (
+                                <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 space-y-3">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        <span className="flex items-center gap-2">
+                                            <MonitorPlay className="w-4 h-4 text-blue-500" />
+                                            URL Web App (Google Apps Script) *
+                                        </span>
+                                    </label>
+                                    <input
+                                        type="url"
+                                        name="webappUrl"
+                                        value={formData.webappUrl}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 bg-white border-2 border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                        placeholder="https://script.google.com/macros/s/.../exec"
+                                    />
+                                    <p className="text-xs text-blue-600">
+                                        URL deployment Google Apps Script. Web app akan ditampilkan via iframe di halaman produk.
+                                    </p>
+                                    {/* Mini iframe preview */}
+                                    {formData.webappUrl && (
+                                        <div className="mt-3">
+                                            <p className="text-xs font-medium text-gray-500 mb-2">Preview:</p>
+                                            <div className="relative rounded-lg overflow-hidden border border-blue-200 bg-white" style={{ height: '200px' }}>
+                                                <div className="absolute top-0 left-0 right-0 h-7 bg-gray-100 border-b border-gray-200 flex items-center px-3 gap-1.5 z-10">
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                                                    <div className="ml-2 flex-1 bg-white rounded px-2 py-0.5 text-[10px] text-gray-400 truncate">
+                                                        {formData.webappUrl}
+                                                    </div>
+                                                </div>
+                                                <iframe
+                                                    src={formData.webappUrl}
+                                                    className="w-full h-full pt-7"
+                                                    style={{ border: 'none', pointerEvents: 'none' }}
+                                                    title="Web App Preview"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Nama Produk *
@@ -244,6 +359,20 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                     </select>
                                 </div>
                             </div>
+
+                            {/* Markdown Upload */}
+                            <MarkdownUpload
+                                onApply={(data) => {
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        description: data.description || prev.description,
+                                        title: data.title || prev.title,
+                                    }))
+                                    if (data.features.length > 0) {
+                                        setFeatures(data.features)
+                                    }
+                                }}
+                            />
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -393,7 +522,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            URL Demo (Google Sheets)
+                                            {formData.productType === 'webapp' ? 'URL Demo (Web App)' : 'URL Demo (Google Sheets)'}
                                         </label>
                                         <input
                                             type="url"
@@ -401,9 +530,17 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                             value={formData.demoUrl}
                                             onChange={handleChange}
                                             className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
-                                            placeholder="https://docs.google.com/spreadsheets/d/..."
+                                            placeholder={formData.productType === 'webapp' 
+                                                ? 'https://script.google.com/macros/s/.../exec atau custom domain'
+                                                : 'https://docs.google.com/spreadsheets/d/...'
+                                            }
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">Link preview untuk calon pembeli</p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {formData.productType === 'webapp'
+                                                ? 'URL demo web app. Bisa pakai URL GAS langsung atau custom domain'
+                                                : 'Link preview untuk calon pembeli'
+                                            }
+                                        </p>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">

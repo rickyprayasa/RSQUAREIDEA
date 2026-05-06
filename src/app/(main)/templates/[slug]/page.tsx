@@ -43,6 +43,8 @@ async function getTemplate(slug: string) {
         isFeatured: data.is_featured,
         isCustomShowcase: data.is_custom_showcase || false,
         serviceType: data.service_type || null,
+        productType: data.product_type || 'template',
+        webappUrl: data.webapp_url || '',
         rating: 0,
         reviewCount: 0,
     }
