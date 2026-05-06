@@ -49,7 +49,7 @@ PENTING:
 - Jika konten markdown tidak jelas, tetap buat output terbaik berdasarkan informasi yang ada.`
 
         const result = await generateText({
-            model: google('gemini-2.0-flash'),
+            model: google('gemini-1.5-flash'),
             system: systemPrompt,
             prompt: `Berikut konten markdown dari ringkasan aplikasi:\n\n${markdownContent}`,
         })
