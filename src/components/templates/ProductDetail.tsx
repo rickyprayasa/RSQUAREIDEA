@@ -10,7 +10,7 @@ import { ImageSlider } from './ImageSlider'
 import { useCart } from '@/contexts/CartContext'
 import { LordIcon } from '@/components/ui/lordicon'
 import { trackProductClick, trackButtonClick } from '@/hooks/useAnalytics'
-
+import { ProductReview } from './ProductReview'
 interface ExternalLink {
     name: string
     url: string
@@ -931,6 +931,15 @@ export function ProductDetail({ template }: ProductDetailProps) {
                 </section>
             )}
 
+            {/* In-Page Review Section */}
+            <div className="container mx-auto px-6 relative z-10 max-w-5xl">
+                <ProductReview 
+                    templateName={template.title} 
+                    productType={template.productType}
+                    isCustomShowcase={template.isCustomShowcase}
+                />
+            </div>
+
             {/* CTA Section */}
             <section className="py-12">
                 <div className="container mx-auto px-6 relative z-10">
@@ -947,7 +956,23 @@ export function ProductDetail({ template }: ProductDetailProps) {
                             Dapatkan template ini sekarang dan mulai kelola data dengan lebih efisien.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            {template.isFree ? (
+                            {template.isCustomShowcase ? (
+                                <Link href={`/jasa-kustom?ref=${template.slug}`}>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="relative h-14 px-8 rounded-xl font-semibold text-lg shadow-lg overflow-hidden group bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-purple-200/50 w-full"
+                                    >
+                                        <span className="relative z-10 flex items-center justify-center gap-2">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                            </svg>
+                                            Request Template Serupa
+                                        </span>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    </motion.button>
+                                </Link>
+                            ) : template.isFree ? (
                                 /* Free product - Always active, go to checkout for customer data */
                                 <motion.button
                                     onClick={handleBuyNow}

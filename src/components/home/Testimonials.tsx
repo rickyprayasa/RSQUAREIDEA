@@ -14,6 +14,8 @@ interface Testimonial {
     template_name: string | null
     rating: number
     likes: string
+    productType?: string
+    isCustomShowcase?: boolean
 }
 
 export function Testimonials() {
@@ -146,6 +148,22 @@ export function Testimonials() {
                     <div className="absolute inset-0 flex items-center justify-center">
                         {testimonials.map((testimonial, index) => {
                             const style = getCardStyle(index)
+                            
+                            // Theme configuration
+                            const isCustom = testimonial.isCustomShowcase
+                            const isWebApp = testimonial.productType === 'webapp'
+
+                            const theme = {
+                                cardBg: isCustom ? 'bg-slate-900 border-yellow-500/30' : isWebApp ? 'bg-blue-50/80 border-blue-200' : 'bg-white border-gray-200',
+                                quoteBg: isCustom ? 'bg-slate-800' : isWebApp ? 'bg-blue-100' : 'bg-orange-100',
+                                quoteIconColor: isCustom ? 'primary:#eab308' : isWebApp ? 'primary:#3b82f6' : 'primary:#f97316',
+                                textQuote: isCustom ? 'text-slate-300' : 'text-gray-700',
+                                textName: isCustom ? 'text-slate-100' : 'text-gray-900',
+                                textRole: isCustom ? 'text-slate-400' : 'text-gray-500',
+                                avatarBg: isCustom ? 'from-yellow-500 to-amber-600 shadow-yellow-900/50' : isWebApp ? 'from-blue-400 to-indigo-500 shadow-blue-200' : 'from-orange-400 to-amber-400 shadow-orange-200',
+                                starActive: isCustom ? 'primary:#eab308' : 'primary:#facc15',
+                                starInactive: isCustom ? 'primary:#334155' : 'primary:#e5e7eb',
+                            }
 
                             return (
                                 <motion.div
@@ -156,14 +174,14 @@ export function Testimonials() {
                                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                                     onClick={() => setActiveIndex(index)}
                                 >
-                                    <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 hover:shadow-2xl transition-shadow relative overflow-hidden">
+                                    <div className={`rounded-2xl p-6 shadow-xl border hover:shadow-2xl transition-shadow relative overflow-hidden ${theme.cardBg}`}>
                                         {/* Quote Icon */}
-                                        <div className="absolute top-4 right-4 w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                        <div className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center ${theme.quoteBg}`}>
                                             <ClientLordIcon
                                                 src="https://cdn.lordicon.com/puvaffet.json"
                                                 trigger="loop"
                                                 delay="3000"
-                                                colors="primary:#f97316"
+                                                colors={theme.quoteIconColor}
                                                 style={{ width: '22px', height: '22px' }}
                                             />
                                         </div>
@@ -175,28 +193,30 @@ export function Testimonials() {
                                                     key={star}
                                                     src="https://cdn.lordicon.com/mdgrhyca.json"
                                                     trigger="hover"
-                                                    colors={star <= testimonial.rating ? "primary:#facc15" : "primary:#e5e7eb"}
+                                                    colors={star <= testimonial.rating ? theme.starActive : theme.starInactive}
                                                     style={{ width: '22px', height: '22px' }}
                                                 />
                                             ))}
                                         </div>
 
                                         {/* Content */}
-                                        <p className="text-gray-700 mb-5 leading-relaxed line-clamp-4 min-h-[96px]">
+                                        <p className={`mb-5 leading-relaxed line-clamp-4 min-h-[96px] ${theme.textQuote}`}>
                                             &ldquo;{testimonial.likes}&rdquo;
                                         </p>
 
                                         {/* Author */}
-                                        <div className="pt-4 border-t border-gray-100">
+                                        <div className={`pt-4 border-t ${isCustom ? 'border-slate-800' : 'border-gray-100'}`}>
                                             <div className="flex items-center gap-3">
-                                                <div className="w-11 h-11 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-orange-200">
+                                                <div className={`w-11 h-11 bg-gradient-to-br rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ${theme.avatarBg}`}>
                                                     {testimonial.name?.charAt(0).toUpperCase() || 'U'}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <p className="font-semibold text-gray-900">{testimonial.name || 'Pengguna'}</p>
+                                                    <p className={`font-semibold ${theme.textName}`}>{testimonial.name || 'Pengguna'}</p>
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         {testimonial.template_name && (
-                                                            <span className="text-xs text-gray-500">{testimonial.template_name}</span>
+                                                            <span className={`text-xs ${theme.textRole}`}>
+                                                                {isCustom ? '★ Custom Showcase' : testimonial.template_name}
+                                                            </span>
                                                         )}
                                                         {testimonial.social_media && (
                                                             <a
