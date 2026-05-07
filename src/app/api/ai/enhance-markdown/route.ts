@@ -5,13 +5,13 @@ import { createClient } from '@/lib/supabase/server'
 
 export const maxDuration = 30
 
-// Valid Gemini models
+// Valid Gemini models (2025-2026 active models)
 const VALID_MODELS = [
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-pro',
     'gemini-2.0-flash',
     'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b',
-    'gemini-1.5-pro',
 ]
 
 async function getAiModel(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -22,10 +22,10 @@ async function getAiModel(supabase: Awaited<ReturnType<typeof createClient>>) {
             .eq('key', 'ai_model')
             .single()
         
-        const model = data?.value || 'gemini-1.5-flash'
-        return VALID_MODELS.includes(model) ? model : 'gemini-1.5-flash'
+        const model = data?.value || 'gemini-2.5-flash'
+        return VALID_MODELS.includes(model) ? model : 'gemini-2.5-flash'
     } catch {
-        return 'gemini-1.5-flash'
+        return 'gemini-2.5-flash'
     }
 }
 

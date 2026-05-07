@@ -6,11 +6,11 @@ import { createClient } from '@/lib/supabase/server'
 export const maxDuration = 15
 
 const VALID_MODELS = [
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-pro',
     'gemini-2.0-flash',
     'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b',
-    'gemini-1.5-pro',
 ]
 
 export async function POST() {
@@ -34,7 +34,7 @@ export async function POST() {
         }
 
         // Get model from settings
-        let modelName = 'gemini-1.5-flash'
+        let modelName = 'gemini-2.5-flash'
         try {
             const { data } = await supabase
                 .from('site_settings')
@@ -76,7 +76,7 @@ export async function POST() {
         } else if (message.includes('429') || message.includes('quota') || message.includes('RESOURCE_EXHAUSTED')) {
             hint = 'Rate limit tercapai. Tunggu beberapa menit atau ganti ke model yang lebih ringan.'
         } else if (message.includes('404') || message.includes('not found')) {
-            hint = 'Model tidak ditemukan. Coba ganti ke model lain di dropdown.'
+            hint = 'Model tidak ditemukan atau sudah deprecated. Coba ganti ke model lain (Gemini 2.5 Flash direkomendasikan).'
         }
 
         return NextResponse.json({

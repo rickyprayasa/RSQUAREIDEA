@@ -1829,26 +1829,26 @@ function AiSettings({ settings, handleChange }: { settings: SettingsData, handle
                     onChange={(e) => handleChange('ai_model', e.target.value)}
                     className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
                 >
-                    <optgroup label="Gemini 2.0 (Terbaru)">
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash — Cepat &amp; powerful (Free tier terbatas)</option>
-                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite — Ringan &amp; hemat kuota</option>
+                    <optgroup label="Gemini 2.5 (Terbaru)">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash — Cepat &amp; powerful ⭐</option>
+                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite — Ringan &amp; hemat kuota</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro — Terbaik, kuota terbatas</option>
                     </optgroup>
-                    <optgroup label="Gemini 1.5 (Stabil)">
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash — Stabil, free tier besar ⭐</option>
-                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B — Paling ringan, free tier terbesar</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro — Terbaik, kuota terbatas</option>
+                    <optgroup label="Gemini 2.0 (Stabil)">
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash — Stabil &amp; cepat</option>
+                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite — Paling ringan</option>
                     </optgroup>
                 </select>
-                <p className="text-xs text-gray-500 mt-1.5">Rekomendasi: <strong>Gemini 1.5 Flash</strong> untuk free tier yang stabil</p>
+                <p className="text-xs text-gray-500 mt-1.5">Rekomendasi: <strong>Gemini 2.5 Flash</strong> untuk performa terbaik di free tier</p>
             </div>
 
             {/* Model Info Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {[
-                    { model: 'gemini-2.0-flash', name: '2.0 Flash', speed: 'Cepat', quality: 'Tinggi', free: '~15 RPM' },
-                    { model: 'gemini-2.0-flash-lite', name: '2.0 Flash Lite', speed: 'Sangat Cepat', quality: 'Sedang', free: '~30 RPM' },
-                    { model: 'gemini-1.5-flash', name: '1.5 Flash', speed: 'Cepat', quality: 'Tinggi', free: '~15 RPM' },
-                    { model: 'gemini-1.5-flash-8b', name: '1.5 Flash 8B', speed: 'Sangat Cepat', quality: 'Sedang', free: '~30 RPM' },
+                    { model: 'gemini-2.5-flash', name: '2.5 Flash ⭐', speed: 'Cepat', quality: 'Tinggi', free: '~15 RPM' },
+                    { model: 'gemini-2.5-flash-lite', name: '2.5 Flash Lite', speed: 'Sangat Cepat', quality: 'Sedang', free: '~30 RPM' },
+                    { model: 'gemini-2.5-pro', name: '2.5 Pro', speed: 'Sedang', quality: 'Terbaik', free: '~5 RPM' },
+                    { model: 'gemini-2.0-flash', name: '2.0 Flash', speed: 'Cepat', quality: 'Baik', free: '~15 RPM' },
                 ].map((m) => {
                     const isActive = settings.ai_model === m.model
                     return (
