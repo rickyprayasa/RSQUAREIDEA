@@ -1756,6 +1756,34 @@ function DuitkuSettings({ settings, handleChange }: { settings: SettingsData, ha
 }
 
 function AiSettings({ settings, handleChange }: { settings: SettingsData, handleChange: (key: keyof SettingsData, value: string) => void }) {
+    const [testing, setTesting] = useState(false)
+    const [testResult, setTestResult] = useState<{
+        success?: boolean
+        model?: string
+        response?: string
+        duration?: number
+        tokensUsed?: number | null
+        error?: string
+        hint?: string
+    } | null>(null)
+
+    const handleTestAi = async () => {
+        setTesting(true)
+        setTestResult(null)
+        try {
+            const res = await fetch('/api/ai/test', { method: 'POST' })
+            const data = await res.json()
+            setTestResult(data)
+        } catch (err) {
+            setTestResult({
+                success: false,
+                error: err instanceof Error ? err.message : 'Gagal menghubungi server',
+            })
+        } finally {
+            setTesting(false)
+        }
+    }
+
     return (
         <div className="space-y-4 md:space-y-6">
             <SectionHeader
@@ -1852,6 +1880,98 @@ function AiSettings({ settings, handleChange }: { settings: SettingsData, handle
                         </button>
                     )
                 })}
+            </div>
+
+            {/* Test AI Connection */}
+            <div className="p-4 border-2 border-dashed border-violet-200 rounded-xl bg-violet-50/30">
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-violet-500" />
+                        <span className="text-sm font-semibold text-gray-800">Test Koneksi AI</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleTestAi}
+                        disabled={testing}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-violet-500 hover:bg-violet-600 disabled:bg-violet-300 rounded-lg transition-colors"
+                    >
+                        {testing ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Testing...
+                            </>
+                        ) : (
+                            <>
+                                <Zap className="w-4 h-4" />
+                                Test AI
+                            </>
+                        )}
+                    </button>
+                </div>
+                <p className="text-xs text-gray-500 mb-3">
+                    Kirim prompt sederhana untuk memverifikasi API key dan model berfungsi dengan benar.
+                </p>
+
+                {/* Test Result */}
+                {testResult && (
+                    <div className={`p-3 rounded-lg border ${
+                        testResult.success 
+                            ? 'bg-green-50 border-green-200' 
+                            : 'bg-red-50 border-red-200'
+                    }`}>
+                        <div className="flex items-start gap-2">
+                            {testResult.success ? (
+                                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            ) : (
+                                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-medium ${testResult.success ? 'text-green-800' : 'text-red-800'}`}>
+                                    {testResult.success ? 'Koneksi Berhasil! ✅' : 'Koneksi Gagal ❌'}
+                                </p>
+
+                                {testResult.success && (
+                                    <div className="mt-2 space-y-1.5">
+                                        <p className="text-xs text-green-700">
+                                            <strong>Response:</strong> {testResult.response}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                                🤖 {testResult.model}
+                                            </span>
+                                            <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                                ⏱️ {testResult.duration}ms
+                                            </span>
+                                            {testResult.tokensUsed && (
+                                                <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                                    📊 {testResult.tokensUsed} tokens
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {!testResult.success && (
+                                    <div className="mt-2 space-y-1.5">
+                                        <p className="text-xs text-red-600 break-all">
+                                            <strong>Error:</strong> {testResult.error}
+                                        </p>
+                                        {testResult.hint && (
+                                            <p className="text-xs text-red-700 bg-red-100 px-2 py-1 rounded">
+                                                💡 <strong>Saran:</strong> {testResult.hint}
+                                            </p>
+                                        )}
+                                        {testResult.duration && (
+                                            <span className="text-[10px] px-2 py-0.5 bg-red-100 text-red-600 rounded-full inline-block">
+                                                ⏱️ {testResult.duration}ms
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* API Key Info */}
