@@ -52,7 +52,6 @@ export async function POST() {
         const result = await generateText({
             model: google(modelName),
             prompt: 'Balas dengan tepat satu kalimat singkat dalam Bahasa Indonesia: "AI berhasil terhubung dan siap digunakan."',
-            maxTokens: 50,
         })
 
         const duration = Date.now() - startTime
