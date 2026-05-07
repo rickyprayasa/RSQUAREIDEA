@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMZETIN POS</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+    <script>
+        // 1. Masukkan URL Web App Google Apps Script Anda di sini
+        var gasUrl = "https://script.google.com/macros/s/AKfycbzbzLd7HZeO9A0gs6sUFTRHcZXHE59QTvyJ1y_DEYaHoJCAoQxtqEXlhUxyxIatVQhc/exec";
+        
+        // 2. Ambil parameter dari address bar (contoh: ?view=order)
+        var queryParams = window.location.search;
+        
+        // 3. Render iframe dengan parameter yang sudah digabungkan
+        document.write('<iframe src="' + gasUrl + queryParams + '" allow="camera; clipboard-read; clipboard-write; autoplay"></iframe>');
+    </script>
+</body>
+</html>
+

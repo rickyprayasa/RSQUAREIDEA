@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ExternalLink, Maximize2, Minimize2, Monitor, ShoppingCart } from 'lucide-react'
 
@@ -23,6 +24,16 @@ interface WebAppFrameProps {
 export function WebAppFrame({ webapp }: WebAppFrameProps) {
     const [isLoaded, setIsLoaded] = useState(false)
     const [isFullscreen, setIsFullscreen] = useState(false)
+    const searchParams = useSearchParams()
+
+    // Build iframe URL: append browser query params to the GAS URL
+    const iframeUrl = useMemo(() => {
+        const queryString = searchParams.toString()
+        if (!queryString) return webapp.webappUrl
+        // If the webapp URL already has query params, append with &, otherwise with ?
+        const separator = webapp.webappUrl.includes('?') ? '&' : '?'
+        return `${webapp.webappUrl}${separator}${queryString}`
+    }, [webapp.webappUrl, searchParams])
 
     return (
         <div className={`flex flex-col ${isFullscreen ? 'fixed inset-0 z-50' : 'min-h-screen'}`}>
@@ -55,7 +66,7 @@ export function WebAppFrame({ webapp }: WebAppFrameProps) {
                             </div>
                             <Monitor className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                             <span className="text-xs text-gray-300 truncate font-mono">
-                                rsquareidea.my.id/webapp/{webapp.slug}
+                                rsquareidea.my.id/webapp/{webapp.slug}{searchParams.toString() ? `?${searchParams.toString()}` : ''}
                             </span>
                         </div>
                     </div>
@@ -70,7 +81,7 @@ export function WebAppFrame({ webapp }: WebAppFrameProps) {
                             Beli Produk
                         </Link>
                         <a
-                            href={webapp.webappUrl}
+                            href={iframeUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
@@ -204,7 +215,7 @@ export function WebAppFrame({ webapp }: WebAppFrameProps) {
                 )}
 
                 <iframe
-                    src={webapp.webappUrl}
+                    src={iframeUrl}
                     className={`w-full h-full transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
                     style={{ border: 'none', minHeight: isFullscreen ? 'calc(100vh - 52px)' : 'calc(100vh - 116px)' }}
                     title={`${webapp.title} - Live Demo`}
