@@ -16,6 +16,9 @@ interface TemplateCardProps {
     category: string
     isFeatured?: boolean
     compact?: boolean
+    rating?: number
+    reviewCount?: number
+    soldCount?: number
 }
 
 export function TemplateCard({
@@ -28,6 +31,9 @@ export function TemplateCard({
     category,
     isFeatured,
     compact = false,
+    rating = 0,
+    reviewCount = 0,
+    soldCount = 0,
 }: TemplateCardProps) {
     const discountPercent = discountPrice ? Math.round((1 - discountPrice / price) * 100) : 0
 
@@ -141,6 +147,22 @@ export function TemplateCard({
                     <h3 className="font-bold text-lg text-gray-900 line-clamp-2 mb-3 group-hover:text-orange-600 transition-colors leading-tight">
                         {title}
                     </h3>
+
+                    {/* Rating & Sold Count */}
+                    {(rating > 0 || soldCount > 0) && (
+                        <div className="flex items-center gap-3 mb-3 text-sm">
+                            {rating > 0 && (
+                                <div className="flex items-center gap-1">
+                                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                    <span className="font-medium text-gray-700">{rating.toFixed(1)}</span>
+                                    <span className="text-gray-400">({reviewCount})</span>
+                                </div>
+                            )}
+                            {soldCount > 0 && (
+                                <span className="text-gray-400">{soldCount} terjual</span>
+                            )}
+                        </div>
+                    )}
                     
                     <div className="flex items-center justify-between">
                         <div className="flex items-baseline gap-2">

@@ -18,7 +18,7 @@ interface ProductReviewProps {
     isCustomShowcase?: boolean
 }
 
-export function ProductReview({ templateName }: ProductReviewProps) {
+export function ProductReview({ templateName, productType, isCustomShowcase }: ProductReviewProps) {
     const [reviews, setReviews] = useState<Review[]>([])
     const [summary, setSummary] = useState({ averageRating: 0, totalReviews: 0 })
     const [isLoading, setIsLoading] = useState(true)
@@ -26,10 +26,17 @@ export function ProductReview({ templateName }: ProductReviewProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
+    // Show company/website fields for custom app requests and web app category
+    const isCustomOrWebApp = productType === 'webapp' || productType === 'fullstack' || isCustomShowcase
+
     const [formData, setFormData] = useState({
         name: '',
         rating: 5,
-        likes: ''
+        likes: '',
+        email: '',
+        socialMedia: '',
+        companyName: '',
+        website: '',
     })
 
     useEffect(() => {
@@ -66,6 +73,10 @@ export function ProductReview({ templateName }: ProductReviewProps) {
                     name: formData.name,
                     rating: formData.rating,
                     likes: formData.likes,
+                    email: formData.email || null,
+                    socialMedia: formData.socialMedia || null,
+                    companyName: isCustomOrWebApp ? (formData.companyName || null) : null,
+                    website: isCustomOrWebApp ? (formData.website || null) : null,
                     templateName: templateName,
                     testimonialPermission: true // Always request permission for public reviews
                 })
@@ -73,7 +84,7 @@ export function ProductReview({ templateName }: ProductReviewProps) {
 
             if (res.ok) {
                 setSubmitStatus('success')
-                setFormData({ name: '', rating: 5, likes: '' })
+                setFormData({ name: '', rating: 5, likes: '', email: '', socialMedia: '', companyName: '', website: '' })
                 setTimeout(() => setIsFormOpen(false), 3000)
             } else {
                 setSubmitStatus('error')
@@ -188,6 +199,54 @@ export function ProductReview({ templateName }: ProductReviewProps) {
                                                     placeholder="Masukkan nama Anda"
                                                 />
                                             </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1.5 text-gray-900">Email</label>
+                                                <input
+                                                    type="email"
+                                                    value={formData.email}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                                                    className="w-full px-4 py-2.5 rounded-lg border bg-white border-gray-300 focus:border-orange-500 focus:ring-orange-500 focus:outline-none focus:ring-2 transition-all"
+                                                    placeholder="email@contoh.com"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Company & Website - Only for custom app / web app products */}
+                                        {isCustomOrWebApp && (
+                                            <div className="grid md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-1.5 text-gray-900">Nama Perusahaan</label>
+                                                    <input
+                                                        type="text"
+                                                        value={formData.companyName}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                                                        className="w-full px-4 py-2.5 rounded-lg border bg-white border-gray-300 focus:border-orange-500 focus:ring-orange-500 focus:outline-none focus:ring-2 transition-all"
+                                                        placeholder="Nama perusahaan Anda"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium mb-1.5 text-gray-900">Website</label>
+                                                    <input
+                                                        type="url"
+                                                        value={formData.website}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                                                        className="w-full px-4 py-2.5 rounded-lg border bg-white border-gray-300 focus:border-orange-500 focus:ring-orange-500 focus:outline-none focus:ring-2 transition-all"
+                                                        placeholder="https://website-anda.com"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Social Media - All products */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1.5 text-gray-900">Social Media</label>
+                                            <input
+                                                type="text"
+                                                value={formData.socialMedia}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, socialMedia: e.target.value }))}
+                                                className="w-full px-4 py-2.5 rounded-lg border bg-white border-gray-300 focus:border-orange-500 focus:ring-orange-500 focus:outline-none focus:ring-2 transition-all"
+                                                placeholder="@username Instagram / TikTok / lainnya"
+                                            />
                                         </div>
 
                                         <div>
@@ -225,7 +284,7 @@ export function ProductReview({ templateName }: ProductReviewProps) {
                                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                                 ) : (
                                                     <ClientLordIcon
-                                                        src="https://cdn.lordicon.com/udbbfuld.json"
+                                                        src="https://cdn.lordicon.com/ternnbni.json"
                                                         trigger="hover"
                                                         colors="primary:#ffffff"
                                                         style={{ width: '20px', height: '20px' }}

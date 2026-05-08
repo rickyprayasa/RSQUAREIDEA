@@ -16,6 +16,9 @@ interface Template {
     category: string
     isFeatured?: boolean
     isFree?: boolean
+    rating?: number
+    reviewCount?: number
+    soldCount?: number
 }
 
 interface Category {
@@ -36,7 +39,7 @@ export default function TemplatesPage() {
         ])
             .then(([productsData, categoriesData]) => {
                 if (productsData.products) {
-                    setTemplates(productsData.products.map((t: { id: number; title: string; slug: string; price: number; discountPrice?: number; image?: string; category: string; isFeatured?: boolean; isFree?: boolean }) => ({
+                    setTemplates(productsData.products.map((t: { id: number; title: string; slug: string; price: number; discountPrice?: number; image?: string; category: string; isFeatured?: boolean; isFree?: boolean; rating?: number; reviewCount?: number; soldCount?: number }) => ({
                         _id: t.id.toString(),
                         title: t.title,
                         slug: t.slug,
@@ -46,6 +49,9 @@ export default function TemplatesPage() {
                         category: t.category,
                         isFeatured: t.isFeatured,
                         isFree: t.isFree,
+                        rating: t.rating || 0,
+                        reviewCount: t.reviewCount || 0,
+                        soldCount: t.soldCount || 0,
                     })))
                 }
                 if (categoriesData.categories) {

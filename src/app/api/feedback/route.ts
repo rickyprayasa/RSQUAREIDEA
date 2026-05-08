@@ -159,6 +159,8 @@ export async function POST(request: NextRequest) {
                 email: data.email || null,
                 social_media: data.socialMedia || null,
                 social_media_url: data.socialMediaUrl || null,
+                company_name: data.companyName || null,
+                website: data.website || null,
                 template_name: data.templateName || null,
                 rating: data.rating,
                 likes: data.likes || null,

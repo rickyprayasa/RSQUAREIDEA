@@ -58,14 +58,21 @@ async function getTemplate(slug: string) {
 
     if (feedbackData && feedbackData.length > 0) {
         const totalRating = feedbackData.reduce((sum, item) => sum + item.rating, 0)
-        return {
-            ...initialResult,
-            rating: Number((totalRating / feedbackData.length).toFixed(1)),
-            reviewCount: feedbackData.length
-        }
+        initialResult.rating = Number((totalRating / feedbackData.length).toFixed(1))
+        initialResult.reviewCount = feedbackData.length
     }
 
-    return initialResult
+    // Fetch sold count from orders (paid/completed)
+    const { count: soldCount } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .ilike('product_title', `%${data.title}%`)
+        .in('status', ['paid', 'completed'])
+
+    return {
+        ...initialResult,
+        soldCount: soldCount || 0,
+    }
 }
 
 export default async function TemplateDetailPage({ params }: TemplateDetailProps) {

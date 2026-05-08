@@ -15,6 +15,9 @@ interface Template {
     image: string
     category: string
     isFeatured?: boolean
+    rating?: number
+    reviewCount?: number
+    soldCount?: number
 }
 
 interface Category {
@@ -179,6 +182,9 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                                 category={template.category}
                                 isFeatured={template.isFeatured}
                                 compact={viewMode === 'compact'}
+                                rating={template.rating}
+                                reviewCount={template.reviewCount}
+                                soldCount={template.soldCount}
                             />
                         </motion.div>
                     ))}

@@ -47,6 +47,7 @@ interface ProductDetailProps {
         videoTutorialUrl?: string
         rating?: number
         reviewCount?: number
+        soldCount?: number
         isCustomShowcase?: boolean
         serviceType?: string
         productType?: string
@@ -460,6 +461,23 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                     <span className="text-4xl font-bold text-gray-900">
                                         Rp {template.price.toLocaleString('id-ID')}
                                     </span>
+                                )}
+                            </div>
+
+                            {/* Rating & Sold Count */}
+                            <div className="flex items-center gap-4 mb-6 flex-wrap">
+                                {(template.rating !== undefined && template.rating > 0) && (
+                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+                                        <LordIcon src="https://cdn.lordicon.com/mdgrhyca.json" trigger="loop" delay={5000} size={18} colors={{ primary: '#f59e0b' }} />
+                                        <span className="text-sm font-semibold text-amber-700">{template.rating.toFixed(1)}</span>
+                                        <span className="text-xs text-amber-600">({template.reviewCount} ulasan)</span>
+                                    </div>
+                                )}
+                                {(template.soldCount !== undefined && template.soldCount > 0) && (
+                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg">
+                                        <LordIcon src="https://cdn.lordicon.com/medpcfcy.json" trigger="loop" delay={5000} size={18} colors={{ primary: '#16a34a' }} />
+                                        <span className="text-sm font-semibold text-green-700">{template.soldCount} terjual</span>
+                                    </div>
                                 )}
                             </div>
 
