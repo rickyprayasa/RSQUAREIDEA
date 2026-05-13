@@ -45,7 +45,7 @@ async function getTemplate(slug: string) {
         serviceType: data.service_type || null,
         productType: data.product_type || 'template',
         webappUrl: data.webapp_url || '',
-        clientName: data.template_requests?.name || null,
+        clientName: Array.isArray(data.template_requests) ? data.template_requests[0]?.name : (data.template_requests as any)?.name || null,
         rating: 0,
         reviewCount: 0,
     }

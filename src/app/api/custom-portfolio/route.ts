@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
             category: p.category,
             features: p.features || [],
             serviceType: p.service_type,
-            clientName: p.template_requests?.name || null,
+            clientName: Array.isArray(p.template_requests) ? p.template_requests[0]?.name : (p.template_requests as any)?.name || null,
             createdAt: p.created_at
         })) || []
 
