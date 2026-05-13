@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
                 is_free: data.isFree || false,
                 is_active: data.isActive ?? true,
                 is_custom_showcase: data.isCustomShowcase || false,
+                request_id: data.requestId || null,
                 service_type: data.serviceType || null,
                 product_type: data.productType || 'template',
                 webapp_url: data.webappUrl || null,

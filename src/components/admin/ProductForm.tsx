@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader2, Save, Plus, X, Image as ImageIcon, Link as LinkIcon, Tag, DollarSign, Settings, Sparkles, Youtube, Globe, Layout, Code2, MonitorPlay } from 'lucide-react'
@@ -31,6 +31,7 @@ interface Product {
     is_free: boolean
     is_active: boolean
     is_custom_showcase?: boolean
+    request_id?: number | null
     service_type?: string | null
     product_type?: string | null
     webapp_url?: string | null
@@ -72,10 +73,26 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         isFree: product?.is_free || false,
         isActive: product?.is_active ?? true,
         isCustomShowcase: product?.is_custom_showcase || false,
+        requestId: product?.request_id || '',
         serviceType: product?.service_type || '',
         productType: product?.product_type || 'template',
         webappUrl: product?.webapp_url || '',
     })
+
+    const [templateRequests, setTemplateRequests] = useState<{id: number, name: string, template_name: string}[]>([])
+
+    useEffect(() => {
+        if (formData.isCustomShowcase) {
+            fetch('/api/admin/requests')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.requests) {
+                        setTemplateRequests(data.requests.filter((r: any) => r.status === 'completed'))
+                    }
+                })
+                .catch(console.error)
+        }
+    }, [formData.isCustomShowcase])
 
     const [features, setFeatures] = useState<string[]>(
         product?.features || []
@@ -639,11 +656,32 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                 </label>
 
                                 {formData.isCustomShowcase && (
-                                    <div className="p-4 bg-purple-50 rounded-xl border border-purple-200">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Tipe Layanan Custom
-                                        </label>
-                                        <select
+                                    <div className="p-4 bg-purple-50 rounded-xl border border-purple-200 space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Link Request Terkait
+                                            </label>
+                                            <select
+                                                name="requestId"
+                                                value={formData.requestId}
+                                                onChange={handleChange}
+                                                className="w-full px-4 py-2.5 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 bg-white"
+                                            >
+                                                <option value="">-- Pilih Request (Opsional) --</option>
+                                                {templateRequests.map(req => (
+                                                    <option key={req.id} value={req.id}>
+                                                        {req.template_name} - {req.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <p className="text-xs text-gray-500 mt-1">Hanya menampilkan request dengan status "Selesai".</p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Tipe Layanan Custom
+                                            </label>
+                                            <select
                                             name="serviceType"
                                             value={formData.serviceType}
                                             onChange={handleChange}

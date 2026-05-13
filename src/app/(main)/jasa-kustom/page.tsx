@@ -36,6 +36,7 @@ interface Portfolio {
     category: string
     features: string[]
     serviceType: string
+    clientName?: string | null
 }
 
 interface Testimonial {
@@ -704,7 +705,18 @@ export default function JasaKustomPage() {
                                             </div>
                                             <div className="p-5">
                                                 <h3 className="font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">{project.title}</h3>
-                                                <p className="text-sm text-gray-600 line-clamp-2">{project.description}</p>
+                                                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{project.description}</p>
+                                                {project.clientName && (
+                                                    <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-md border border-purple-100 mt-2">
+                                                        <ClientLordIcon
+                                                            src="https://cdn.lordicon.com/dxjqnldd.json"
+                                                            trigger="hover"
+                                                            colors="primary:#9333ea"
+                                                            style={{ width: '14px', height: '14px' }}
+                                                        />
+                                                        Requested by {project.clientName}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </Link>

@@ -50,8 +50,8 @@ interface ProductDetailProps {
         soldCount?: number
         isCustomShowcase?: boolean
         serviceType?: string
-        productType?: string
         webappUrl?: string
+        clientName?: string | null
     }
 }
 
@@ -477,6 +477,12 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg">
                                         <LordIcon src="https://cdn.lordicon.com/medpcfcy.json" trigger="loop" delay={5000} size={18} colors={{ primary: '#16a34a' }} />
                                         <span className="text-sm font-semibold text-green-700">{template.soldCount} terjual</span>
+                                    </div>
+                                )}
+                                {template.isCustomShowcase && template.clientName && (
+                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg">
+                                        <LordIcon src="https://cdn.lordicon.com/dxjqnldd.json" trigger="loop" delay={5000} size={18} colors={{ primary: '#9333ea' }} />
+                                        <span className="text-sm font-semibold text-purple-700">Requested by {template.clientName}</span>
                                     </div>
                                 )}
                             </div>

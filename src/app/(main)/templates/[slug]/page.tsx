@@ -15,7 +15,7 @@ async function getTemplate(slug: string) {
 
     const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, template_requests(name)')
         .eq('slug', slug)
         .eq('is_active', true)
         .single()
@@ -45,6 +45,7 @@ async function getTemplate(slug: string) {
         serviceType: data.service_type || null,
         productType: data.product_type || 'template',
         webappUrl: data.webapp_url || '',
+        clientName: data.template_requests?.name || null,
         rating: 0,
         reviewCount: 0,
     }

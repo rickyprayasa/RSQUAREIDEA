@@ -151,6 +151,35 @@ export async function POST(request: NextRequest) {
         // Use service role to bypass RLS
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+        // Handle image upload if present
+        let imageUrl = null
+        if (data.imageBase64) {
+            try {
+                // Remove data:image/jpeg;base64, from the string
+                const base64Data = data.imageBase64.replace(/^data:image\/\w+;base64,/, "")
+                const buffer = Buffer.from(base64Data, 'base64')
+                const fileName = `feedback-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
+
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('feedback_images')
+                    .upload(fileName, buffer, {
+                        contentType: 'image/jpeg',
+                        upsert: false
+                    })
+
+                if (uploadError) {
+                    console.error('Error uploading image:', uploadError)
+                } else if (uploadData) {
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('feedback_images')
+                        .getPublicUrl(fileName)
+                    imageUrl = publicUrl
+                }
+            } catch (err) {
+                console.error('Error processing image:', err)
+            }
+        }
+
         // Insert feedback
         const { data: feedback, error } = await supabase
             .from('feedback')
@@ -166,6 +195,7 @@ export async function POST(request: NextRequest) {
                 likes: data.likes || null,
                 improvements: data.improvements || null,
                 testimonial_permission: data.testimonialPermission || false,
+                image_url: imageUrl,
                 status: 'new',
             })
             .select()

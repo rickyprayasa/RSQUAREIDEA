@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
         let query = supabase
             .from('products')
-            .select('id, title, slug, description, price, discount_price, image, category, features, service_type, created_at')
+            .select('id, title, slug, description, price, discount_price, image, category, features, service_type, created_at, request_id, template_requests(name)')
             .eq('is_custom_showcase', true)
             .eq('is_active', true)
 
@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
             category: p.category,
             features: p.features || [],
             serviceType: p.service_type,
+            clientName: p.template_requests?.name || null,
             createdAt: p.created_at
         })) || []
 

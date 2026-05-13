@@ -10,6 +10,7 @@ interface Review {
     rating: number
     likes: string
     created_at: string
+    image_url?: string
 }
 
 interface ProductReviewProps {
@@ -37,7 +38,48 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
         socialMedia: '',
         companyName: '',
         website: '',
+        imageBase64: '',
     })
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        const reader = new FileReader()
+        reader.onload = (event) => {
+            const img = new Image()
+            img.onload = () => {
+                const canvas = document.createElement('canvas')
+                const MAX_WIDTH = 800
+                const MAX_HEIGHT = 800
+                let width = img.width
+                let height = img.height
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width
+                        width = MAX_WIDTH
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height
+                        height = MAX_HEIGHT
+                    }
+                }
+
+                canvas.width = width
+                canvas.height = height
+                const ctx = canvas.getContext('2d')
+                ctx?.drawImage(img, 0, 0, width, height)
+                
+                // Compress to JPEG with 0.7 quality
+                const base64String = canvas.toDataURL('image/jpeg', 0.7)
+                setFormData(prev => ({ ...prev, imageBase64: base64String }))
+            }
+            img.src = event.target?.result as string
+        }
+        reader.readAsDataURL(file)
+    }
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -77,6 +119,7 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
                     socialMedia: formData.socialMedia || null,
                     companyName: isCustomOrWebApp ? (formData.companyName || null) : null,
                     website: isCustomOrWebApp ? (formData.website || null) : null,
+                    imageBase64: isCustomOrWebApp ? (formData.imageBase64 || null) : null,
                     templateName: templateName,
                     testimonialPermission: true // Always request permission for public reviews
                 })
@@ -84,7 +127,7 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
 
             if (res.ok) {
                 setSubmitStatus('success')
-                setFormData({ name: '', rating: 5, likes: '', email: '', socialMedia: '', companyName: '', website: '' })
+                setFormData({ name: '', rating: 5, likes: '', email: '', socialMedia: '', companyName: '', website: '', imageBase64: '' })
                 setTimeout(() => setIsFormOpen(false), 3000)
             } else {
                 setSubmitStatus('error')
@@ -211,30 +254,57 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
                                             </div>
                                         </div>
 
-                                        {/* Company & Website - Only for custom app / web app products */}
+                                        {/* Company & Website & Image Upload - Only for custom app / web app products */}
                                         {isCustomOrWebApp && (
-                                            <div className="grid md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-sm font-medium mb-1.5 text-gray-900">Nama Perusahaan</label>
-                                                    <input
-                                                        type="text"
-                                                        value={formData.companyName}
-                                                        onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
-                                                        className="w-full px-4 py-2.5 rounded-lg border bg-white border-gray-300 focus:border-orange-500 focus:ring-orange-500 focus:outline-none focus:ring-2 transition-all"
-                                                        placeholder="Nama perusahaan Anda"
-                                                    />
+                                            <>
+                                                <div className="grid md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-1.5 text-gray-900">Nama Perusahaan</label>
+                                                        <input
+                                                            type="text"
+                                                            value={formData.companyName}
+                                                            onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                                                            className="w-full px-4 py-2.5 rounded-lg border bg-white border-gray-300 focus:border-orange-500 focus:ring-orange-500 focus:outline-none focus:ring-2 transition-all"
+                                                            placeholder="Nama perusahaan Anda"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-1.5 text-gray-900">Website</label>
+                                                        <input
+                                                            type="url"
+                                                            value={formData.website}
+                                                            onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                                                            className="w-full px-4 py-2.5 rounded-lg border bg-white border-gray-300 focus:border-orange-500 focus:ring-orange-500 focus:outline-none focus:ring-2 transition-all"
+                                                            placeholder="https://website-anda.com"
+                                                        />
+                                                    </div>
                                                 </div>
+                                                
                                                 <div>
-                                                    <label className="block text-sm font-medium mb-1.5 text-gray-900">Website</label>
-                                                    <input
-                                                        type="url"
-                                                        value={formData.website}
-                                                        onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                                                        className="w-full px-4 py-2.5 rounded-lg border bg-white border-gray-300 focus:border-orange-500 focus:ring-orange-500 focus:outline-none focus:ring-2 transition-all"
-                                                        placeholder="https://website-anda.com"
-                                                    />
+                                                    <label className="block text-sm font-medium mb-1.5 text-gray-900">Upload Screenshot / Gambar (Opsional)</label>
+                                                    <div className="flex items-center gap-4">
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={handleImageUpload}
+                                                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100 transition-all cursor-pointer border border-gray-300 rounded-lg bg-white"
+                                                        />
+                                                        {formData.imageBase64 && (
+                                                            <div className="relative shrink-0">
+                                                                <img src={formData.imageBase64} alt="Preview" className="w-12 h-12 rounded-lg object-cover border border-gray-200" />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setFormData(prev => ({ ...prev, imageBase64: '' }))}
+                                                                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600 transition-colors"
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 mt-1.5">Gambar akan dikompres secara otomatis.</p>
                                                 </div>
-                                            </div>
+                                            </>
                                         )}
 
                                         {/* Social Media - All products */}
@@ -328,6 +398,16 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
                                     </div>
                                 </div>
                                 <p className="leading-relaxed text-gray-500">{review.likes}</p>
+                                {review.image_url && (
+                                    <div className="mt-3">
+                                        <img 
+                                            src={review.image_url} 
+                                            alt="Review attachment" 
+                                            className="rounded-xl border border-gray-200 max-h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
+                                            onClick={() => window.open(review.image_url, '_blank')} 
+                                        />
+                                    </div>
+                                )}
                             </div>
                         ))
                     ) : (
