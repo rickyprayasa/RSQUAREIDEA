@@ -481,9 +481,14 @@ export function ProductDetail({ template }: ProductDetailProps) {
                                     </div>
                                 )}
                                 {template.isCustomShowcase && template.clientName && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg">
-                                        <LordIcon src="https://cdn.lordicon.com/dxjqnldd.json" trigger="loop" delay={5000} size={18} colors={{ primary: '#9333ea' }} />
-                                        <span className="text-sm font-semibold text-purple-700">Requested by {template.clientName}</span>
+                                    <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-purple-50 to-fuchsia-50 border border-purple-200/60 shadow-sm hover:shadow-md hover:border-purple-300 transition-all rounded-xl cursor-default group">
+                                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-purple-100 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+                                            <LordIcon src="https://cdn.lordicon.com/fmasbomy.json" trigger="loop" delay={2000} size={24} colors={{ primary: '#9333ea', secondary: '#c026d3' }} />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase tracking-widest font-bold text-purple-400 leading-none mb-1">Custom Project</span>
+                                            <span className="text-sm font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-fuchsia-600 leading-none">by {template.clientName}</span>
+                                        </div>
                                     </div>
                                 )}
                             </div>

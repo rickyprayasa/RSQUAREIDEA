@@ -26,6 +26,7 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+    const [isDragging, setIsDragging] = useState(false)
 
     // Show company/website fields for custom app requests and web app category
     const isCustomOrWebApp = productType === 'webapp' || productType === 'fullstack' || isCustomShowcase
@@ -41,10 +42,7 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
         imageBase64: '',
     })
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
+    const processImageFile = (file: File) => {
         const reader = new FileReader()
         reader.onload = (event) => {
             const img = new Image()
@@ -79,6 +77,31 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
             img.src = event.target?.result as string
         }
         reader.readAsDataURL(file)
+    }
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        processImageFile(file)
+    }
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        setIsDragging(true)
+    }
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        setIsDragging(false)
+    }
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        setIsDragging(false)
+        const file = e.dataTransfer.files?.[0]
+        if (file && file.type.startsWith('image/')) {
+            processImageFile(file)
+        }
     }
 
     useEffect(() => {
@@ -282,27 +305,47 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
                                                 
                                                 <div>
                                                     <label className="block text-sm font-medium mb-1.5 text-gray-900">Upload Screenshot / Gambar (Opsional)</label>
-                                                    <div className="flex items-center gap-4">
+                                                    <div 
+                                                        className={`relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl transition-colors cursor-pointer ${isDragging ? 'border-orange-500 bg-orange-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}
+                                                        onDragOver={handleDragOver}
+                                                        onDragLeave={handleDragLeave}
+                                                        onDrop={handleDrop}
+                                                        onClick={() => document.getElementById('review-image-upload')?.click()}
+                                                    >
                                                         <input
+                                                            id="review-image-upload"
                                                             type="file"
                                                             accept="image/*"
                                                             onChange={handleImageUpload}
-                                                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100 transition-all cursor-pointer border border-gray-300 rounded-lg bg-white"
+                                                            className="hidden"
                                                         />
-                                                        {formData.imageBase64 && (
-                                                            <div className="relative shrink-0">
-                                                                <img src={formData.imageBase64} alt="Preview" className="w-12 h-12 rounded-lg object-cover border border-gray-200" />
+                                                        {!formData.imageBase64 ? (
+                                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                                <ClientLordIcon
+                                                                    src="https://cdn.lordicon.com/vixtkkbk.json"
+                                                                    trigger="hover"
+                                                                    colors="primary:#f97316"
+                                                                    style={{ width: '40px', height: '40px', marginBottom: '8px' }}
+                                                                />
+                                                                <p className="mb-1 text-sm text-gray-500"><span className="font-semibold text-orange-600">Klik untuk upload</span> atau drag and drop</p>
+                                                                <p className="text-xs text-gray-500">PNG, JPG atau GIF</p>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="relative w-full h-full p-2">
+                                                                <img src={formData.imageBase64} alt="Preview" className="w-full h-full object-contain rounded-lg" />
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => setFormData(prev => ({ ...prev, imageBase64: '' }))}
-                                                                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600 transition-colors"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation()
+                                                                        setFormData(prev => ({ ...prev, imageBase64: '' }))
+                                                                    }}
+                                                                    className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-colors"
                                                                 >
                                                                     ×
                                                                 </button>
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <p className="text-xs text-gray-500 mt-1.5">Gambar akan dikompres secara otomatis.</p>
                                                 </div>
                                             </>
                                         )}
