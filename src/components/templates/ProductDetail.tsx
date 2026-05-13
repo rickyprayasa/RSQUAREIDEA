@@ -50,6 +50,7 @@ interface ProductDetailProps {
         soldCount?: number
         isCustomShowcase?: boolean
         serviceType?: string
+        productType?: string
         webappUrl?: string
         clientName?: string | null
     }
