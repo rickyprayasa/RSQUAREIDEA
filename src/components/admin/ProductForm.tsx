@@ -696,6 +696,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                             Pilih tipe layanan untuk kategorisasi di halaman Jasa Kustom
                                         </p>
                                     </div>
+                                    </div>
                                 )}
                             </div>
 
