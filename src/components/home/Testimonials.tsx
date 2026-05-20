@@ -4,6 +4,7 @@ import { ClientLordIcon } from '@/components/ui/lordicon'
 
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { Star } from 'lucide-react'
 import Link from 'next/link'
 
 interface Testimonial {
@@ -16,6 +17,7 @@ interface Testimonial {
     likes: string
     productType?: string
     isCustomShowcase?: boolean
+    slug?: string | null
 }
 
 export function Testimonials() {
@@ -83,7 +85,7 @@ export function Testimonials() {
     }
 
     return (
-        <section className="py-16 md:py-20 relative">
+        <section id="testimonials" className="py-16 md:py-20 relative scroll-mt-20">
             <div className="container mx-auto px-6 relative z-10">
                 {/* Header */}
                 <motion.div
@@ -154,15 +156,15 @@ export function Testimonials() {
                             const isWebApp = testimonial.productType === 'webapp'
 
                             const theme = {
-                                cardBg: isCustom ? 'bg-slate-900 border-yellow-500/30' : isWebApp ? 'bg-blue-50/80 border-blue-200' : 'bg-white border-gray-200',
-                                quoteBg: isCustom ? 'bg-slate-800' : isWebApp ? 'bg-blue-100' : 'bg-orange-100',
-                                quoteIconColor: isCustom ? 'primary:#eab308' : isWebApp ? 'primary:#3b82f6' : 'primary:#f97316',
-                                textQuote: isCustom ? 'text-slate-300' : 'text-gray-700',
-                                textName: isCustom ? 'text-slate-100' : 'text-gray-900',
-                                textRole: isCustom ? 'text-slate-400' : 'text-gray-500',
-                                avatarBg: isCustom ? 'from-yellow-500 to-amber-600 shadow-yellow-900/50' : isWebApp ? 'from-blue-400 to-indigo-500 shadow-blue-200' : 'from-orange-400 to-amber-400 shadow-orange-200',
-                                starActive: isCustom ? 'primary:#eab308' : 'primary:#facc15',
-                                starInactive: isCustom ? 'primary:#334155' : 'primary:#e5e7eb',
+                                cardBg: isCustom ? 'bg-purple-50/80 border-purple-200' : isWebApp ? 'bg-blue-50/80 border-blue-200' : 'bg-white border-gray-200',
+                                quoteBg: isCustom ? 'bg-purple-100' : isWebApp ? 'bg-blue-100' : 'bg-orange-100',
+                                quoteIconColor: isCustom ? 'primary:#9333ea' : isWebApp ? 'primary:#3b82f6' : 'primary:#f97316',
+                                textQuote: 'text-gray-700',
+                                textName: 'text-gray-900',
+                                textRole: 'text-gray-500',
+                                avatarBg: isCustom ? 'from-purple-500 to-fuchsia-600 shadow-purple-200' : isWebApp ? 'from-blue-400 to-indigo-500 shadow-blue-200' : 'from-orange-400 to-amber-400 shadow-orange-200',
+                                starActive: isCustom ? 'text-fuchsia-500 fill-fuchsia-500' : 'text-yellow-400 fill-yellow-400',
+                                starInactive: 'text-gray-200 fill-gray-200',
                             }
 
                             return (
@@ -187,20 +189,17 @@ export function Testimonials() {
                                         </div>
 
                                         {/* Rating */}
-                                        <div className="flex gap-0.5 mb-4">
+                                        <div className="flex gap-1 mb-4">
                                             {[1, 2, 3, 4, 5].map((star) => (
-                                                <ClientLordIcon
+                                                <Star
                                                     key={star}
-                                                    src="https://cdn.lordicon.com/mdgrhyca.json"
-                                                    trigger="hover"
-                                                    colors={star <= testimonial.rating ? theme.starActive : theme.starInactive}
-                                                    style={{ width: '22px', height: '22px' }}
+                                                    className={`w-5 h-5 ${star <= testimonial.rating ? theme.starActive : theme.starInactive}`}
                                                 />
                                             ))}
                                         </div>
 
                                         {/* Content */}
-                                        <p className={`mb-5 leading-relaxed line-clamp-4 min-h-[96px] ${theme.textQuote}`}>
+                                        <p className={`mb-5 leading-relaxed line-clamp-4 min-h-[96px] whitespace-pre-line ${theme.textQuote}`}>
                                             &ldquo;{testimonial.likes}&rdquo;
                                         </p>
 
@@ -215,7 +214,17 @@ export function Testimonials() {
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         {testimonial.template_name && (
                                                             <span className={`text-xs ${theme.textRole}`}>
-                                                                {isCustom ? '★ Custom Showcase' : testimonial.template_name}
+                                                                {testimonial.slug ? (
+                                                                    <Link href={`/templates/${testimonial.slug}`} className="hover:underline flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                                                        {isCustom && <span className="text-purple-600 font-semibold border border-purple-200 bg-purple-100 px-1.5 py-0.5 rounded text-[10px]">CUSTOM APP</span>}
+                                                                        {testimonial.template_name}
+                                                                    </Link>
+                                                                ) : (
+                                                                    <span className="flex items-center gap-1">
+                                                                        {isCustom && <span className="text-purple-600 font-semibold border border-purple-200 bg-purple-100 px-1.5 py-0.5 rounded text-[10px]">CUSTOM APP</span>}
+                                                                        {testimonial.template_name}
+                                                                    </span>
+                                                                )}
                                                             </span>
                                                         )}
                                                         {testimonial.social_media && (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Star, ChevronDown, ChevronUp, Image as ImageIcon, X } from 'lucide-react'
 import { ClientLordIcon } from '@/components/ui/lordicon'
 
 interface Review {
@@ -175,12 +176,9 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1">
                                 {[1, 2, 3, 4, 5].map((star) => (
-                                    <ClientLordIcon
+                                    <Star
                                         key={star}
-                                        src="https://cdn.lordicon.com/mdgrhyca.json"
-                                        trigger="hover"
-                                        colors={star <= summary.averageRating ? "primary:#facc15" : "primary:#e5e7eb"}
-                                        style={{ width: '24px', height: '24px' }}
+                                        className={`w-6 h-6 ${star <= summary.averageRating ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"}`}
                                     />
                                 ))}
                             </div>
@@ -242,11 +240,8 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
                                                         onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
                                                         className="focus:outline-none transition-transform hover:scale-110"
                                                     >
-                                                        <ClientLordIcon
-                                                            src="https://cdn.lordicon.com/mdgrhyca.json"
-                                                            trigger="hover"
-                                                            colors={star <= formData.rating ? "primary:#facc15" : "primary:#e5e7eb"}
-                                                            style={{ width: '36px', height: '36px' }}
+                                                        <Star
+                                                            className={`w-9 h-9 ${star <= formData.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"}`}
                                                         />
                                                     </button>
                                                 ))}
@@ -431,16 +426,11 @@ export function ProductReview({ templateName, productType, isCustomShowcase }: P
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-gray-200">
-                                        <ClientLordIcon
-                                            src="https://cdn.lordicon.com/mdgrhyca.json"
-                                            trigger="hover"
-                                            colors="primary:#facc15"
-                                            style={{ width: '16px', height: '16px' }}
-                                        />
+                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                                         <span className="text-sm font-semibold text-gray-900">{review.rating}.0</span>
                                     </div>
                                 </div>
-                                <p className="leading-relaxed text-gray-500">{review.likes}</p>
+                                <p className="leading-relaxed text-gray-500 whitespace-pre-line">{review.likes}</p>
                                 {review.image_url && (
                                     <div className="mt-3">
                                         <img 

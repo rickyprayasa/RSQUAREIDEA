@@ -11,6 +11,7 @@ import { useCart } from '@/contexts/CartContext'
 import { LordIcon } from '@/components/ui/lordicon'
 import { trackProductClick, trackButtonClick } from '@/hooks/useAnalytics'
 import { ProductReview } from './ProductReview'
+
 interface ExternalLink {
     name: string
     url: string
@@ -467,13 +468,18 @@ export function ProductDetail({ template }: ProductDetailProps) {
 
                             {/* Rating & Sold Count */}
                             <div className="flex items-center gap-4 mb-6 flex-wrap">
-                                {(template.rating !== undefined && template.rating > 0) && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+                                <button 
+                                    onClick={() => {
+                                        document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors group"
+                                >
+                                    <div className="group-hover:scale-110 transition-transform">
                                         <LordIcon src="https://cdn.lordicon.com/mdgrhyca.json" trigger="loop" delay={5000} size={18} colors={{ primary: '#f59e0b' }} />
-                                        <span className="text-sm font-semibold text-amber-700">{template.rating.toFixed(1)}</span>
-                                        <span className="text-xs text-amber-600">({template.reviewCount} ulasan)</span>
                                     </div>
-                                )}
+                                    <span className="text-sm font-semibold text-amber-700">{(template.rating || 0).toFixed(1)}</span>
+                                    <span className="text-xs text-amber-600 underline-offset-2 group-hover:underline">({template.reviewCount || 0} ulasan)</span>
+                                </button>
                                 {(template.soldCount !== undefined && template.soldCount > 0) && (
                                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg">
                                         <LordIcon src="https://cdn.lordicon.com/medpcfcy.json" trigger="loop" delay={5000} size={18} colors={{ primary: '#16a34a' }} />
@@ -962,7 +968,7 @@ export function ProductDetail({ template }: ProductDetailProps) {
             )}
 
             {/* In-Page Review Section */}
-            <div className="container mx-auto px-6 relative z-10 max-w-5xl">
+            <div id="reviews" className="container mx-auto px-6 relative z-10 max-w-5xl scroll-mt-24">
                 <ProductReview 
                     templateName={template.title} 
                     productType={template.productType}

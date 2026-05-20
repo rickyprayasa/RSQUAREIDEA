@@ -25,7 +25,7 @@ export async function GET() {
         // Get product details for context (webapp, custom showcase)
         const { data: products } = await supabase
             .from('products')
-            .select('title, product_type, is_custom_showcase')
+            .select('title, slug, product_type, is_custom_showcase')
             .in('title', (feedback || []).map(f => f.template_name).filter(Boolean))
 
         const testimonials = feedback?.map(f => {
@@ -33,7 +33,8 @@ export async function GET() {
             return {
                 ...f,
                 productType: product?.product_type || 'template',
-                isCustomShowcase: product?.is_custom_showcase || false
+                isCustomShowcase: product?.is_custom_showcase || false,
+                slug: product?.slug || null
             }
         }) || []
 

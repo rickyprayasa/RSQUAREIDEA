@@ -13,6 +13,7 @@ import { CartButton } from '@/components/cart/CartButton'
 const navigation = [
     { name: 'Beranda', href: '/' },
     { name: 'Templates', href: '/templates' },
+    { name: 'Testimoni', href: '/#testimonials' },
     { name: 'Artikel', href: '/articles' },
     { name: 'Kontak', href: '/kontak' },
 ]
@@ -46,6 +47,14 @@ export function Header() {
                             <Link
                                 key={item.name}
                                 href={item.href}
+                                onClick={(e) => {
+                                    if (item.href.startsWith('/#') && pathname === '/') {
+                                        e.preventDefault();
+                                        const id = item.href.replace('/#', '');
+                                        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                                        window.history.pushState(null, '', item.href);
+                                    }
+                                }}
                                 className="relative px-4 py-2 text-sm font-medium transition-colors duration-200 group flex items-center gap-1.5"
                             >
                                 <span className={`relative z-10 ${isActive ? 'text-orange-600' : 'text-gray-600 group-hover:text-gray-900'}`}>
@@ -119,7 +128,17 @@ export function Header() {
                                                 ? 'bg-orange-50 text-orange-600'
                                                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 active:scale-[0.98]'
                                                 }`}
-                                            onClick={() => setMobileMenuOpen(false)}
+                                            onClick={(e) => {
+                                                setMobileMenuOpen(false);
+                                                if (item.href.startsWith('/#') && pathname === '/') {
+                                                    e.preventDefault();
+                                                    setTimeout(() => {
+                                                        const id = item.href.replace('/#', '');
+                                                        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                                                        window.history.pushState(null, '', item.href);
+                                                    }, 300); // Wait for menu to close
+                                                }
+                                            }}
                                         >
                                             {item.name}
                                         </Link>
