@@ -21,7 +21,7 @@ let cachedOpenRouterModels: { provider: string; id: string; name: string }[] | n
 let cacheTimestamp = 0
 const CACHE_TTL = 3600000 // 1 hour in ms
 
-async function getAvailableModels(): Promise<{ provider: string; id: string; name: string }[]> {
+export async function getAvailableModels(): Promise<{ provider: string; id: string; name: string }[]> {
     const models = [...BASE_GEMINI_MODELS]
     
     // Use cached models if valid

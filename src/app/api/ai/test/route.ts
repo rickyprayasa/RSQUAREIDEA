@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { google } from '@ai-sdk/google'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import { generateText } from 'ai'
+import { getAvailableModels } from '@/lib/ai-router'
 
 export const maxDuration = 30
 
@@ -43,20 +44,39 @@ export async function POST() {
 
         // Test OpenRouter
         if (openrouterKey) {
-            try {
-                const openrouterProvider = createOpenAICompatible({
-                    name: 'openrouter',
-                    apiKey: openrouterKey,
-                    baseURL: 'https://openrouter.ai/api/v1',
-                })
-                // Use a fast free model for testing
-                const res = await generateText({
-                    model: openrouterProvider('deepseek/deepseek-r1:free'),
-                    prompt: 'Balas dengan "OpenRouter berhasil terhubung!"',
-                })
-                results.push(`✅ OpenRouter (deepseek-r1:free) OK!`)
-            } catch (e: any) {
-                results.push(`❌ OpenRouter Gagal: ${e.message}`)
+            const availableModels = await getAvailableModels()
+            const orModels = availableModels.filter(m => m.provider === 'openrouter')
+            if (orModels.length === 0) {
+                orModels.push({ provider: 'openrouter', id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 (Free)' })
+            }
+
+            const openrouterProvider = createOpenAICompatible({
+                name: 'openrouter',
+                apiKey: openrouterKey,
+                baseURL: 'https://openrouter.ai/api/v1',
+            })
+
+            let success = false
+            let lastErrorMsg = ''
+
+            // Try models sequentially just like the real router
+            for (const m of orModels) {
+                try {
+                    const res = await generateText({
+                        model: openrouterProvider(m.id),
+                        prompt: 'Balas dengan "OpenRouter berhasil terhubung!"',
+                    })
+                    results.push(`✅ OpenRouter (${m.id}) OK!`)
+                    success = true
+                    break // Stop on first success
+                } catch (e: any) {
+                    lastErrorMsg = e.message
+                    console.warn(`[Test] OpenRouter model ${m.id} failed, trying next...`)
+                }
+            }
+
+            if (!success) {
+                results.push(`❌ OpenRouter Gagal: ${lastErrorMsg || 'Semua model gratis sedang limit/tidak tersedia.'}`)
             }
         }
 
