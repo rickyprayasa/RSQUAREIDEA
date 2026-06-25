@@ -643,7 +643,7 @@ export default function RequestsPage() {
                                             </label>
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    onClick={handleGenerateProposal}
+                                                    onClick={() => handleGenerateProposal()}
                                                     disabled={isGeneratingProposal}
                                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
                                                 >
@@ -651,7 +651,7 @@ export default function RequestsPage() {
                                                     {isGeneratingProposal ? 'Menyusun...' : 'Proposal Klien'}
                                                 </button>
                                                 <button
-                                                    onClick={handleGeneratePrd}
+                                                    onClick={() => handleGeneratePrd()}
                                                     disabled={isGeneratingPrd}
                                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
                                                 >
