@@ -265,7 +265,7 @@ export function Testimonials() {
                                     src="https://cdn.lordicon.com/vduvxizq.json"
                                     trigger="hover"
                                     colors="primary:#ea580c"
-                                    style={{ width: '24px', height: '24px' }}
+                                    style={{ width: '24px', height: '24px', transform: 'rotate(180deg)' }}
                                 />
                             </button>
                             <button
@@ -276,7 +276,7 @@ export function Testimonials() {
                                     src="https://cdn.lordicon.com/vduvxizq.json"
                                     trigger="hover"
                                     colors="primary:#ea580c"
-                                    style={{ width: '24px', height: '24px', transform: 'rotate(180deg)' }}
+                                    style={{ width: '24px', height: '24px' }}
                                 />
                             </button>
                         </>

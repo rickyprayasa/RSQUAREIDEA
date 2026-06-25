@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         const { data: settingsData } = await adminSupabase
             .from('site_settings')
             .select('key, value')
-            .in('key', ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_password', 'smtp_from_name', 'smtp_from_email'])
+            .in('key', ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_password', 'smtp_from_name', 'smtp_from_email', 'contact_email', 'contact_phone'])
 
         if (!settingsData || settingsData.length === 0) {
             return NextResponse.json({ error: 'Email settings not configured' }, { status: 500 })
@@ -52,6 +52,10 @@ export async function POST(request: NextRequest) {
         const smtpPassword = settings.smtp_password
         const fromName = settings.smtp_from_name || 'RSQUARE'
         const fromEmail = settings.smtp_from_email || smtpUser
+        
+        const contactEmail = settings.contact_email || 'info@rsquareidea.my.id'
+        const contactPhone = settings.contact_phone || '+62 856 5967 4001'
+        const cleanPhone = contactPhone.replace(/[^0-9]/g, '')
 
         if (!smtpHost || !smtpUser || !smtpPassword) {
             return NextResponse.json({ error: 'SMTP not configured' }, { status: 500 })
@@ -80,7 +84,10 @@ export async function POST(request: NextRequest) {
         }))
 
         // Generate PDF attachment
-        const pdfBuffer = generateInvoicePDF(invoice, paymentMethods)
+        const pdfBuffer = generateInvoicePDF(invoice, paymentMethods, {
+            phone: contactPhone,
+            email: contactEmail,
+        })
 
         // Build items table HTML
         const items = (invoice.items || []) as { name: string; qty: number; price: number }[]
@@ -280,8 +287,8 @@ export async function POST(request: NextRequest) {
                 <table cellpadding="0" cellspacing="0" style="width: 100%;">
                     <tr>
                         <td style="width: 50%; vertical-align: top;">
-                            <p style="color: #6b7280; font-size: 13px; margin: 0 0 4px;">📱 WhatsApp: <a href="https://wa.me/6285659674001" style="color: #f97316; text-decoration: none; font-weight: 500;">+62 856 5967 4001</a></p>
-                            <p style="color: #6b7280; font-size: 13px; margin: 0;">📧 Email: <a href="mailto:info@rsquareidea.my.id" style="color: #f97316; text-decoration: none; font-weight: 500;">info@rsquareidea.my.id</a></p>
+                            <p style="color: #6b7280; font-size: 13px; margin: 0 0 4px;">📱 WhatsApp: <a href="https://wa.me/${cleanPhone}" style="color: #f97316; text-decoration: none; font-weight: 500;">${contactPhone}</a></p>
+                            <p style="color: #6b7280; font-size: 13px; margin: 0;">📧 Email: <a href="mailto:${contactEmail}" style="color: #f97316; text-decoration: none; font-weight: 500;">${contactEmail}</a></p>
                         </td>
                         <td style="width: 50%; vertical-align: top; text-align: right;">
                             <p style="color: #6b7280; font-size: 13px; margin: 0 0 4px;">🌐 <a href="https://www.rsquareidea.my.id" style="color: #f97316; text-decoration: none; font-weight: 500;">www.rsquareidea.my.id</a></p>
@@ -304,7 +311,7 @@ export async function POST(request: NextRequest) {
 </body>
 </html>`
 
-        const textBody = `Invoice ${invoice.invoice_number}\n\nHalo ${invoice.customer_name},\n\nBerikut invoice untuk layanan yang Anda request.\n\nTotal: Rp ${(invoice.total || 0).toLocaleString('id-ID')}\nJatuh Tempo: ${dueDateStr}\n\nMetode Pembayaran:\nBank BCA\nNo. Rekening: 7690434543\nAtas Nama: Ricky Prayasa\n\nCustomer Care:\nWhatsApp: +62 856 5967 4001\nEmail: info@rsquareidea.my.id\n\nSalam,\nTim RSQUARE`
+        const textBody = `Invoice ${invoice.invoice_number}\n\nHalo ${invoice.customer_name},\n\nBerikut invoice untuk layanan yang Anda request.\n\nTotal: Rp ${(invoice.total || 0).toLocaleString('id-ID')}\nJatuh Tempo: ${dueDateStr}\n\nMetode Pembayaran:\nBank BCA\nNo. Rekening: 7690434543\nAtas Nama: Ricky Prayasa\n\nCustomer Care:\nWhatsApp: ${contactPhone}\nEmail: ${contactEmail}\n\nSalam,\nTim RSQUARE`
 
         await transporter.sendMail({
             from: `"${fromName}" <${fromEmail}>`,

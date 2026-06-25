@@ -43,7 +43,8 @@ import {
     Wand2,
     Brain,
     Key,
-    Zap
+    Zap,
+    Phone
 } from 'lucide-react'
 import jsQR from 'jsqr'
 
@@ -51,6 +52,7 @@ interface SettingsData {
     site_name: string
     site_description: string
     contact_email: string
+    contact_phone: string
     active_users_count: string
     external_sales_count: string
     voucher_code: string
@@ -105,6 +107,7 @@ const defaultSettings: SettingsData = {
     site_name: 'RSQUARE',
     site_description: 'Platform template Google Sheets premium',
     contact_email: 'hello@rsquareidea.my.id',
+    contact_phone: '+62 856 5967 4001',
     active_users_count: '0',
     external_sales_count: '0',
     voucher_code: '',
@@ -566,6 +569,15 @@ export default function SettingsPage() {
                                 value={settings.contact_email}
                                 onChange={(v) => handleChange('contact_email', v)}
                                 iconColor="text-green-500"
+                            />
+                            <InputField
+                                label="Nomor Kontak / WhatsApp"
+                                icon={Phone}
+                                type="text"
+                                value={settings.contact_phone || ''}
+                                onChange={(v) => handleChange('contact_phone', v)}
+                                iconColor="text-green-600"
+                                placeholder="+62 856 5967 4001"
                             />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                                 <InputField

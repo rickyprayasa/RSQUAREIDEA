@@ -158,7 +158,7 @@ export function VideoTutorials() {
                                             src="https://cdn.lordicon.com/zmkotitn.json"
                                             trigger="hover"
                                             colors="primary:#f97316"
-                                            style={{ width: '24px', height: '24px' }}
+                                            style={{ width: '24px', height: '24px', transform: 'rotate(180deg)' }}
                                         />
                                     </button>
                                 )}

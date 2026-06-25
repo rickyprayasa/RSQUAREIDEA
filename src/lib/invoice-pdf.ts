@@ -2,6 +2,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { RSQUARE_LOGO_BASE64 } from './logo-base64'
 import { RSQUARE_QR_BASE64 } from './qrcode-base64'
+import { parseInvoiceNotes } from './invoice-utils'
 
 interface InvoiceItem {
     name: string
@@ -80,7 +81,19 @@ function formatDate(dateStr: string | null): string {
 
 export { DEFAULT_TERMS }
 
-export function generateInvoicePDF(invoice: InvoiceData, paymentMethods: PaymentMethod[] = []): Buffer {
+export interface CompanySettings {
+    phone?: string
+    email?: string
+}
+
+export function generateInvoicePDF(
+    invoice: InvoiceData, 
+    paymentMethods: PaymentMethod[] = [],
+    companySettings?: CompanySettings
+): Buffer {
+    const phone = companySettings?.phone || COMPANY.phone
+    const email = companySettings?.email || COMPANY.email
+
     const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -142,7 +155,7 @@ export function generateInvoicePDF(invoice: InvoiceData, paymentMethods: Payment
     doc.text(COMPANY.address, margin, companyInfoY)
     doc.text(COMPANY.city, margin, companyInfoY + 4)
     doc.setTextColor(...COLORS.gray)
-    doc.text(`${COMPANY.phone} | ${COMPANY.email}`, margin, companyInfoY + 8)
+    doc.text(`${phone} | ${email}`, margin, companyInfoY + 8)
 
     // ============================================================
     // INVOICE TITLE & INFO (Right side)
@@ -279,6 +292,11 @@ export function generateInvoicePDF(invoice: InvoiceData, paymentMethods: Payment
     // ============================================================
     // TOTALS SECTION — right-aligned
     // ============================================================
+    const meta = parseInvoiceNotes(invoice.notes)
+    const invoiceType = meta.invoice_type || 'full'
+    const dpPercent = meta.dp_percent || 0
+    const dpAmount = meta.dp_amount || 0
+
     const totalsX = pageWidth - margin - 85
     const totalsW = 85
     const labelX = totalsX + 2
@@ -309,24 +327,72 @@ export function generateInvoicePDF(invoice: InvoiceData, paymentMethods: Payment
         doc.text('- ' + formatRupiah(invoice.discount), valueX, totalY, { align: 'right' })
     }
 
+    const fullProjectTotal = invoice.subtotal + invoice.tax_amount - (invoice.discount || 0)
+
+    if (invoiceType === 'dp') {
+        // Show Total Project
+        totalY += 6
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(...COLORS.dark)
+        doc.text('Total Proyek', labelX, totalY)
+        doc.text(formatRupiah(fullProjectTotal), valueX, totalY, { align: 'right' })
+
+        // Show DP
+        totalY += 6
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(...COLORS.gray)
+        doc.text(`DP (${dpPercent}%)`, labelX, totalY)
+        doc.setTextColor(...COLORS.dark)
+        doc.text(formatRupiah(dpAmount), valueX, totalY, { align: 'right' })
+
+        // Show Sisa Pelunasan
+        totalY += 6
+        doc.text('Sisa Pelunasan', labelX, totalY)
+        doc.text(formatRupiah(fullProjectTotal - dpAmount), valueX, totalY, { align: 'right' })
+    } else if (invoiceType === 'settlement') {
+        // Show Total Project
+        totalY += 6
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(...COLORS.dark)
+        doc.text('Total Proyek', labelX, totalY)
+        doc.text(formatRupiah(fullProjectTotal), valueX, totalY, { align: 'right' })
+
+        // Show DP Paid
+        totalY += 6
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(...COLORS.gray)
+        doc.text(`Uang Muka (DP) ${dpPercent}% (Lunas)`, labelX, totalY)
+        doc.setTextColor(239, 68, 68)
+        doc.text('- ' + formatRupiah(dpAmount), valueX, totalY, { align: 'right' })
+    }
+
     totalY += 6
 
     // Total decorative bar
     doc.setFillColor(...COLORS.primary)
     doc.rect(totalsX, totalY, totalsW, 10, 'F')
 
-    doc.setFontSize(11)
+    doc.setFontSize(10)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(...COLORS.white)
-    doc.text('TOTAL', labelX + 2, totalY + 7)
-    doc.text(formatRupiah(invoice.total), valueX - 2, totalY + 7, { align: 'right' })
+    
+    let totalLabel = 'TOTAL'
+    if (invoiceType === 'dp') {
+        totalLabel = 'TOTAL HARUS DIBAYAR (DP)'
+    } else if (invoiceType === 'settlement') {
+        totalLabel = 'TOTAL HARUS DIBAYAR (PELUNASAN)'
+    }
+    
+    doc.text(totalLabel, labelX + 2, totalY + 6.5)
+    doc.text(formatRupiah(invoice.total), valueX - 2, totalY + 6.5, { align: 'right' })
 
     y = totalY + 20
 
     // ============================================================
     // NOTES (if any)
     // ============================================================
-    if (invoice.notes) {
+    const displayNotes = meta.notes
+    if (displayNotes) {
         doc.setFontSize(9)
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(...COLORS.primaryDark)
@@ -335,7 +401,7 @@ export function generateInvoicePDF(invoice: InvoiceData, paymentMethods: Payment
         doc.setFontSize(8.5)
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(...COLORS.dark)
-        const noteLines = doc.splitTextToSize(invoice.notes, contentWidth)
+        const noteLines = doc.splitTextToSize(displayNotes, contentWidth)
         doc.text(noteLines, margin, y + 5)
         y += 5 + noteLines.length * 4.5 + 8
     }
@@ -419,8 +485,8 @@ export function generateInvoicePDF(invoice: InvoiceData, paymentMethods: Payment
     doc.setFontSize(8)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...COLORS.dark)
-    doc.text(`WA: ${COMPANY.phone}`, col3X, y + 5)
-    doc.text(`Email: ${COMPANY.email}`, col3X, y + 10)
+    doc.text(`WA: ${phone}`, col3X, y + 5)
+    doc.text(`Email: ${email}`, col3X, y + 10)
     doc.text(`Web: ${COMPANY.website}`, col3X, y + 15)
 
     // Real QR Code Image

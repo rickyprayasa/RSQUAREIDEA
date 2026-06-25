@@ -27,6 +27,7 @@ import {
     Eye
 } from 'lucide-react'
 import { DEFAULT_TERMS } from '@/lib/invoice-pdf'
+import { parseInvoiceNotes, serializeInvoiceNotes } from '@/lib/invoice-utils'
 
 interface InvoiceItem {
     name: string
@@ -103,6 +104,10 @@ export default function InvoicesPage() {
         due_date: '',
         notes: '',
         terms_conditions: DEFAULT_TERMS,
+        invoice_type: 'full' as 'full' | 'dp' | 'settlement',
+        dp_percent: 50,
+        dp_amount: 0,
+        parent_invoice_id: '',
     })
 
     // Deliver form state
@@ -160,17 +165,28 @@ export default function InvoicesPage() {
     const createInvoice = async () => {
         setActionLoading(true)
         try {
+            const serializedNotes = serializeInvoiceNotes({
+                notes: form.notes,
+                invoice_type: form.invoice_type,
+                dp_percent: form.dp_percent,
+                dp_amount: form.dp_amount,
+                parent_invoice_id: form.parent_invoice_id ? parseInt(form.parent_invoice_id) : null,
+            })
+
             const res = await fetch('/api/admin/request-invoices', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...form,
                     request_id: form.request_id ? parseInt(form.request_id) : null,
+                    notes: serializedNotes,
+                    invoice_type: form.invoice_type,
+                    dp_amount: form.dp_amount,
                 }),
             })
             const data = await res.json()
             if (res.ok) {
-                showToast('Invoice berhasil dibuat!', 'success')
+                showToast(form.id ? 'Invoice berhasil diperbarui!' : 'Invoice berhasil dibuat!', 'success')
                 setShowCreate(false)
                 setForm({
                     id: undefined,
@@ -186,13 +202,17 @@ export default function InvoicesPage() {
                     due_date: '',
                     notes: '',
                     terms_conditions: DEFAULT_TERMS,
+                    invoice_type: 'full',
+                    dp_percent: 50,
+                    dp_amount: 0,
+                    parent_invoice_id: '',
                 })
                 await fetchInvoices()
             } else {
-                showToast(data.error || 'Gagal membuat invoice', 'error')
+                showToast(data.error || 'Gagal menyimpan invoice', 'error')
             }
         } catch {
-            showToast('Gagal membuat invoice', 'error')
+            showToast('Gagal menyimpan invoice', 'error')
         } finally {
             setActionLoading(false)
         }
@@ -338,6 +358,43 @@ export default function InvoicesPage() {
     const calcTax = calcSubtotal * (form.tax_percent / 100)
     const calcTotal = calcSubtotal + calcTax - form.discount
 
+    // Filter matching DP invoices for settlement references
+    const matchingDpInvoices = invoices.filter(inv => {
+        if (inv.id === form.id) return false
+        const emailMatch = inv.customer_email && form.customer_email && inv.customer_email.toLowerCase() === form.customer_email.toLowerCase()
+        const requestMatch = inv.request_id && form.request_id && inv.request_id.toString() === form.request_id.toString()
+        const meta = parseInvoiceNotes(inv.notes)
+        return (emailMatch || requestMatch) && meta.invoice_type === 'dp'
+    })
+
+    // Sync DP Amount when calcTotal or dp_percent changes
+    useEffect(() => {
+        if (form.invoice_type === 'dp') {
+            const calculated = Math.round(calcTotal * (form.dp_percent / 100))
+            if (form.dp_amount !== calculated) {
+                setForm(prev => ({ ...prev, dp_amount: calculated }))
+            }
+        }
+    }, [calcTotal, form.invoice_type, form.dp_percent])
+
+    const handleDpAmountChange = (amount: number) => {
+        const percent = calcTotal > 0 ? parseFloat(((amount / calcTotal) * 100).toFixed(2)) : 0
+        setForm(prev => ({
+            ...prev,
+            dp_amount: amount,
+            dp_percent: percent
+        }))
+    }
+
+    const handleDpPercentChange = (percent: number) => {
+        const amount = Math.round(calcTotal * (percent / 100))
+        setForm(prev => ({
+            ...prev,
+            dp_percent: percent,
+            dp_amount: amount
+        }))
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -384,6 +441,10 @@ export default function InvoicesPage() {
                             due_date: '',
                             notes: '',
                             terms_conditions: DEFAULT_TERMS,
+                            invoice_type: 'full',
+                            dp_percent: 50,
+                            dp_amount: 0,
+                            parent_invoice_id: '',
                         })
                         setShowCreate(true)
                     }}
@@ -674,18 +735,22 @@ export default function InvoicesPage() {
                                 )}
 
                                 {/* Notes */}
-                                {selectedInvoice.notes && (
-                                    <div className="mb-6">
-                                        <p className="text-sm text-gray-500 mb-1">Catatan</p>
-                                        <p className="text-sm text-gray-700">{selectedInvoice.notes}</p>
-                                    </div>
-                                )}
+                                {(() => {
+                                    const meta = parseInvoiceNotes(selectedInvoice.notes)
+                                    return meta.notes ? (
+                                        <div className="mb-6">
+                                            <p className="text-sm text-gray-500 mb-1">Catatan</p>
+                                            <p className="text-sm text-gray-700">{meta.notes}</p>
+                                        </div>
+                                    ) : null
+                                })()}
 
                                 {/* PDF Preview */}
                                 {/* PDF Preview Make it a 2-column grid to squeeze Edit button */}
                                 <div className="pt-4 border-t flex gap-3">
                                     <button
                                         onClick={() => {
+                                            const meta = parseInvoiceNotes(selectedInvoice.notes)
                                             setForm({
                                                 id: selectedInvoice.id,
                                                 request_id: selectedInvoice.request_id?.toString() || '',
@@ -698,8 +763,12 @@ export default function InvoicesPage() {
                                                 tax_percent: selectedInvoice.tax_percent,
                                                 discount: selectedInvoice.discount,
                                                 due_date: selectedInvoice.due_date ? selectedInvoice.due_date.split('T')[0] : '',
-                                                notes: selectedInvoice.notes || '',
+                                                notes: meta.notes,
                                                 terms_conditions: selectedInvoice.terms_conditions || DEFAULT_TERMS,
+                                                invoice_type: meta.invoice_type || 'full',
+                                                dp_percent: meta.dp_percent || 50,
+                                                dp_amount: meta.dp_amount || 0,
+                                                parent_invoice_id: meta.parent_invoice_id?.toString() || '',
                                             })
                                             setSelectedInvoice(null)
                                             setShowCreate(true)
@@ -1040,6 +1109,90 @@ export default function InvoicesPage() {
                                         </div>
                                     </div>
 
+                                    {/* Termin Pembayaran */}
+                                    <div className="bg-orange-50/50 rounded-xl p-4 border border-orange-100 space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-800 mb-1">Termin Pembayaran</label>
+                                            <select
+                                                value={form.invoice_type}
+                                                onChange={e => setForm(prev => ({
+                                                    ...prev,
+                                                    invoice_type: e.target.value as 'full' | 'dp' | 'settlement',
+                                                    parent_invoice_id: '',
+                                                    dp_amount: 0,
+                                                    dp_percent: 50
+                                                }))}
+                                                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent font-medium text-gray-700"
+                                            >
+                                                <option value="full">Pembayaran Penuh (100%)</option>
+                                                <option value="dp">Uang Muka (DP)</option>
+                                                <option value="settlement">Pelunasan (Settlement)</option>
+                                            </select>
+                                        </div>
+
+                                        {form.invoice_type === 'dp' && (
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-600 mb-1">Persentase DP (%)</label>
+                                                    <input
+                                                        type="number"
+                                                        value={form.dp_percent}
+                                                        onChange={e => handleDpPercentChange(parseFloat(e.target.value) || 0)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent font-medium"
+                                                        min={1}
+                                                        max={99}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-600 mb-1">Nominal DP (Rp)</label>
+                                                    <input
+                                                        type="number"
+                                                        value={form.dp_amount}
+                                                        onChange={e => handleDpAmountChange(parseInt(e.target.value) || 0)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent font-medium text-right text-orange-700"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {form.invoice_type === 'settlement' && (
+                                            <div>
+                                                <label className="block text-xs font-semibold text-gray-600 mb-1">Pilih Invoice DP yang Sesuai *</label>
+                                                {matchingDpInvoices.length > 0 ? (
+                                                    <select
+                                                        value={form.parent_invoice_id}
+                                                        onChange={e => {
+                                                            const parentId = e.target.value
+                                                            const parent = matchingDpInvoices.find(inv => inv.id.toString() === parentId)
+                                                            const parentMeta = parent ? parseInvoiceNotes(parent.notes) : null
+                                                            setForm(prev => ({
+                                                                ...prev,
+                                                                parent_invoice_id: parentId,
+                                                                dp_amount: parent ? parent.total : 0,
+                                                                dp_percent: parentMeta ? (parentMeta.dp_percent || 50) : 50
+                                                            }))
+                                                        }}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent font-medium text-gray-700"
+                                                    >
+                                                        <option value="">-- Pilih Invoice DP --</option>
+                                                        {matchingDpInvoices.map(inv => {
+                                                            const meta = parseInvoiceNotes(inv.notes)
+                                                            return (
+                                                                <option key={inv.id} value={inv.id}>
+                                                                    {inv.invoice_number} ({inv.customer_name} - DP {meta.dp_percent}%: Rp {inv.total.toLocaleString('id-ID')})
+                                                                </option>
+                                                            )
+                                                        })}
+                                                    </select>
+                                                ) : (
+                                                    <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3 font-medium">
+                                                        Tidak ditemukan Invoice DP aktif yang cocok untuk pelanggan ini. Pastikan nama/email pelanggan atau Request ID sesuai dengan Invoice DP yang telah dibuat sebelumnya.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {/* Notes */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
@@ -1082,9 +1235,52 @@ export default function InvoicesPage() {
                                                 <span className="text-red-500">- Rp {form.discount.toLocaleString('id-ID')}</span>
                                             </div>
                                         )}
+                                        
+                                        {(form.invoice_type === 'dp' || form.invoice_type === 'settlement') && (
+                                            <div className="flex justify-between text-sm font-semibold border-t border-gray-200 pt-2">
+                                                <span className="text-gray-700">Total Proyek</span>
+                                                <span className="text-gray-900">Rp {calcTotal.toLocaleString('id-ID')}</span>
+                                            </div>
+                                        )}
+
+                                        {form.invoice_type === 'dp' && (
+                                            <>
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-500">Uang Muka (DP {form.dp_percent}%)</span>
+                                                    <span className="text-gray-900">Rp {form.dp_amount.toLocaleString('id-ID')}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-500">Sisa Pelunasan</span>
+                                                    <span className="text-gray-900">Rp {(calcTotal - form.dp_amount).toLocaleString('id-ID')}</span>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {form.invoice_type === 'settlement' && (
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Uang Muka (DP Sudah Dibayar)</span>
+                                                <span className="text-red-500">- Rp {form.dp_amount.toLocaleString('id-ID')}</span>
+                                            </div>
+                                        )}
+
                                         <div className="flex justify-between pt-2 border-t border-gray-200">
-                                            <span className="font-bold text-gray-900">Total</span>
-                                            <span className="font-bold text-orange-600">Rp {calcTotal.toLocaleString('id-ID')}</span>
+                                            <span className="font-bold text-gray-900 font-medium">
+                                                {form.invoice_type === 'dp'
+                                                    ? 'Total Bayar (DP)'
+                                                    : form.invoice_type === 'settlement'
+                                                    ? 'Total Bayar (Pelunasan)'
+                                                    : 'Total Bayar'}
+                                            </span>
+                                            <span className="font-bold text-orange-600 text-lg">
+                                                Rp {
+                                                    (form.invoice_type === 'dp'
+                                                        ? form.dp_amount
+                                                        : form.invoice_type === 'settlement'
+                                                        ? calcTotal - form.dp_amount
+                                                        : calcTotal
+                                                    ).toLocaleString('id-ID')
+                                                }
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

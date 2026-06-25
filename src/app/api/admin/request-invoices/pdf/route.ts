@@ -44,7 +44,19 @@ export async function GET(request: NextRequest) {
             accountName: p.account_name,
         }))
 
-        const pdfBuffer = generateInvoicePDF(invoice, paymentMethods)
+        // Fetch contact email and phone settings
+        const { data: settingsData } = await supabase
+            .from('site_settings')
+            .select('key, value')
+            .in('key', ['contact_email', 'contact_phone'])
+
+        const companySettings: Record<string, string> = {}
+        settingsData?.forEach(s => { if (s.value) companySettings[s.key] = s.value })
+
+        const pdfBuffer = generateInvoicePDF(invoice, paymentMethods, {
+            phone: companySettings.contact_phone,
+            email: companySettings.contact_email
+        })
 
         return new NextResponse(new Uint8Array(pdfBuffer), {
             status: 200,

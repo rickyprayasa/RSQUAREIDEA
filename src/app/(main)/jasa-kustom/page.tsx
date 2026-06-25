@@ -446,7 +446,7 @@ export default function JasaKustomPage() {
             </section>
 
             {/* Services Detail */}
-            <section id="services" ref={servicesRef} className="py-16 md:py-20 relative">
+            <section id="services" ref={servicesRef} className="py-8 md:py-12 relative">
                 <div className="container mx-auto px-6 relative z-10">
                     {/* Section Header */}
                     <motion.div
@@ -631,17 +631,19 @@ export default function JasaKustomPage() {
 
             {/* Portfolio Section */}
             {portfolio.length > 0 && (
-                <section ref={portfolioRef} className="py-16 md:py-20 relative">
+                <section ref={portfolioRef} className="py-8 md:py-12 relative">
                     <div className="container mx-auto px-6 relative z-10">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
-                            animate={portfolioInView ? { opacity: 1, y: 0 } : {}}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
                             className="text-center mb-12"
                         >
                             <h2 className="text-3xl md:text-4xl font-bold mb-4">
                                 <motion.span
                                     initial={{ opacity: 0, y: 20 }}
-                                    animate={portfolioInView ? { opacity: 1, y: 0 } : {}}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
                                     transition={{ duration: 0.6, delay: 0.2 }}
                                     className="inline-block text-gray-900"
                                 >
@@ -649,7 +651,8 @@ export default function JasaKustomPage() {
                                 </motion.span>
                                 <motion.span
                                     initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={portfolioInView ? { opacity: 1, scale: 1 } : {}}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
                                     transition={{ duration: 0.6, delay: 0.3, type: "spring" }}
                                     className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500"
                                 >
@@ -658,7 +661,8 @@ export default function JasaKustomPage() {
                             </h2>
                             <motion.p
                                 initial={{ opacity: 0, filter: "blur(5px)" }}
-                                animate={portfolioInView ? { opacity: 1, filter: "blur(0px)" } : {}}
+                                whileInView={{ opacity: 1, filter: "blur(0px)" }}
+                                viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.4 }}
                                 className="text-lg text-gray-600"
                             >
@@ -671,12 +675,12 @@ export default function JasaKustomPage() {
                                 <motion.div
                                     key={project.id}
                                     initial={{ opacity: 0, y: 30 }}
-                                    animate={portfolioInView ? { opacity: 1, y: 0 } : {}}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
                                     transition={{ delay: 0.2 + idx * 0.1 }}
-                                    whileHover={{ y: -5 }}
                                 >
                                     <Link href={`/templates/${project.slug}`}>
-                                        <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border-2 border-gray-200 hover:border-orange-300">
+                                        <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group border-2 border-gray-200 hover:border-orange-300">
                                             <div className="aspect-video bg-gray-100 relative overflow-hidden">
                                                 {project.image ? (
                                                     <Image 
@@ -728,7 +732,8 @@ export default function JasaKustomPage() {
                             <motion.div 
                                 className="text-center mt-10"
                                 initial={{ opacity: 0 }}
-                                animate={portfolioInView ? { opacity: 1 } : {}}
+                                whileInView={{ opacity: 1 }}
+                                viewport={{ once: true }}
                                 transition={{ delay: 0.8 }}
                             >
                                 <Link href="/templates?filter=custom">
@@ -748,7 +753,7 @@ export default function JasaKustomPage() {
             )}
 
             {/* Process Timeline - Modern Design */}
-            <section ref={processRef} className="py-16 md:py-24 relative overflow-hidden">
+            <section ref={processRef} className="py-8 md:py-12 relative overflow-hidden">
                 {/* Background decorations */}
                 <motion.div
                     className="absolute top-1/4 right-[5%] w-48 h-48 rounded-full bg-orange-100/40 blur-3xl"
@@ -971,17 +976,19 @@ export default function JasaKustomPage() {
 
             {/* Testimonials */}
             {testimonials.length > 0 && (
-                <section ref={testimonialsRef} className="py-16 md:py-20 relative">
+                <section ref={testimonialsRef} className="py-8 md:py-12 relative">
                     <div className="container mx-auto px-6 relative z-10">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
-                            animate={testimonialsInView ? { opacity: 1, y: 0 } : {}}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
                             className="text-center mb-12"
                         >
                             <h2 className="text-3xl md:text-4xl font-bold mb-4">
                                 <motion.span
                                     initial={{ opacity: 0, y: 20 }}
-                                    animate={testimonialsInView ? { opacity: 1, y: 0 } : {}}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
                                     transition={{ duration: 0.6, delay: 0.2 }}
                                     className="inline-block text-gray-900"
                                 >
@@ -989,7 +996,8 @@ export default function JasaKustomPage() {
                                 </motion.span>
                                 <motion.span
                                     initial={{ opacity: 0, scale: 0.8, rotateX: 90 }}
-                                    animate={testimonialsInView ? { opacity: 1, scale: 1, rotateX: 0 } : {}}
+                                    whileInView={{ opacity: 1, scale: 1, rotateX: 0 }}
+                                    viewport={{ once: true }}
                                     transition={{ duration: 0.8, delay: 0.3, type: "spring" }}
                                     className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500"
                                 >
@@ -997,7 +1005,8 @@ export default function JasaKustomPage() {
                                 </motion.span>
                                 <motion.span
                                     initial={{ opacity: 0, x: 20 }}
-                                    animate={testimonialsInView ? { opacity: 1, x: 0 } : {}}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
                                     transition={{ duration: 0.6, delay: 0.4 }}
                                     className="inline-block text-gray-900"
                                 >
@@ -1006,7 +1015,8 @@ export default function JasaKustomPage() {
                             </h2>
                             <motion.p
                                 initial={{ opacity: 0, filter: "blur(5px)" }}
-                                animate={testimonialsInView ? { opacity: 1, filter: "blur(0px)" } : {}}
+                                whileInView={{ opacity: 1, filter: "blur(0px)" }}
+                                viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.5 }}
                                 className="text-lg text-gray-600"
                             >
@@ -1019,39 +1029,42 @@ export default function JasaKustomPage() {
                                 <motion.div
                                     key={testimonial.id}
                                     initial={{ opacity: 0, y: 30, rotateY: -15 }}
-                                    animate={testimonialsInView ? { opacity: 1, y: 0, rotateY: 0 } : {}}
+                                    whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
+                                    viewport={{ once: true }}
                                     transition={{ delay: 0.2 + idx * 0.15, type: "spring" }}
-                                    whileHover={{ y: -5, scale: 1.02 }}
-                                    className="bg-white p-6 rounded-2xl shadow-md border-2 border-gray-200 hover:shadow-xl hover:border-orange-200 transition-all"
+                                    className="h-full"
                                 >
-                                    <div className="flex items-center gap-1 mb-4">
-                                        {[...Array(5)].map((_, i) => (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ opacity: 0, scale: 0 }}
-                                                animate={testimonialsInView ? { opacity: 1, scale: 1 } : {}}
-                                                transition={{ delay: 0.5 + idx * 0.1 + i * 0.05 }}
-                                            >
-                                                <Star 
-                                                    className={`w-4 h-4 ${i < testimonial.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200'}`} 
-                                                />
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                    <p className="text-gray-600 mb-4 line-clamp-4">&quot;{testimonial.likes}&quot;</p>
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="font-bold text-gray-900">{testimonial.name}</p>
-                                            {testimonial.templateSlug ? (
-                                                <Link 
-                                                    href={`/templates/${testimonial.templateSlug}`}
-                                                    className="text-sm text-orange-600 hover:text-orange-700"
+                                    <div className="bg-white p-6 rounded-2xl shadow-md border-2 border-gray-200 hover:shadow-xl hover:border-orange-200 hover:-translate-y-1.5 hover:scale-[1.02] transition-all duration-300 h-full">
+                                        <div className="flex items-center gap-1 mb-4">
+                                            {[...Array(5)].map((_, i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    initial={{ opacity: 0, scale: 0 }}
+                                                    whileInView={{ opacity: 1, scale: 1 }}
+                                                    viewport={{ once: true }}
+                                                    transition={{ delay: 0.5 + idx * 0.1 + i * 0.05 }}
                                                 >
-                                                    {testimonial.templateName}
-                                                </Link>
-                                            ) : (
-                                                <p className="text-sm text-gray-500">{testimonial.templateName}</p>
-                                            )}
+                                                    <Star 
+                                                        className={`w-4 h-4 ${i < testimonial.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200'}`} 
+                                                    />
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                        <p className="text-gray-600 mb-4 line-clamp-4">&quot;{testimonial.likes}&quot;</p>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="font-bold text-gray-900">{testimonial.name}</p>
+                                                {testimonial.templateSlug ? (
+                                                    <Link 
+                                                        href={`/templates/${testimonial.templateSlug}`}
+                                                        className="text-sm text-orange-600 hover:text-orange-700"
+                                                    >
+                                                        {testimonial.templateName}
+                                                    </Link>
+                                                ) : (
+                                                    <p className="text-sm text-gray-500">{testimonial.templateName}</p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -1064,7 +1077,7 @@ export default function JasaKustomPage() {
 
 
             {/* FAQ */}
-            <section ref={faqRef} className="py-16 md:py-20 relative">
+            <section ref={faqRef} className="py-8 md:py-12 relative">
                 <div className="container mx-auto px-6 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -1141,7 +1154,7 @@ export default function JasaKustomPage() {
             </section>
 
             {/* Request Form */}
-            <section id="request-form" ref={formRef} className="py-16 md:py-20 relative overflow-hidden">
+            <section id="request-form" ref={formRef} className="py-8 md:py-12 relative overflow-hidden">
                 <motion.div
                     className="absolute top-1/4 right-[5%] w-48 h-48 rounded-full bg-orange-100/30 blur-3xl"
                     animate={{ scale: [1, 1.2, 1] }}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { parseInvoiceNotes } from '@/lib/invoice-utils'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -73,7 +74,19 @@ export async function POST(request: NextRequest) {
         const taxPercent = data.tax_percent || 0
         const taxAmount = subtotal * (taxPercent / 100)
         const discount = data.discount || 0
-        const total = subtotal + taxAmount - discount
+        
+        let total = subtotal + taxAmount - discount
+
+        // Handle DP or Settlement calculation
+        const notesMeta = parseInvoiceNotes(data.notes)
+        const invoiceType = data.invoice_type || notesMeta.invoice_type || 'full'
+        const dpAmount = data.dp_amount !== undefined ? data.dp_amount : notesMeta.dp_amount
+
+        if (invoiceType === 'dp' && dpAmount !== undefined) {
+            total = dpAmount
+        } else if (invoiceType === 'settlement' && dpAmount !== undefined) {
+            total = total - dpAmount
+        }
 
         let invoiceResult;
 
@@ -160,17 +173,42 @@ export async function PATCH(request: NextRequest) {
             return NextResponse.json({ error: 'Invoice ID required' }, { status: 400 })
         }
 
-        // Recalculate totals if items changed
-        if (updateFields.items) {
-            const items = updateFields.items
-            updateFields.subtotal = items.reduce((sum: number, item: { qty: number; price: number }) =>
-                sum + (item.qty * item.price), 0)
-            if (updateFields.tax_percent !== undefined) {
-                updateFields.tax_amount = updateFields.subtotal * (updateFields.tax_percent / 100)
+        // Recalculate totals if items, tax_percent, discount, or notes/type/dp changed
+        if (updateFields.items || updateFields.tax_percent !== undefined || updateFields.discount !== undefined || updateFields.notes !== undefined) {
+            // Fetch current invoice state to get current values for missing fields
+            const { data: currentInvoice } = await supabase
+                .from('request_invoices')
+                .select('*')
+                .eq('id', id)
+                .single()
+
+            if (currentInvoice) {
+                const items = updateFields.items || currentInvoice.items || []
+                const subtotal = items.reduce((sum: number, item: { qty: number; price: number }) =>
+                    sum + (item.qty * item.price), 0)
+                
+                const taxPercent = updateFields.tax_percent !== undefined ? updateFields.tax_percent : (currentInvoice.tax_percent || 0)
+                const taxAmount = subtotal * (taxPercent / 100)
+                const discount = updateFields.discount !== undefined ? updateFields.discount : (currentInvoice.discount || 0)
+                
+                let total = subtotal + taxAmount - discount
+
+                // Handle DP or Settlement calculation
+                const notesField = updateFields.notes !== undefined ? updateFields.notes : currentInvoice.notes
+                const notesMeta = parseInvoiceNotes(notesField)
+                const invoiceType = updateFields.invoice_type || notesMeta.invoice_type || 'full'
+                const dpAmount = updateFields.dp_amount !== undefined ? updateFields.dp_amount : notesMeta.dp_amount
+
+                if (invoiceType === 'dp' && dpAmount !== undefined) {
+                    total = dpAmount
+                } else if (invoiceType === 'settlement' && dpAmount !== undefined) {
+                    total = total - dpAmount
+                }
+
+                updateFields.subtotal = subtotal
+                updateFields.tax_amount = taxAmount
+                updateFields.total = total
             }
-            const taxAmount = updateFields.tax_amount || 0
-            const discount = updateFields.discount || 0
-            updateFields.total = updateFields.subtotal + taxAmount - discount
         }
 
         // Handle status transitions
