@@ -22,7 +22,9 @@ import {
     Package,
     Send,
     ExternalLink,
-    Download
+    Download,
+    Sparkles,
+    Copy
 } from 'lucide-react'
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal'
 
@@ -37,6 +39,8 @@ interface TemplateRequest {
     deadline: string | null
     status: 'pending' | 'in_progress' | 'completed' | 'rejected'
     admin_notes: string | null
+    service_type?: string | null
+    company?: string | null
     created_at: string
 }
 
@@ -70,6 +74,11 @@ export default function RequestsPage() {
     const [deliverForm, setDeliverForm] = useState({ delivery_url: '', delivery_file_url: '', message: '' })
     const [deliverLoading, setDeliverLoading] = useState(false)
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' })
+
+    // PRD State
+    const [prdContent, setPrdContent] = useState<string>('')
+    const [isGeneratingPrd, setIsGeneratingPrd] = useState(false)
+    const [showPrdModal, setShowPrdModal] = useState(false)
 
     useEffect(() => {
         fetchRequests()
@@ -195,6 +204,57 @@ export default function RequestsPage() {
         } finally {
             setDeliverLoading(false)
         }
+    }
+
+    const handleGeneratePrd = async () => {
+        if (!selectedRequest) return
+        setIsGeneratingPrd(true)
+        setPrdContent('')
+        
+        try {
+            const res = await fetch('/api/ai/generate-prd', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    template_name: selectedRequest.template_name,
+                    description: selectedRequest.description,
+                    budget: selectedRequest.budget,
+                    deadline: selectedRequest.deadline,
+                    service_type: selectedRequest.service_type
+                })
+            })
+            
+            const data = await res.json()
+            if (data.success && data.prd) {
+                setPrdContent(data.prd)
+                setShowPrdModal(true)
+                showToast('PRD berhasil dibuat dengan AI!', 'success')
+            } else {
+                showToast(data.error || 'Gagal membuat PRD', 'error')
+            }
+        } catch (error) {
+            showToast('Terjadi kesalahan saat memanggil AI', 'error')
+        } finally {
+            setIsGeneratingPrd(false)
+        }
+    }
+
+    const handleCopyPrd = () => {
+        if (!prdContent) return
+        navigator.clipboard.writeText(prdContent)
+        showToast('PRD disalin ke clipboard', 'success')
+    }
+
+    const handleDownloadPrd = () => {
+        if (!prdContent || !selectedRequest) return
+        const element = document.createElement('a')
+        const file = new Blob([prdContent], { type: 'text/markdown' })
+        element.href = URL.createObjectURL(file)
+        const fileName = `PRD_${selectedRequest.template_name.replace(/\\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.md`
+        element.download = fileName
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
     }
 
     const filteredRequests = requests.filter(r => filter === 'all' || r.status === filter)
@@ -361,6 +421,17 @@ export default function RequestsPage() {
                                 <div>
                                     <label className="text-sm text-gray-500">Template yang Diminta</label>
                                     <p className="text-lg font-bold text-orange-600">{selectedRequest.template_name}</p>
+                                    {selectedRequest.service_type && (
+                                        <p className="text-sm font-medium text-gray-600 mt-1">
+                                            Jenis Aplikasi: <span className="text-indigo-600 font-semibold">{
+                                                selectedRequest.service_type === 'sheets' ? 'Google Sheets' :
+                                                selectedRequest.service_type === 'webapp' ? 'Google Web App' :
+                                                selectedRequest.service_type === 'fullstack' ? 'Full Stack Dev' :
+                                                selectedRequest.service_type === 'consultation' ? 'Konsultasi' :
+                                                selectedRequest.service_type
+                                            }</span>
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
@@ -388,12 +459,33 @@ export default function RequestsPage() {
 
                                 {selectedRequest.description && (
                                     <div>
-                                        <label className="text-sm text-gray-500 flex items-center gap-1">
-                                            <FileText className="h-4 w-4" /> Deskripsi
-                                        </label>
-                                        <p className="mt-1 p-4 bg-gray-50 rounded-xl text-gray-700 whitespace-pre-wrap">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="text-sm text-gray-500 flex items-center gap-1">
+                                                <FileText className="h-4 w-4" /> Deskripsi
+                                            </label>
+                                            <button
+                                                onClick={handleGeneratePrd}
+                                                disabled={isGeneratingPrd}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                                            >
+                                                {isGeneratingPrd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                                                {isGeneratingPrd ? 'AI sedang menyusun...' : 'Generate PRD dengan AI'}
+                                            </button>
+                                        </div>
+                                        <p className="p-4 bg-gray-50 rounded-xl text-gray-700 whitespace-pre-wrap">
                                             {selectedRequest.description}
                                         </p>
+
+                                        {prdContent && !showPrdModal && (
+                                            <div className="mt-3 flex justify-end">
+                                                <button
+                                                    onClick={() => setShowPrdModal(true)}
+                                                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
+                                                >
+                                                    <Sparkles className="h-4 w-4" /> Buka PRD Markdown
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -568,6 +660,58 @@ export default function RequestsPage() {
                 itemName={deleteModal.request?.template_name}
                 isDeleting={deletingId !== null}
             />
+
+            {/* Fullscreen PRD Preview Modal */}
+            {showPrdModal && prdContent && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 sm:p-6">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="bg-white rounded-2xl w-full max-w-5xl h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-gray-200"
+                    >
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <Sparkles className="h-5 w-5 text-indigo-500" />
+                                    Hasil Generate PRD
+                                </h2>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    {selectedRequest?.template_name}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={handleCopyPrd}
+                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-sm font-medium transition-colors"
+                                >
+                                    <Copy className="h-4 w-4" /> Salin Teks
+                                </button>
+                                <button
+                                    onClick={handleDownloadPrd}
+                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
+                                >
+                                    <Download className="h-4 w-4" /> Download .md
+                                </button>
+                                <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                                <button
+                                    onClick={() => setShowPrdModal(false)}
+                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                                >
+                                    <X className="h-6 w-6" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 p-0 bg-gray-50 overflow-hidden">
+                            <textarea
+                                readOnly
+                                value={prdContent}
+                                className="w-full h-full p-6 text-[14px] leading-relaxed font-mono text-gray-800 bg-transparent resize-none focus:outline-none"
+                            />
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     )
 }

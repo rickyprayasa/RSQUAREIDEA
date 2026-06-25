@@ -117,7 +117,8 @@ export async function generateWithFallback(options: {
     prompt?: string,
     messages?: CoreMessage[],
     maxTokens?: number,
-    temperature?: number
+    temperature?: number,
+    tier?: 'standard' | 'high'
 }): Promise<GenerateResult> {
     const { googleKey, openrouterKey } = await getApiKeys()
     
@@ -132,7 +133,17 @@ export async function generateWithFallback(options: {
 
     let attempts = 0
     let lastError: any = null
-    const fallbackModels = await getAvailableModels()
+    let fallbackModels = await getAvailableModels()
+
+    // If high tier is requested, prepend Pro/Reasoning models
+    if (options.tier === 'high') {
+        const highTierModels = [
+            { provider: 'google', id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro' },
+            { provider: 'google', id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
+            { provider: 'google', id: 'gemini-2.0-pro-exp-02-05', name: 'Gemini 2.0 Pro Exp' },
+        ]
+        fallbackModels = [...highTierModels, ...fallbackModels]
+    }
 
     for (const modelConfig of fallbackModels) {
         // Skip if API key for provider is missing

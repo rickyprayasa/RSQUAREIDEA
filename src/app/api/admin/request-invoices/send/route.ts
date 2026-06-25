@@ -105,6 +105,41 @@ export async function POST(request: NextRequest) {
         const dueDateStr = invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'
         const createdDateStr = new Date(invoice.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
 
+        const meta = parseInvoiceNotes(invoice.notes)
+        const isDP = meta.invoice_type === 'dp'
+        const isSettlement = meta.invoice_type === 'settlement'
+        const projectTotal = invoice.subtotal || 0
+
+        let totalHtml = `
+            <tr>
+                <td style="padding: 6px 0; color: #111827; font-size: 16px; font-weight: 700;">Total</td>
+                <td style="padding: 6px 0; text-align: right; color: #ea580c; font-size: 18px; font-weight: 800;">Rp ${(invoice.total || 0).toLocaleString('id-ID')}</td>
+            </tr>
+        `
+        
+        if (isDP || isSettlement) {
+            totalHtml = `
+            <tr>
+                <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">Total Proyek</td>
+                <td style="padding: 6px 0; text-align: right; color: #111827; font-size: 14px;">Rp ${projectTotal.toLocaleString('id-ID')}</td>
+            </tr>
+            <tr>
+                <td style="padding: 6px 0; color: #6b7280; font-size: 14px;">Uang Muka (DP) ${isSettlement ? '(Lunas)' : ''}</td>
+                <td style="padding: 6px 0; text-align: right; color: #111827; font-size: 14px;">${isSettlement ? '-' : ''}Rp ${(meta.dp_amount || 0).toLocaleString('id-ID')}</td>
+            </tr>
+            ${isDP ? `
+            <tr>
+                <td style="padding: 6px 0; color: #ea580c; font-size: 14px; font-weight: 600;">Sisa Pelunasan</td>
+                <td style="padding: 6px 0; text-align: right; color: #ea580c; font-size: 14px; font-weight: 700;">Rp ${(projectTotal - (meta.dp_amount || 0)).toLocaleString('id-ID')}</td>
+            </tr>
+            ` : ''}
+            <tr>
+                <td style="padding: 12px 0 6px; border-top: 1px dashed #e5e7eb; color: #111827; font-size: 16px; font-weight: 700; margin-top: 6px;">Total Harus Dibayar ${isDP ? '(DP)' : '(Pelunasan)'}</td>
+                <td style="padding: 12px 0 6px; border-top: 1px dashed #e5e7eb; text-align: right; color: #ea580c; font-size: 18px; font-weight: 800; margin-top: 6px;">Rp ${(invoice.total || 0).toLocaleString('id-ID')}</td>
+            </tr>
+            `
+        }
+
         const htmlBody = `
 <!DOCTYPE html>
 <html>

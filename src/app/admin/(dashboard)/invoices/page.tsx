@@ -678,28 +678,42 @@ export default function InvoicesPage() {
                                 </div>
 
                                 {/* Totals */}
-                                <div className="border-t border-gray-200 pt-4 mb-6 space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Subtotal</span>
-                                        <span className="text-gray-900">Rp {(selectedInvoice.subtotal || 0).toLocaleString('id-ID')}</span>
-                                    </div>
-                                    {selectedInvoice.tax_percent > 0 && (
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500">Pajak ({selectedInvoice.tax_percent}%)</span>
-                                            <span className="text-gray-900">Rp {(selectedInvoice.tax_amount || 0).toLocaleString('id-ID')}</span>
+                                {(() => {
+                                    const meta = parseInvoiceNotes(selectedInvoice.notes)
+                                    const isDp = meta.invoice_type === 'dp'
+                                    const remainingBalance = isDp ? (selectedInvoice.subtotal - selectedInvoice.total) : 0
+                                    
+                                    return (
+                                        <div className="border-t border-gray-200 pt-4 mb-6 space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-500">Subtotal</span>
+                                                <span className="text-gray-900">Rp {(selectedInvoice.subtotal || 0).toLocaleString('id-ID')}</span>
+                                            </div>
+                                            {selectedInvoice.tax_percent > 0 && (
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-500">Pajak ({selectedInvoice.tax_percent}%)</span>
+                                                    <span className="text-gray-900">Rp {(selectedInvoice.tax_amount || 0).toLocaleString('id-ID')}</span>
+                                                </div>
+                                            )}
+                                            {selectedInvoice.discount > 0 && (
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-500">Diskon</span>
+                                                    <span className="text-red-500">- Rp {(selectedInvoice.discount || 0).toLocaleString('id-ID')}</span>
+                                                </div>
+                                            )}
+                                            <div className="flex justify-between pt-2 border-t border-gray-200">
+                                                <span className="text-lg font-bold text-gray-900">Total Tagihan {isDp ? '(DP)' : ''}</span>
+                                                <span className="text-lg font-bold text-orange-600">Rp {(selectedInvoice.total || 0).toLocaleString('id-ID')}</span>
+                                            </div>
+                                            {isDp && (
+                                                <div className="flex justify-between pt-1 text-sm bg-orange-50/50 -mx-6 px-6 py-2 border-y border-orange-100 mt-2">
+                                                    <span className="text-orange-700 font-semibold">Sisa Pembayaran (Belum Lunas)</span>
+                                                    <span className="text-orange-700 font-bold">Rp {(remainingBalance).toLocaleString('id-ID')}</span>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                    {selectedInvoice.discount > 0 && (
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500">Diskon</span>
-                                            <span className="text-red-500">- Rp {(selectedInvoice.discount || 0).toLocaleString('id-ID')}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-between pt-2 border-t border-gray-200">
-                                        <span className="text-lg font-bold text-gray-900">Total</span>
-                                        <span className="text-lg font-bold text-orange-600">Rp {(selectedInvoice.total || 0).toLocaleString('id-ID')}</span>
-                                    </div>
-                                </div>
+                                    )
+                                })()}
 
                                 {/* Due date & delivery info */}
                                 <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
