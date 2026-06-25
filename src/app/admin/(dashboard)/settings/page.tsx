@@ -99,8 +99,7 @@ interface SettingsData {
     duitku_api_key: string
     duitku_production: string
     // AI settings
-    ai_provider: string
-    ai_model: string
+    openrouter_api_key: string
 }
 
 const defaultSettings: SettingsData = {
@@ -169,8 +168,7 @@ Tim RSQUARE`,
     duitku_api_key: '',
     duitku_production: 'false',
     // AI settings
-    ai_provider: 'google',
-    ai_model: 'gemini-1.5-flash',
+    openrouter_api_key: '',
 }
 
 const tabs = [
@@ -1810,88 +1808,29 @@ function AiSettings({ settings, handleChange }: { settings: SettingsData, handle
                     <Wand2 className="h-5 w-5 text-violet-500 flex-shrink-0 mt-0.5" />
                     <div className="text-sm text-violet-800">
                         <p className="font-medium mb-1">Tentang Fitur AI</p>
-                        <p className="text-violet-600">AI digunakan untuk auto-generate deskripsi dan fitur produk dari file markdown yang diupload. Pilih model Google Gemini yang sesuai dengan kebutuhan Anda.</p>
+                        <p className="text-violet-600">AI digunakan untuk auto-generate deskripsi dan fitur produk dari file markdown yang diupload. Sistem menggunakan <strong className="font-semibold">AI Router Otomatis</strong> yang akan mencoba model gratis terbaik (Google Gemini & OpenRouter) secara berurutan. Jika satu model terkena limit (429), sistem otomatis pindah ke model gratis berikutnya.</p>
                     </div>
                 </div>
             </div>
 
-            {/* Provider */}
+            {/* OpenRouter Configuration */}
             <div>
                 <label className="text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2 flex items-center gap-1.5 md:gap-2">
-                    <Zap className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500" />
-                    Provider AI
+                    <Key className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500" />
+                    OpenRouter API Key (Opsional)
                 </label>
-                <select
-                    value={settings.ai_provider}
-                    onChange={(e) => handleChange('ai_provider', e.target.value)}
-                    className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
-                >
-                    <option value="google">Google AI Studio (Gemini)</option>
-                </select>
-            </div>
-
-            {/* Model Selector */}
-            <div>
-                <label className="text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2 flex items-center gap-1.5 md:gap-2">
-                    <Brain className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500" />
-                    Model AI
-                </label>
-                <select
-                    value={settings.ai_model}
-                    onChange={(e) => handleChange('ai_model', e.target.value)}
-                    className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
-                >
-                    <optgroup label="Gemini 2.5 (Terbaru)">
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash — Cepat &amp; powerful ⭐</option>
-                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite — Ringan &amp; hemat kuota</option>
-                        <option value="gemini-2.5-pro">Gemini 2.5 Pro — Terbaik, kuota terbatas</option>
-                    </optgroup>
-                    <optgroup label="Gemini 2.0 (Stabil)">
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash — Stabil &amp; cepat</option>
-                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite — Paling ringan</option>
-                    </optgroup>
-                </select>
-                <p className="text-xs text-gray-500 mt-1.5">Rekomendasi: <strong>Gemini 2.5 Flash</strong> untuk performa terbaik di free tier</p>
-            </div>
-
-            {/* Model Info Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {[
-                    { model: 'gemini-2.5-flash', name: '2.5 Flash ⭐', speed: 'Cepat', quality: 'Tinggi', free: '~15 RPM' },
-                    { model: 'gemini-2.5-flash-lite', name: '2.5 Flash Lite', speed: 'Sangat Cepat', quality: 'Sedang', free: '~30 RPM' },
-                    { model: 'gemini-2.5-pro', name: '2.5 Pro', speed: 'Sedang', quality: 'Terbaik', free: '~5 RPM' },
-                    { model: 'gemini-2.0-flash', name: '2.0 Flash', speed: 'Cepat', quality: 'Baik', free: '~15 RPM' },
-                ].map((m) => {
-                    const isActive = settings.ai_model === m.model
-                    return (
-                        <button
-                            key={m.model}
-                            type="button"
-                            onClick={() => handleChange('ai_model', m.model)}
-                            className={`p-3 rounded-xl border-2 text-left transition-all duration-200 ${
-                                isActive
-                                    ? 'border-violet-400 bg-violet-50 ring-2 ring-violet-200'
-                                    : 'border-gray-200 bg-gray-50 hover:border-gray-300'
-                            }`}
-                        >
-                            <div className="flex items-center justify-between mb-1.5">
-                                <span className={`text-sm font-semibold ${isActive ? 'text-violet-700' : 'text-gray-700'}`}>
-                                    {m.name}
-                                </span>
-                                {isActive && (
-                                    <span className="w-5 h-5 rounded-full bg-violet-500 flex items-center justify-center">
-                                        <Check className="w-3 h-3 text-white" />
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex flex-wrap gap-1.5">
-                                <span className="text-[10px] px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded">⚡ {m.speed}</span>
-                                <span className="text-[10px] px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded">📊 {m.quality}</span>
-                                <span className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-700 rounded">🆓 {m.free}</span>
-                            </div>
-                        </button>
-                    )
-                })}
+                <div className="relative">
+                    <input
+                        type="password"
+                        value={settings.openrouter_api_key}
+                        onChange={(e) => handleChange('openrouter_api_key', e.target.value)}
+                        placeholder="sk-or-v1-..."
+                        className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all placeholder:text-gray-400 font-mono"
+                    />
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5">
+                    Tambahkan API Key <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:text-violet-700 font-medium underline">OpenRouter</a> untuk menambah pool model AI gratis (DeepSeek R1/V3, Llama 3, Qwen). Jika dikosongkan, sistem hanya akan menggunakan model Google Gemini.
+                </p>
             </div>
 
             {/* Test AI Connection */}

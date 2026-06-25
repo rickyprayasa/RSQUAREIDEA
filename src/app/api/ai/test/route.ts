@@ -1,17 +1,10 @@
-import { google } from '@ai-sdk/google'
-import { generateText } from 'ai'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { google } from '@ai-sdk/google'
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
+import { generateText } from 'ai'
 
-export const maxDuration = 15
-
-const VALID_MODELS = [
-    'gemini-2.5-flash',
-    'gemini-2.5-flash-lite',
-    'gemini-2.5-pro',
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite',
-]
+export const maxDuration = 30
 
 export async function POST() {
     const startTime = Date.now()
@@ -24,58 +17,74 @@ export async function POST() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Check API key exists
-        if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-            return NextResponse.json({
-                success: false,
-                error: 'API key tidak ditemukan. Pastikan GOOGLE_GENERATIVE_AI_API_KEY sudah diset di .env.local',
-                duration: Date.now() - startTime,
-            })
+        // Get keys
+        const { data } = await supabase.from('site_settings').select('key, value').in('key', ['openrouter_api_key'])
+        const openrouterKey = data?.find((s: any) => s.key === 'openrouter_api_key')?.value || ''
+        const googleKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || ''
+
+        if (!googleKey && !openrouterKey) {
+            throw new Error('Tidak ada API Key yang dikonfigurasi (Google / OpenRouter).')
         }
 
-        // Get model from settings
-        let modelName = 'gemini-2.5-flash'
-        try {
-            const { data } = await supabase
-                .from('site_settings')
-                .select('value')
-                .eq('key', 'ai_model')
-                .single()
-            if (data?.value && VALID_MODELS.includes(data.value)) {
-                modelName = data.value
+        const results = []
+
+        // Test Google Gemini
+        if (googleKey) {
+            try {
+                const res = await generateText({
+                    model: google('gemini-2.5-flash'),
+                    prompt: 'Balas dengan "Google Gemini berhasil terhubung!"',
+                })
+                results.push(`✅ Google (gemini-2.5-flash) OK!`)
+            } catch (e: any) {
+                results.push(`❌ Google Gagal: ${e.message}`)
             }
-        } catch {
-            // Use default
         }
 
-        // Test with a simple prompt
-        const result = await generateText({
-            model: google(modelName),
-            prompt: 'Balas dengan tepat satu kalimat singkat dalam Bahasa Indonesia: "AI berhasil terhubung dan siap digunakan."',
-        })
+        // Test OpenRouter
+        if (openrouterKey) {
+            try {
+                const openrouterProvider = createOpenAICompatible({
+                    name: 'openrouter',
+                    apiKey: openrouterKey,
+                    baseURL: 'https://openrouter.ai/api/v1',
+                })
+                // Use a fast free model for testing
+                const res = await generateText({
+                    model: openrouterProvider('deepseek/deepseek-r1:free'),
+                    prompt: 'Balas dengan "OpenRouter berhasil terhubung!"',
+                })
+                results.push(`✅ OpenRouter (deepseek-r1:free) OK!`)
+            } catch (e: any) {
+                results.push(`❌ OpenRouter Gagal: ${e.message}`)
+            }
+        }
 
         const duration = Date.now() - startTime
+        
+        const allSuccess = results.some(r => r.includes('✅'))
 
-        return NextResponse.json({
-            success: true,
-            model: modelName,
-            response: result.text.trim(),
-            duration,
-            tokensUsed: result.usage?.totalTokens || null,
-        })
+        if (allSuccess) {
+            return NextResponse.json({
+                success: true,
+                model: 'Dual Router (Gemini + OpenRouter)',
+                response: results.join(' | '),
+                duration,
+                tokensUsed: null,
+            })
+        } else {
+             throw new Error(results.join(' | '))
+        }
 
     } catch (error) {
         const duration = Date.now() - startTime
         const message = error instanceof Error ? error.message : 'Unknown error'
         
-        // Provide helpful error messages
-        let hint = ''
-        if (message.includes('API_KEY') || message.includes('401') || message.includes('403')) {
-            hint = 'API key tidak valid atau expired. Dapatkan key baru di aistudio.google.com/apikey'
-        } else if (message.includes('429') || message.includes('quota') || message.includes('RESOURCE_EXHAUSTED')) {
-            hint = 'Rate limit tercapai. Tunggu beberapa menit atau ganti ke model yang lebih ringan.'
-        } else if (message.includes('404') || message.includes('not found')) {
-            hint = 'Model tidak ditemukan atau sudah deprecated. Coba ganti ke model lain (Gemini 2.5 Flash direkomendasikan).'
+        let hint = 'Pastikan API Key sudah benar.'
+        if (message.includes('401') || message.includes('403')) {
+            hint = 'API key tidak valid atau expired. Periksa kembali.'
+        } else if (message.includes('429')) {
+            hint = 'Rate limit tercapai. Silakan coba beberapa saat lagi.'
         }
 
         return NextResponse.json({

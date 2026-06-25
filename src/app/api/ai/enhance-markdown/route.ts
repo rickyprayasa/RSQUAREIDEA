@@ -1,33 +1,8 @@
-import { google } from '@ai-sdk/google'
-import { generateText } from 'ai'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { generateWithFallback } from '@/lib/ai-router'
 
 export const maxDuration = 30
-
-// Valid Gemini models (2025-2026 active models)
-const VALID_MODELS = [
-    'gemini-2.5-flash',
-    'gemini-2.5-flash-lite',
-    'gemini-2.5-pro',
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite',
-]
-
-async function getAiModel(supabase: Awaited<ReturnType<typeof createClient>>) {
-    try {
-        const { data } = await supabase
-            .from('site_settings')
-            .select('value')
-            .eq('key', 'ai_model')
-            .single()
-        
-        const model = data?.value || 'gemini-2.5-flash'
-        return VALID_MODELS.includes(model) ? model : 'gemini-2.5-flash'
-    } catch {
-        return 'gemini-2.5-flash'
-    }
-}
 
 export async function POST(request: NextRequest) {
     try {
@@ -47,9 +22,6 @@ export async function POST(request: NextRequest) {
         if (markdownContent.length > 50000) {
             return NextResponse.json({ error: 'File terlalu besar (maks 50KB teks)' }, { status: 400 })
         }
-
-        // Get AI model from settings
-        const modelName = await getAiModel(supabase)
 
         const systemPrompt = `Kamu adalah asisten AI profesional untuk platform RSQUARE yang menjual template dan aplikasi web berbasis Google Sheets/Apps Script.
 
@@ -75,10 +47,9 @@ PENTING:
 - Format: {"description": "...", "features": ["...", "..."], "title": "..."}
 - Jika konten markdown tidak jelas, tetap buat output terbaik berdasarkan informasi yang ada.`
 
-        console.log(`AI Enhance: Using model ${modelName}`)
+        console.log(`AI Enhance: Starting generation with AI Router...`)
 
-        const result = await generateText({
-            model: google(modelName),
+        const { result, usedModel } = await generateWithFallback({
             system: systemPrompt,
             prompt: `Berikut konten markdown dari ringkasan aplikasi:\n\n${markdownContent}`,
         })
@@ -104,7 +75,7 @@ PENTING:
             description: parsed.description || '',
             features: Array.isArray(parsed.features) ? parsed.features : [],
             title: parsed.title || '',
-            model: modelName,
+            model: usedModel.id,
         })
 
     } catch (error) {
