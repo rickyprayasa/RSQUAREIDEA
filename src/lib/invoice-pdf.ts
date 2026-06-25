@@ -89,7 +89,8 @@ export interface CompanySettings {
 export function generateInvoicePDF(
     invoice: InvoiceData, 
     paymentMethods: PaymentMethod[] = [],
-    companySettings?: CompanySettings
+    companySettings?: CompanySettings,
+    dynamicQrisImage?: string
 ): Buffer {
     const phone = companySettings?.phone || COMPANY.phone
     const email = companySettings?.email || COMPANY.email
@@ -460,8 +461,35 @@ export function generateInvoicePDF(
         pmY += 8
     }
 
-    // -- Terms & Conditions (Below Payment Method) --
-    const termsY = pmY + 4
+    // -- Real QR Code Image (Moved to Column 2) --
+    const col2X = margin + colWidth + 10
+    const qrSize = 24
+    const qrY = y + 2
+    try {
+        if (dynamicQrisImage) {
+            doc.addImage(dynamicQrisImage, 'PNG', col2X, qrY, qrSize, qrSize)
+        } else {
+            doc.addImage(RSQUARE_QR_BASE64, 'PNG', col2X, qrY, qrSize, qrSize)
+        }
+    } catch {
+        // Safe fallback
+        doc.setFillColor(243, 244, 246)
+        doc.rect(col2X, qrY, qrSize, qrSize, 'F')
+    }
+
+    doc.setFontSize(7)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...COLORS.dark)
+    doc.text(dynamicQrisImage ? 'SCAN UNTUK MEMBAYAR' : 'SCAN UNTUK INFO LEBIH', col2X + qrSize / 2, qrY + qrSize + 4, { align: 'center' })
+    
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(6.5)
+    doc.setTextColor(...COLORS.gray)
+    doc.text('A/N: RSQUAREIDEA', col2X + qrSize / 2, qrY + qrSize + 7, { align: 'center' })
+
+    // -- Terms & Conditions (Below Payment Method and QR) --
+    const maxPmY = Math.max(pmY, qrY + qrSize + 8)
+    const termsY = maxPmY + 2
     doc.setFontSize(9)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(...COLORS.primaryDark)
@@ -474,7 +502,7 @@ export function generateInvoicePDF(
     const termsLines = doc.splitTextToSize(termsText, leftBlockW)
     doc.text(termsLines, margin, termsY + 5)
 
-    // -- Column 3: Customer Care & QR Code --
+    // -- Column 3: Customer Care --
     const col3X = pageWidth - margin - colWidth
 
     doc.setFontSize(9)
@@ -488,22 +516,6 @@ export function generateInvoicePDF(
     doc.text(`WA: ${phone}`, col3X, y + 5)
     doc.text(`Email: ${email}`, col3X, y + 10)
     doc.text(`Web: ${COMPANY.website}`, col3X, y + 15)
-
-    // Real QR Code Image
-    const qrY = y + 22
-    const qrSize = 32
-    try {
-        doc.addImage(RSQUARE_QR_BASE64, 'PNG', col3X, qrY, qrSize, qrSize)
-    } catch {
-        // Safe fallback
-        doc.setFillColor(243, 244, 246)
-        doc.rect(col3X, qrY, qrSize, qrSize, 'F')
-    }
-
-    doc.setFontSize(7)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...COLORS.dark)
-    doc.text('SCAN UNTUK INFO LEBIH', col3X + qrSize / 2, qrY + qrSize + 4, { align: 'center' })
 
     // ============================================================
     // ENHANCED FOOTER SHAPES

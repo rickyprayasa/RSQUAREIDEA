@@ -27,6 +27,7 @@ import {
     Copy
 } from 'lucide-react'
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal'
+import { RichTextEditor } from '@/components/admin/RichTextEditor'
 
 interface TemplateRequest {
     id: number
@@ -42,6 +43,8 @@ interface TemplateRequest {
     service_type?: string | null
     company?: string | null
     created_at: string
+    prd_content?: string | null
+    proposal_content?: string | null
 }
 
 interface RequestInvoice {
@@ -79,6 +82,16 @@ export default function RequestsPage() {
     const [prdContent, setPrdContent] = useState<string>('')
     const [isGeneratingPrd, setIsGeneratingPrd] = useState(false)
     const [showPrdModal, setShowPrdModal] = useState(false)
+
+    // Proposal State
+    const [proposalContent, setProposalContent] = useState<string>('')
+    const [isGeneratingProposal, setIsGeneratingProposal] = useState(false)
+    const [showProposalModal, setShowProposalModal] = useState(false)
+    const [isSendingProposal, setIsSendingProposal] = useState(false)
+    const [showSendProposalModal, setShowSendProposalModal] = useState(false)
+    const [sendProposalForm, setSendProposalForm] = useState({ email: '' })
+
+
 
     useEffect(() => {
         fetchRequests()
@@ -206,8 +219,52 @@ export default function RequestsPage() {
         }
     }
 
-    const handleGeneratePrd = async () => {
+    const [isSavingDraft, setIsSavingDraft] = useState(false)
+
+    const handleSaveDraft = async (docType: 'prd' | 'proposal', content: string) => {
         if (!selectedRequest) return
+        setIsSavingDraft(true)
+        try {
+            const res = await fetch('/api/admin/requests/save-doc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requestId: selectedRequest.id,
+                    docType,
+                    content
+                })
+            })
+            if (res.ok) {
+                showToast(`Draf ${docType.toUpperCase()} berhasil disimpan!`, 'success')
+                // Update local state
+                setSelectedRequest(prev => prev ? {
+                    ...prev,
+                    [docType === 'prd' ? 'prd_content' : 'proposal_content']: content
+                } : null)
+                // Also update the requests array
+                setRequests(prev => prev.map(r => r.id === selectedRequest.id ? {
+                    ...r,
+                    [docType === 'prd' ? 'prd_content' : 'proposal_content']: content
+                } : r))
+            } else {
+                showToast(`Gagal menyimpan draf`, 'error')
+            }
+        } catch {
+            showToast('Terjadi kesalahan saat menyimpan', 'error')
+        } finally {
+            setIsSavingDraft(false)
+        }
+    }
+
+    const handleGeneratePrd = async (forceRegenerate = false) => {
+        if (!selectedRequest) return
+
+        if (!forceRegenerate && selectedRequest.prd_content) {
+            setPrdContent(selectedRequest.prd_content)
+            setShowPrdModal(true)
+            return
+        }
+
         setIsGeneratingPrd(true)
         setPrdContent('')
         
@@ -216,6 +273,7 @@ export default function RequestsPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    requestId: selectedRequest.id,
                     template_name: selectedRequest.template_name,
                     description: selectedRequest.description,
                     budget: selectedRequest.budget,
@@ -229,6 +287,10 @@ export default function RequestsPage() {
                 setPrdContent(data.prd)
                 setShowPrdModal(true)
                 showToast('PRD berhasil dibuat dengan AI!', 'success')
+                
+                // Update local request object
+                setSelectedRequest(prev => prev ? { ...prev, prd_content: data.prd } : null)
+                setRequests(prev => prev.map(r => r.id === selectedRequest.id ? { ...r, prd_content: data.prd } : r))
             } else {
                 showToast(data.error || 'Gagal membuat PRD', 'error')
             }
@@ -250,12 +312,128 @@ export default function RequestsPage() {
         const element = document.createElement('a')
         const file = new Blob([prdContent], { type: 'text/markdown' })
         element.href = URL.createObjectURL(file)
-        const fileName = `PRD_${selectedRequest.template_name.replace(/\\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.md`
+        const fileName = `PRD_${selectedRequest.template_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.md`
         element.download = fileName
         document.body.appendChild(element)
         element.click()
         document.body.removeChild(element)
     }
+
+    const handleCopyProposal = async () => {
+        if (!proposalContent) return
+        try {
+            const htmlBlob = new Blob([proposalContent], { type: 'text/html' });
+            const textBlob = new Blob([proposalContent.replace(/<[^>]*>?/gm, '')], { type: 'text/plain' });
+            const data = [new ClipboardItem({ 
+                'text/html': htmlBlob,
+                'text/plain': textBlob
+            })];
+            await navigator.clipboard.write(data);
+            showToast('Proposal disalin ke clipboard', 'success');
+        } catch (err) {
+            navigator.clipboard.writeText(proposalContent);
+            showToast('Proposal disalin ke clipboard', 'success');
+        }
+    }
+
+    const handleDownloadProposal = () => {
+        if (!proposalContent || !selectedRequest) return
+        const element = document.createElement('a')
+        const file = new Blob([proposalContent], { type: 'text/markdown' })
+        element.href = URL.createObjectURL(file)
+        const fileName = `Proposal_${selectedRequest.template_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.md`
+        element.download = fileName
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+    }
+
+    const handleGenerateProposal = async (forceRegenerate = false) => {
+        if (!selectedRequest) return
+
+        if (!forceRegenerate && selectedRequest.proposal_content) {
+            setProposalContent(selectedRequest.proposal_content)
+            setShowProposalModal(true)
+            return
+        }
+
+        setIsGeneratingProposal(true)
+        setProposalContent('')
+        
+        try {
+            const res = await fetch('/api/admin/requests/generate-proposal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requestId: selectedRequest.id,
+                    templateName: selectedRequest.template_name,
+                    description: selectedRequest.description,
+                    serviceType: selectedRequest.service_type,
+                    email: selectedRequest.email
+                })
+            })
+            
+            const data = await res.json()
+            if (res.ok && data.proposal) {
+                setProposalContent(data.proposal)
+                setShowProposalModal(true)
+                showToast('Proposal berhasil disusun!', 'success')
+
+                // Update local state
+                setSelectedRequest(prev => prev ? { ...prev, proposal_content: data.proposal } : null)
+                setRequests(prev => prev.map(r => r.id === selectedRequest.id ? { ...r, proposal_content: data.proposal } : r))
+            } else {
+                showToast(data.error || 'Gagal menyusun proposal', 'error')
+            }
+        } catch (error) {
+            showToast('Terjadi kesalahan saat memanggil AI', 'error')
+        } finally {
+            setIsGeneratingProposal(false)
+        }
+    }
+
+    const handleOpenSendProposalModal = () => {
+        if (!selectedRequest) return
+        setSendProposalForm({ email: selectedRequest.email })
+        setShowSendProposalModal(true)
+    }
+
+    const handleSendProposal = async () => {
+        if (!selectedRequest || !proposalContent) return
+        
+        if (!sendProposalForm.email) {
+            showToast('Email tujuan harus diisi', 'error')
+            return
+        }
+
+        setIsSendingProposal(true)
+        
+        try {
+            const res = await fetch('/api/admin/requests/send-proposal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requestId: selectedRequest.id,
+                    proposalContent: proposalContent,
+                    recipientEmail: sendProposalForm.email,
+                    recipientName: selectedRequest.name
+                })
+            })
+            
+            const data = await res.json()
+            if (res.ok && data.success) {
+                showToast('Proposal berhasil dikirim ke email!', 'success')
+                setShowSendProposalModal(false)
+            } else {
+                showToast(data.error || 'Gagal mengirim proposal', 'error')
+            }
+        } catch (error) {
+            showToast('Terjadi kesalahan saat mengirim email', 'error')
+        } finally {
+            setIsSendingProposal(false)
+        }
+    }
+
 
     const filteredRequests = requests.filter(r => filter === 'all' || r.status === filter)
     const pendingCount = requests.filter(r => r.status === 'pending').length
@@ -463,27 +641,53 @@ export default function RequestsPage() {
                                             <label className="text-sm text-gray-500 flex items-center gap-1">
                                                 <FileText className="h-4 w-4" /> Deskripsi
                                             </label>
-                                            <button
-                                                onClick={handleGeneratePrd}
-                                                disabled={isGeneratingPrd}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
-                                            >
-                                                {isGeneratingPrd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                                                {isGeneratingPrd ? 'AI sedang menyusun...' : 'Generate PRD dengan AI'}
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={handleGenerateProposal}
+                                                    disabled={isGeneratingProposal}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                                                >
+                                                    {isGeneratingProposal ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
+                                                    {isGeneratingProposal ? 'Menyusun...' : 'Proposal Klien'}
+                                                </button>
+                                                <button
+                                                    onClick={handleGeneratePrd}
+                                                    disabled={isGeneratingPrd}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                                                >
+                                                    {isGeneratingPrd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                                                    {isGeneratingPrd ? 'Menyusun...' : 'PRD Internal'}
+                                                </button>
+                                            </div>
                                         </div>
                                         <p className="p-4 bg-gray-50 rounded-xl text-gray-700 whitespace-pre-wrap">
                                             {selectedRequest.description}
                                         </p>
 
-                                        {prdContent && !showPrdModal && (
-                                            <div className="mt-3 flex justify-end">
-                                                <button
-                                                    onClick={() => setShowPrdModal(true)}
-                                                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
-                                                >
-                                                    <Sparkles className="h-4 w-4" /> Buka PRD Markdown
-                                                </button>
+                                        {((selectedRequest.prd_content && !showPrdModal) || (selectedRequest.proposal_content && !showProposalModal)) && (
+                                            <div className="mt-3 flex justify-end gap-2">
+                                                {selectedRequest.proposal_content && !showProposalModal && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setProposalContent(selectedRequest.proposal_content!);
+                                                            setShowProposalModal(true);
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white hover:bg-orange-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
+                                                    >
+                                                        <Mail className="h-4 w-4" /> Buka Proposal yang Tersimpan
+                                                    </button>
+                                                )}
+                                                {selectedRequest.prd_content && !showPrdModal && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setPrdContent(selectedRequest.prd_content!);
+                                                            setShowPrdModal(true);
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
+                                                    >
+                                                        <Sparkles className="h-4 w-4" /> Buka PRD yang Tersimpan
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -681,14 +885,31 @@ export default function RequestsPage() {
                             </div>
                             <div className="flex items-center gap-3">
                                 <button
-                                    onClick={handleCopyPrd}
-                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-sm font-medium transition-colors"
+                                    onClick={() => handleSaveDraft('prd', prdContent)}
+                                    disabled={isSavingDraft}
+                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
                                 >
-                                    <Copy className="h-4 w-4" /> Salin Teks
+                                    {isSavingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                                    Simpan Draf
+                                </button>
+                                <button
+                                    onClick={() => handleGeneratePrd(true)}
+                                    disabled={isGeneratingPrd}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                                >
+                                    {isGeneratingPrd ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                                    Buat Ulang
+                                </button>
+                                <button
+                                    onClick={handleCopyPrd}
+                                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-xl transition-colors"
+                                    title="Salin Teks"
+                                >
+                                    <Copy className="h-5 w-5" />
                                 </button>
                                 <button
                                     onClick={handleDownloadPrd}
-                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
+                                    className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
                                 >
                                     <Download className="h-4 w-4" /> Download .md
                                 </button>
@@ -708,6 +929,142 @@ export default function RequestsPage() {
                                 value={prdContent}
                                 className="w-full h-full p-6 text-[14px] leading-relaxed font-mono text-gray-800 bg-transparent resize-none focus:outline-none"
                             />
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Fullscreen Proposal Preview Modal */}
+            {showProposalModal && proposalContent && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 sm:p-6">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="bg-white rounded-2xl w-full max-w-5xl h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-gray-200"
+                    >
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <Mail className="h-5 w-5 text-orange-500" />
+                                    Proposal Klien
+                                </h2>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    {selectedRequest?.template_name}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => handleSaveDraft('proposal', proposalContent)}
+                                    disabled={isSavingDraft}
+                                    className="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-700 hover:bg-orange-100 rounded-xl text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+                                >
+                                    {isSavingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                                    Simpan Draf
+                                </button>
+                                <button
+                                    onClick={() => handleGenerateProposal(true)}
+                                    disabled={isGeneratingProposal}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+                                >
+                                    {isGeneratingProposal ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                                    Buat Ulang
+                                </button>
+                                <button
+                                    onClick={handleCopyProposal}
+                                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-xl transition-colors"
+                                    title="Salin Teks"
+                                >
+                                    <Copy className="h-5 w-5" />
+                                </button>
+                                <button
+                                    onClick={handleDownloadProposal}
+                                    className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors shadow-sm"
+                                >
+                                    <Download className="h-4 w-4" /> Download .md
+                                </button>
+                                <button
+                                    onClick={handleOpenSendProposalModal}
+                                    className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white hover:bg-orange-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
+                                >
+                                    <Send className="h-4 w-4" />
+                                    Kirim ke Email
+                                </button>
+                                <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                                <button
+                                    onClick={() => setShowProposalModal(false)}
+                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                                >
+                                    <X className="h-6 w-6" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 p-0 bg-white overflow-y-auto">
+                            <RichTextEditor
+                                content={proposalContent}
+                                onChange={setProposalContent}
+                                editable={true}
+                            />
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+            
+            {/* Send Proposal Confirm Modal */}
+            {showSendProposalModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4 sm:p-6">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-gray-200"
+                    >
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
+                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <Send className="h-5 w-5 text-orange-500" />
+                                Kirim Proposal Klien
+                            </h3>
+                            <button
+                                onClick={() => setShowSendProposalModal(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-sm text-gray-600 mb-4">
+                                Proposal akan dikirim ke alamat email berikut. Anda dapat mengubahnya jika ingin mengirimkan tes ke email Anda sendiri terlebih dahulu.
+                            </p>
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Email Tujuan</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Mail className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        value={sendProposalForm.email}
+                                        onChange={e => setSendProposalForm(prev => ({ ...prev, email: e.target.value }))}
+                                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                                        placeholder="nama@email.com"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowSendProposalModal(false)}
+                                    className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 font-medium"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleSendProposal}
+                                    disabled={isSendingProposal || !sendProposalForm.email}
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-600 text-white rounded-xl hover:bg-orange-700 font-medium disabled:opacity-50 transition-colors"
+                                >
+                                    {isSendingProposal ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                    Kirim Sekarang
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
                 </div>

@@ -3,6 +3,8 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import nodemailer from 'nodemailer'
 import { generateInvoicePDF } from '@/lib/invoice-pdf'
 import { parseInvoiceNotes } from '@/lib/invoice-utils'
+import QRCode from 'qrcode'
+import { generateDynamicQRIS } from '@/lib/qris-utils'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
         const { data: settingsData } = await adminSupabase
             .from('site_settings')
             .select('key, value')
-            .in('key', ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_password', 'smtp_from_name', 'smtp_from_email', 'contact_email', 'contact_phone'])
+            .in('key', ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_password', 'smtp_from_name', 'smtp_from_email', 'contact_email', 'contact_phone', 'qris_enabled', 'qris_merchant_string'])
 
         if (!settingsData || settingsData.length === 0) {
             return NextResponse.json({ error: 'Email settings not configured' }, { status: 500 })
@@ -84,11 +86,27 @@ export async function POST(request: NextRequest) {
             accountName: p.account_name,
         }))
 
+        // Handle QRIS Generation
+        let dynamicQrisImage: string | undefined
+        if (settings.qris_enabled === 'true' && settings.qris_merchant_string && invoice.total > 0) {
+            try {
+                const dynamicQrisStr = generateDynamicQRIS(settings.qris_merchant_string, invoice.total)
+                dynamicQrisImage = await QRCode.toDataURL(dynamicQrisStr, {
+                    width: 300,
+                    margin: 2,
+                    color: { dark: '#000000', light: '#FFFFFF' },
+                    errorCorrectionLevel: 'M'
+                })
+            } catch (err) {
+                console.error('Failed to generate dynamic QRIS for email', err)
+            }
+        }
+
         // Generate PDF attachment
         const pdfBuffer = generateInvoicePDF(invoice, paymentMethods, {
             phone: contactPhone,
             email: contactEmail,
-        })
+        }, dynamicQrisImage)
 
         // Build items table HTML
         const items = (invoice.items || []) as { name: string; qty: number; price: number }[]
@@ -137,6 +155,37 @@ export async function POST(request: NextRequest) {
                 <td style="padding: 12px 0 6px; border-top: 1px dashed #e5e7eb; color: #111827; font-size: 16px; font-weight: 700; margin-top: 6px;">Total Harus Dibayar ${isDP ? '(DP)' : '(Pelunasan)'}</td>
                 <td style="padding: 12px 0 6px; border-top: 1px dashed #e5e7eb; text-align: right; color: #ea580c; font-size: 18px; font-weight: 800; margin-top: 6px;">Rp ${(invoice.total || 0).toLocaleString('id-ID')}</td>
             </tr>
+            `
+        }
+
+        const paymentMethodsHtml = paymentMethods.length > 0 
+            ? paymentMethods.map(p => `
+                    <table cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 8px;">
+                        <tr>
+                            <td style="color: #92400e; font-size: 13px; padding: 3px 0; width: 120px;">Bank</td>
+                            <td style="color: #78350f; font-size: 14px; padding: 3px 0; font-weight: 600;">${p.bankName}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #92400e; font-size: 13px; padding: 3px 0;">No. Rekening</td>
+                            <td style="color: #78350f; font-size: 14px; padding: 3px 0; font-weight: 600;">${p.accountNumber}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #92400e; font-size: 13px; padding: 3px 0;">Atas Nama</td>
+                            <td style="color: #78350f; font-size: 14px; padding: 3px 0; font-weight: 600;">${p.accountName}</td>
+                        </tr>
+                    </table>
+            `).join('')
+            : '<p style="color: #92400e; font-size: 13px; padding: 3px 0;">Metode pembayaran belum dikonfigurasi.</p>';
+
+        let qrisHtml = ''
+        let qrisBase64Data = ''
+        if (dynamicQrisImage) {
+            qrisBase64Data = dynamicQrisImage.split(',')[1]
+            qrisHtml = `
+            <div style="text-align: center; margin-top: 16px; padding-top: 16px; border-top: 1px dashed #fed7aa;">
+                <p style="color: #ea580c; font-size: 11px; font-weight: 700; margin: 0 0 8px; text-transform: uppercase;">Atau Scan QRIS (Dinamis)</p>
+                <img src="cid:qris_image_cid" alt="QRIS" style="width: 150px; height: 150px; border-radius: 8px; border: 1px solid #fed7aa;" />
+            </div>
             `
         }
 
@@ -199,13 +248,6 @@ export async function POST(request: NextRequest) {
 
             <!-- Content -->
     <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <!-- Header -->
-        <div style="background-color: #1f2937; padding: 32px 40px; text-align: center;">
-            <img src="https://www.rsquareidea.my.id/images/rsquare-logo.png" alt="RSQUARE" style="height: 32px; margin-bottom: 24px;">
-            <h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0 0 8px; letter-spacing: 1px;">INVOICE</h1>
-            <p style="color: #9ca3af; font-size: 14px; margin: 0;">#${invoice.invoice_number}</p>
-        </div>
-
         <!-- Content -->
         <div style="padding: 40px;">
             <p style="color: #4b5563; font-size: 15px; margin: 0 0 24px; line-height: 1.6;">
@@ -279,20 +321,8 @@ export async function POST(request: NextRequest) {
                 <!-- Payment Method -->
                 <div style="background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 1px solid #fed7aa; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                     <p style="color: #9a3412; font-size: 10px; font-weight: 700; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 1px;">💳 Metode Pembayaran</p>
-                    <table cellpadding="0" cellspacing="0" style="width: 100%;">
-                        <tr>
-                            <td style="color: #92400e; font-size: 13px; padding: 3px 0; width: 120px;">Bank</td>
-                            <td style="color: #78350f; font-size: 14px; padding: 3px 0; font-weight: 600;">Bank BCA</td>
-                        </tr>
-                        <tr>
-                            <td style="color: #92400e; font-size: 13px; padding: 3px 0;">No. Rekening</td>
-                            <td style="color: #78350f; font-size: 14px; padding: 3px 0; font-weight: 600;">7690434543</td>
-                        </tr>
-                        <tr>
-                            <td style="color: #92400e; font-size: 13px; padding: 3px 0;">Atas Nama</td>
-                            <td style="color: #78350f; font-size: 14px; padding: 3px 0; font-weight: 600;">Ricky Prayasa</td>
-                        </tr>
-                    </table>
+                    ${paymentMethodsHtml}
+                    ${qrisHtml}
                     <p style="color: #92400e; font-size: 12px; margin: 12px 0 0; font-style: italic;">Pembayaran juga dapat dilakukan melalui QRIS. Hubungi kami untuk detail lebih lanjut.</p>
                 </div>
 
@@ -303,11 +333,11 @@ export async function POST(request: NextRequest) {
                     </p>
                 </div>
 
-                ${invoice.notes ? `
+                ${meta.notes ? `
                 <!-- Notes -->
                 <div style="margin-bottom: 20px;">
                     <p style="color: #9ca3af; font-size: 10px; font-weight: 700; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 1px;">Catatan</p>
-                    <p style="color: #4b5563; font-size: 13px; margin: 0; line-height: 1.6;">${invoice.notes}</p>
+                    <p style="color: #4b5563; font-size: 13px; margin: 0; line-height: 1.6;">${meta.notes.replace(/\\n/g, '<br>')}</p>
                 </div>
                 ` : ''}
 
@@ -361,19 +391,30 @@ export async function POST(request: NextRequest) {
 
         const textBody = `Invoice ${invoice.invoice_number}\n\nHalo ${invoice.customer_name},\n\nBerikut invoice untuk layanan yang Anda request.\n\n${textTotals}\n\nJatuh Tempo: ${dueDateStr}\n\nMetode Pembayaran:\nBank BCA\nNo. Rekening: 7690434543\nAtas Nama: Ricky Prayasa\n\nCustomer Care:\nWhatsApp: ${contactPhone}\nEmail: ${contactEmail}\n\nSalam,\nTim RSQUARE`
 
+        const attachments: any[] = [
+            {
+                filename: `${invoice.invoice_number}.pdf`,
+                content: pdfBuffer,
+                contentType: 'application/pdf',
+            },
+        ]
+
+        if (qrisBase64Data) {
+            attachments.push({
+                filename: 'qris.png',
+                content: qrisBase64Data,
+                encoding: 'base64',
+                cid: 'qris_image_cid'
+            })
+        }
+
         await transporter.sendMail({
             from: `"${fromName}" <${fromEmail}>`,
             to: invoice.customer_email,
             subject: `Invoice ${invoice.invoice_number} - RSQUARE`,
             text: textBody,
             html: htmlBody,
-            attachments: [
-                {
-                    filename: `${invoice.invoice_number}.pdf`,
-                    content: pdfBuffer,
-                    contentType: 'application/pdf',
-                },
-            ],
+            attachments,
         })
 
         // Update invoice status to 'sent'

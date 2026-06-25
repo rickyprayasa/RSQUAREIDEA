@@ -1,6 +1,6 @@
 import { google } from '@ai-sdk/google'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
-import { generateText, LanguageModel, CoreMessage } from 'ai'
+import { generateText, LanguageModel } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 
 // Base Gemini models that are consistently reliable
@@ -115,7 +115,7 @@ function isRetryableError(error: any): boolean {
 export async function generateWithFallback(options: {
     system?: string,
     prompt?: string,
-    messages?: CoreMessage[],
+    messages?: any[],
     maxTokens?: number,
     temperature?: number,
     tier?: 'standard' | 'high'

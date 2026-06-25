@@ -13,10 +13,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { template_name, description, budget, deadline } = await req.json()
+        const { requestId, template_name, description, budget, deadline } = await req.json()
 
-        if (!description) {
-            return NextResponse.json({ error: 'Deskripsi request tidak boleh kosong.' }, { status: 400 })
+        if (!requestId || !description) {
+            return NextResponse.json({ error: 'Request ID and Deskripsi request tidak boleh kosong.' }, { status: 400 })
         }
 
         // Define the prompt
@@ -57,10 +57,22 @@ The PRD must include the following sections:
             tier: 'high'
         })
 
+        const generatedMd = result.text.trim()
+
+        // Save to database
+        const { error: updateError } = await supabase
+            .from('template_requests')
+            .update({ prd_content: generatedMd })
+            .eq('id', requestId)
+
+        if (updateError) {
+            console.error('Failed to save PRD to DB:', updateError)
+        }
+
         return NextResponse.json({
             success: true,
             model: usedModel.id,
-            prd: result.text.trim(),
+            prd: generatedMd,
         })
 
     } catch (error) {
