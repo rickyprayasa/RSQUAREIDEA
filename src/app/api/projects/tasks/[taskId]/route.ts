@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth'
 
-export async function PATCH(request: NextRequest, { params }: { params: { taskId: string } }) {
+export async function PATCH(request: NextRequest, props: { params: Promise<{ taskId: string }> }) {
+    const params = await props.params;
     try {
         const session = await getSession()
         if (!session) {
@@ -29,7 +30,8 @@ export async function PATCH(request: NextRequest, { params }: { params: { taskId
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { taskId: string } }) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ taskId: string }> }) {
+    const params = await props.params;
     try {
         const session = await getSession()
         if (!session) {
