@@ -169,7 +169,7 @@ export async function generateWithFallback(options: {
                 system: options.system,
                 prompt: options.prompt,
                 messages: options.messages,
-                maxTokens: options.maxTokens,
+                maxOutputTokens: options.maxTokens,
                 temperature: options.temperature,
             })
 
