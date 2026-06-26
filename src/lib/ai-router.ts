@@ -164,14 +164,20 @@ export async function generateWithFallback(options: {
             console.log(`[AI Router] Attempting generation with ${modelConfig.provider}/${modelConfig.id}...`)
             attempts++
 
-            const result = await generateText({
+            const generateOptions: any = {
                 model: modelInstance,
                 system: options.system,
-                prompt: options.prompt,
-                messages: options.messages,
                 maxOutputTokens: options.maxTokens,
                 temperature: options.temperature,
-            })
+            }
+
+            if (options.messages) {
+                generateOptions.messages = options.messages
+            } else if (options.prompt) {
+                generateOptions.prompt = options.prompt
+            }
+
+            const result = await generateText(generateOptions)
 
             console.log(`[AI Router] Success with ${modelConfig.id}!`)
             
