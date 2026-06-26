@@ -284,12 +284,13 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                             }`}
                         >
                             {image ? (
-                                <Image
-                                    src={image}
-                                    alt={`Thumbnail ${index + 1}`}
-                                    fill
-                                    className="object-cover"
-                                />
+                                    <Image
+                                        src={image}
+                                        alt={`Thumbnail ${index + 1}`}
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                    />
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex flex-col items-center justify-center text-gray-400">
                                     <ImageIcon className="w-6 h-6 mb-1 stroke-[1.5]" />
@@ -521,6 +522,7 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                                                 alt={`Thumb ${idx + 1}`}
                                                 fill
                                                 className="object-cover"
+                                                unoptimized
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-white/20 flex items-center justify-center text-white/60 text-xs">
