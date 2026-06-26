@@ -61,6 +61,7 @@ export function TemplateCard({
                                 alt={title}
                                 fill
                                 className="object-contain"
+                                unoptimized
                             />
                         ) : (
                             <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs">
@@ -106,6 +107,7 @@ export function TemplateCard({
                             alt={title}
                             fill
                             className="object-contain group-hover:scale-105 transition-transform duration-500"
+                            unoptimized
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium">
