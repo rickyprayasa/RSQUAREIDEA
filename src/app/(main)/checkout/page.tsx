@@ -84,6 +84,8 @@ function CheckoutContent() {
         phone: '',
     })
 
+    const isEmailValid = !formData.email || /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,8}$/.test(formData.email)
+
     // Voucher state
     const [voucherCode, setVoucherCode] = useState('')
     const [voucherLoading, setVoucherLoading] = useState(false)
@@ -804,8 +806,14 @@ function CheckoutContent() {
                                                 onChange={(e) => setFormData(p => ({ ...p, email: e.target.value.replace(/\s+/g, '') }))}
                                                 placeholder="email@domain.com"
                                                 maxLength={50}
-                                                className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                                className={`w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base border-2 rounded-xl focus:outline-none focus:ring-2 ${!isEmailValid ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50' : 'border-gray-200 focus:ring-orange-500 focus:border-orange-500'}`}
                                             />
+                                            {!isEmailValid && (
+                                                <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                                                    <AlertCircle className="w-3 h-3" />
+                                                    Format email tidak valid (harus ada @ dan domain valid)
+                                                </p>
+                                            )}
                                         </div>
                                         <div>
                                             <label className="text-xs md:text-sm font-medium text-gray-700 flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
@@ -945,7 +953,7 @@ function CheckoutContent() {
                                             setStep(2)
                                         }
                                     }}
-                                    disabled={!formData.name || !formData.email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email) || loading}
+                                    disabled={!formData.name || !formData.email || !isEmailValid || loading}
                                     className="w-full md:w-auto px-6 md:px-8 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
                                 >
                                     {loading && <Loader2 className="h-4 w-4 animate-spin" />}
