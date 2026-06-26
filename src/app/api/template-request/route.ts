@@ -30,6 +30,26 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
 
+        // Automatically create a Project in PM Workspace
+        try {
+            const { createAdminClient } = require('@/lib/supabase/server')
+            const adminSupabase = await createAdminClient()
+            
+            await adminSupabase.from('projects').insert({
+                name: `Project: ${data.company || data.name}`,
+                description: data.description || data.requirements || '-',
+                client_name: data.name,
+                client_email: data.email,
+                client_phone: data.phone || null,
+                source_type: 'template_requests',
+                source_id: templateRequest.id,
+                status: 'active'
+            })
+        } catch (projErr) {
+            console.error('Error creating project automatically:', projErr)
+            // We don't fail the request if project creation fails
+        }
+
         // Create notification
         const serviceLabels: Record<string, string> = {
             sheets: 'Google Sheets',

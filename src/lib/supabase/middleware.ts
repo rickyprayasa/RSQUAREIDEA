@@ -38,19 +38,17 @@ export async function updateSession(request: NextRequest) {
             url.pathname = '/admin/login'
             return NextResponse.redirect(url)
         }
+        // Role check is deferred to layout.tsx to prevent DB connection exhaustion in middleware
+    }
 
-        // Check if user is admin
-        const { data: profile } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-
-        if (!profile || !['admin', 'superadmin'].includes(profile.role)) {
+    // Protect projects routes
+    if (request.nextUrl.pathname.startsWith('/projects')) {
+        if (!user) {
             const url = request.nextUrl.clone()
             url.pathname = '/admin/login'
             return NextResponse.redirect(url)
         }
+        // Role check is deferred to layout.tsx
     }
 
     return supabaseResponse

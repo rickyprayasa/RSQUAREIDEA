@@ -95,6 +95,7 @@ const navGroups: NavGroup[] = [
 
 // Bottom navigation
 const bottomNav: NavItem[] = [
+    { name: 'Tim Internal', href: '/admin/users', icon: Users, color: 'from-orange-500 to-amber-500' },
     { name: 'Security', href: '/admin/security', icon: Shield, color: 'from-blue-500 to-cyan-500' },
     { name: 'Ganti Password', href: '/admin/change-password', icon: Key, color: 'from-purple-500 to-violet-500' },
     { name: 'Sessions', href: '/admin/sessions', icon: LogOut, color: 'from-orange-500 to-red-500' },

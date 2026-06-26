@@ -41,9 +41,9 @@ export async function login(email: string, password: string) {
         .eq('id', data.user.id)
         .single()
 
-    if (!profile || !['admin', 'superadmin'].includes(profile.role)) {
+    if (!profile || !['admin', 'superadmin', 'pm', 'staff'].includes(profile.role)) {
         await supabase.auth.signOut()
-        return { error: 'Akses ditolak. Anda bukan admin.' }
+        return { error: 'Akses ditolak. Anda tidak memiliki akses ke sistem ini.' }
     }
 
     return { 

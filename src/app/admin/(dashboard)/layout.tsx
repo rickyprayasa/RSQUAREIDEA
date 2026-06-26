@@ -14,6 +14,13 @@ export default async function AdminDashboardLayout({
         redirect('/admin/login')
     }
 
+    if (!['admin', 'superadmin'].includes(user.role)) {
+        if (['pm', 'staff'].includes(user.role)) {
+            redirect('/projects')
+        }
+        redirect('/admin/login')
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
             <AdminSidebar />

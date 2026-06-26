@@ -45,8 +45,11 @@ export default function AdminLoginPage() {
                 setError(data.error || 'Login gagal')
                 return
             }
-
-            router.push('/admin')
+            if (data.user?.role === 'admin' || data.user?.role === 'superadmin') {
+                router.push('/admin')
+            } else {
+                router.push('/projects')
+            }
             router.refresh()
         } catch {
             setError('Terjadi kesalahan. Silakan coba lagi.')
@@ -68,10 +71,10 @@ export default function AdminLoginPage() {
                         <Lock className="h-8 w-8 text-white" />
                     </div>
                     <h2 className="mt-6 text-3xl font-bold text-gray-900">
-                        Admin Login
+                        Portal Internal
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Masuk ke dashboard RSQUARE
+                        Masuk ke sistem manajemen RSQUARE
                     </p>
                 </motion.div>
 
