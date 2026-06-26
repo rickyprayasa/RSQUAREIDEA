@@ -37,7 +37,7 @@ export default function ProjectWorkspace() {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-[60vh]">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+                <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
             </div>
         )
     }
@@ -63,7 +63,7 @@ export default function ProjectWorkspace() {
                     <button
                         onClick={() => setActiveTab('board')}
                         className={`pb-3 px-1 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors ${
-                            activeTab === 'board' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                            activeTab === 'board' ? 'border-orange-600 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                     >
                         <LayoutDashboard className="h-4 w-4" /> Board (Kanban)
@@ -71,7 +71,7 @@ export default function ProjectWorkspace() {
                     <button
                         onClick={() => setActiveTab('documents')}
                         className={`pb-3 px-1 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors ${
-                            activeTab === 'documents' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                            activeTab === 'documents' ? 'border-orange-600 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                     >
                         <FileText className="h-4 w-4" /> Dokumen & Proposal
@@ -79,7 +79,7 @@ export default function ProjectWorkspace() {
                     <button
                         onClick={() => setActiveTab('settings')}
                         className={`pb-3 px-1 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors ${
-                            activeTab === 'settings' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                            activeTab === 'settings' ? 'border-orange-600 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                     >
                         <Settings className="h-4 w-4" /> Pengaturan
