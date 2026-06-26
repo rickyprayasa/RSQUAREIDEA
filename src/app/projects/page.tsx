@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { LayoutDashboard, CheckSquare, Clock, Plus, FolderOpen, Mail, Phone, Loader2, ArrowRight } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, Clock, Plus, FolderOpen, Folder, Mail, Phone, Loader2, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProjectsDashboard() {
