@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+// Pure service-role client to bypass RLS
+function getServiceClient() {
+    const { createClient } = require('@supabase/supabase-js')
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+}
 import { getSession } from '@/lib/auth'
 
 export async function PATCH(request: NextRequest, props: { params: Promise<{ taskId: string }> }) {
@@ -11,7 +19,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ tas
         }
 
         const data = await request.json()
-        const supabase = await createAdminClient()
+        const supabase = getServiceClient()
         
         const { data: task, error } = await supabase
             .from('project_tasks')
@@ -38,7 +46,7 @@ export async function DELETE(request: NextRequest, props: { params: Promise<{ ta
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const supabase = await createAdminClient()
+        const supabase = getServiceClient()
         
         const { error } = await supabase
             .from('project_tasks')

@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth'
+
+// Use a pure service-role client to bypass RLS on the projects table
+function getServiceClient() {
+    const { createClient } = require('@supabase/supabase-js')
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+}
 
 export async function GET(request: NextRequest) {
     try {
@@ -9,7 +18,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const supabase = await createAdminClient()
+        const supabase = getServiceClient()
         
         // Include tasks to calculate progress
         const { data: projects, error } = await supabase
@@ -35,7 +44,7 @@ export async function POST(request: NextRequest) {
         }
 
         const data = await request.json()
-        const supabase = await createAdminClient()
+        const supabase = getServiceClient()
         
         const { data: project, error } = await supabase
             .from('projects')
@@ -44,6 +53,8 @@ export async function POST(request: NextRequest) {
                 description: data.description || '',
                 client_name: data.client_name || '',
                 client_email: data.client_email || '',
+                client_phone: data.client_phone || '',
+                source_type: 'manual',
                 status: 'active'
             })
             .select()
@@ -58,3 +69,4 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 }
+

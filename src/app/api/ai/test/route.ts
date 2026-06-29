@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { google } from '@ai-sdk/google'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
-import { generateText } from 'ai'
+import { generateText, streamText } from 'ai'
 import { getAvailableModels } from '@/lib/ai-router'
 
 export const maxDuration = 30
 
-export async function POST() {
+export async function POST(req: Request) {
     const startTime = Date.now()
 
     try {
@@ -18,9 +18,13 @@ export async function POST() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Get keys
-        const { data } = await supabase.from('site_settings').select('key, value').in('key', ['openrouter_api_key'])
-        const openrouterKey = data?.find((s: any) => s.key === 'openrouter_api_key')?.value || ''
+        const body = await req.json().catch(() => ({}))
+        
+        // Get keys (from body, fallback to DB)
+        const { data } = await supabase.from('site_settings').select('key, value').in('key', ['openrouter_api_key', 'openrouter_base_url', 'primary_ai_model'])
+        const openrouterKey = body.openrouter_api_key !== undefined ? body.openrouter_api_key : (data?.find((s: any) => s.key === 'openrouter_api_key')?.value || '')
+        const openrouterBaseUrl = body.openrouter_base_url !== undefined ? body.openrouter_base_url : (data?.find((s: any) => s.key === 'openrouter_base_url')?.value || 'https://openrouter.ai/api/v1')
+        const primaryAiModel = body.primary_ai_model !== undefined ? body.primary_ai_model : (data?.find((s: any) => s.key === 'primary_ai_model')?.value || '')
         const googleKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || ''
 
         if (!googleKey && !openrouterKey) {
@@ -44,16 +48,21 @@ export async function POST() {
 
         // Test OpenRouter
         if (openrouterKey) {
-            const availableModels = await getAvailableModels()
-            const orModels = availableModels.filter(m => m.provider === 'openrouter')
-            if (orModels.length === 0) {
-                orModels.push({ provider: 'openrouter', id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 (Free)' })
+            let orModels = []
+            if (primaryAiModel) {
+                orModels.push({ provider: 'openrouter', id: primaryAiModel, name: primaryAiModel })
+            } else {
+                const availableModels = await getAvailableModels()
+                orModels = availableModels.filter(m => m.provider === 'openrouter')
+                if (orModels.length === 0) {
+                    orModels.push({ provider: 'openrouter', id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 (Free)' })
+                }
             }
 
             const openrouterProvider = createOpenAICompatible({
                 name: 'openrouter',
                 apiKey: openrouterKey,
-                baseURL: 'https://openrouter.ai/api/v1',
+                baseURL: openrouterBaseUrl,
             })
 
             let success = false
@@ -62,10 +71,12 @@ export async function POST() {
             // Try models sequentially just like the real router
             for (const m of orModels) {
                 try {
-                    const res = await generateText({
+                    // Use streamText for OpenRouter/9Router to support forced-streaming proxies
+                    const streamResult = await streamText({
                         model: openrouterProvider(m.id),
                         prompt: 'Balas dengan "OpenRouter berhasil terhubung!"',
                     })
+                    const text = await streamResult.text
                     results.push(`✅ OpenRouter (${m.id}) OK!`)
                     success = true
                     break // Stop on first success

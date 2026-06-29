@@ -641,61 +641,16 @@ export default function RequestsPage() {
                                             <label className="text-sm text-gray-500 flex items-center gap-1">
                                                 <FileText className="h-4 w-4" /> Deskripsi
                                             </label>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => handleGenerateProposal()}
-                                                    disabled={isGeneratingProposal}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
-                                                >
-                                                    {isGeneratingProposal ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
-                                                    {isGeneratingProposal ? 'Menyusun...' : 'Proposal Klien'}
-                                                </button>
-                                                <button
-                                                    onClick={() => handleGeneratePrd()}
-                                                    disabled={isGeneratingPrd}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
-                                                >
-                                                    {isGeneratingPrd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                                                    {isGeneratingPrd ? 'Menyusun...' : 'PRD Internal'}
-                                                </button>
-                                            </div>
                                         </div>
                                         <p className="p-4 bg-gray-50 rounded-xl text-gray-700 whitespace-pre-wrap">
                                             {selectedRequest.description}
                                         </p>
-
-                                        {((selectedRequest.prd_content && !showPrdModal) || (selectedRequest.proposal_content && !showProposalModal)) && (
-                                            <div className="mt-3 flex justify-end gap-2">
-                                                {selectedRequest.proposal_content && !showProposalModal && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setProposalContent(selectedRequest.proposal_content!);
-                                                            setShowProposalModal(true);
-                                                        }}
-                                                        className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 text-white hover:bg-orange-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
-                                                    >
-                                                        <Mail className="h-4 w-4" /> Buka Proposal yang Tersimpan
-                                                    </button>
-                                                )}
-                                                {selectedRequest.prd_content && !showPrdModal && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setPrdContent(selectedRequest.prd_content!);
-                                                            setShowPrdModal(true);
-                                                        }}
-                                                        className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl text-sm font-medium transition-colors shadow-sm"
-                                                    >
-                                                        <Sparkles className="h-4 w-4" /> Buka PRD yang Tersimpan
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
                                     </div>
                                 )}
 
                                 {/* Invoice Info */}
                                 {invoiceMap[selectedRequest.id] && invoiceMap[selectedRequest.id].length > 0 && (
-                                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mt-4">
                                         <p className="text-sm font-semibold text-orange-800 mb-2 flex items-center gap-1.5">
                                             <Receipt className="h-4 w-4" /> Invoice Terkait
                                         </p>
@@ -710,11 +665,6 @@ export default function RequestsPage() {
                                                         }`}>
                                                         {inv.status === 'paid' ? 'Lunas' : inv.status === 'sent' ? 'Terkirim' : 'Draft'}
                                                     </span>
-                                                    {inv.delivery_status === 'delivered' && (
-                                                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
-                                                            Dikirim
-                                                        </span>
-                                                    )}
                                                 </div>
                                             </div>
                                         ))}
@@ -722,44 +672,31 @@ export default function RequestsPage() {
                                 )}
 
                                 {/* Status Actions */}
-                                <div className="flex gap-3 pt-4 border-t">
+                                <div className="flex gap-3 pt-6 mt-4 border-t border-gray-100">
                                     <button
                                         onClick={() => handleUpdateStatus(selectedRequest.id, 'in_progress')}
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors"
+                                        className="flex-[2] flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:from-indigo-700 hover:to-purple-700 transition-colors shadow-md shadow-indigo-200"
                                     >
                                         <Play className="h-5 w-5" />
-                                        Mulai Kerjakan
-                                    </button>
-                                    <button
-                                        onClick={() => handleUpdateStatus(selectedRequest.id, 'completed')}
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
-                                    >
-                                        <Check className="h-5 w-5" />
-                                        Selesai
+                                        Terima & Kirim ke Project Management
                                     </button>
                                     <button
                                         onClick={() => handleUpdateStatus(selectedRequest.id, 'rejected')}
-                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors"
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold hover:bg-red-100 transition-colors"
                                     >
                                         <XCircle className="h-5 w-5" />
+                                        Tolak
                                     </button>
                                 </div>
 
-                                {/* Invoice & Delivery Actions */}
+                                {/* Invoice Actions */}
                                 <div className="flex gap-3">
                                     <button
                                         onClick={() => handleCreateInvoice(selectedRequest)}
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors"
+                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-orange-50 text-orange-600 border border-orange-100 rounded-xl font-bold hover:bg-orange-100 transition-colors"
                                     >
                                         <Receipt className="h-5 w-5" />
                                         Buat Invoice
-                                    </button>
-                                    <button
-                                        onClick={() => setShowDeliver(true)}
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 text-white rounded-xl font-medium hover:bg-emerald-600 transition-colors"
-                                    >
-                                        <Package className="h-5 w-5" />
-                                        Kirim Aplikasi
                                     </button>
                                 </div>
                             </div>

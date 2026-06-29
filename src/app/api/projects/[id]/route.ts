@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth'
+
+function getServiceClient() {
+    const { createClient } = require('@supabase/supabase-js')
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+}
 
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -10,14 +18,14 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const supabase = await createAdminClient()
+        const supabase = getServiceClient()
         
         const { data: project, error } = await supabase
             .from('projects')
             .select(`
                 *,
                 project_tasks(id, title, description, status, assignee_id, due_date, position),
-                project_documents(id, type, title, updated_at)
+                project_documents(id, type, title, content, updated_at)
             `)
             .eq('id', params.id)
             .single()
@@ -41,7 +49,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
         }
 
         const data = await request.json()
-        const supabase = await createAdminClient()
+        const supabase = getServiceClient()
         
         const { data: project, error } = await supabase
             .from('projects')
@@ -59,3 +67,28 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 }
+
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    try {
+        const session = await getSession()
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const supabase = getServiceClient()
+        const { error } = await supabase
+            .from('projects')
+            .delete()
+            .eq('id', params.id)
+
+        if (error) {
+            return NextResponse.json({ error: error.message }, { status: 400 })
+        }
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+}
+

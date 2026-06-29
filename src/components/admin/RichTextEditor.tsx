@@ -140,6 +140,7 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
     // Custom AI state (replacing useCompletion)
     const [aiInput, setAiInput] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
+    const [selectedTextContext, setSelectedTextContext] = useState('')
 
     // Color picker states
     const [showHighlightPicker, setShowHighlightPicker] = useState(false)
@@ -349,15 +350,21 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
             const imageUrl = imgMatch ? imgMatch[1] : undefined
 
             // For fix_format and fix_grammar, send the current content as context
-            const context = (cmd === 'fix_format' || cmd === 'fix_grammar') ? html : undefined
+            let finalCmd = cmd
+            let finalContext = (cmd === 'fix_format' || cmd === 'fix_grammar') ? html : undefined
+            
+            if (cmd === 'generate' && selectedTextContext) {
+                finalCmd = 'edit_selection'
+                finalContext = selectedTextContext
+            }
 
             const response = await fetch('/api/ai/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     prompt: effectivePrompt,
-                    command: cmd,
-                    context: context,
+                    command: finalCmd,
+                    context: finalContext,
                     imageUrl: imageUrl
                 })
             })
@@ -867,7 +874,16 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
 
                         <motion.button
                             type="button"
-                            onClick={() => setShowAIModal(true)}
+                            onClick={() => {
+                                const { from, to, empty } = editor.state.selection
+                                if (!empty) {
+                                    const selectedText = editor.state.doc.textBetween(from, to, '\n')
+                                    setSelectedTextContext(selectedText)
+                                } else {
+                                    setSelectedTextContext('')
+                                }
+                                setShowAIModal(true)
+                            }}
                             className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -901,8 +917,13 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
 
                             <div className="mb-4">
                                 <label htmlFor="ai-input" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Apa yang ingin Anda tulis?
+                                    {selectedTextContext ? 'Instruksi untuk teks yang dipilih:' : 'Apa yang ingin Anda tulis?'}
                                 </label>
+                                {selectedTextContext && (
+                                    <div className="mb-3 p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg text-xs text-gray-600 italic line-clamp-3">
+                                        "{selectedTextContext}"
+                                    </div>
+                                )}
                                 <textarea
                                     id="ai-input"
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm"

@@ -1,17 +1,9 @@
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
+import { createClient } from '@/lib/supabase/server';
 
 export const maxDuration = 60;
-// export const runtime = 'edge'; // Switch to Node.js for better stability/debugging
-
-// Initialize Z.Ai (Zhipu AI) using OpenAI-compatible provider
-const zai = createOpenAICompatible({
-    name: 'zai',
-    baseURL: 'https://api.z.ai/api/coding/paas/v4',
-    headers: {
-        Authorization: `Bearer ${process.env.ZAI_API_KEY}`,
-    },
-});
 
 export async function POST(req: Request) {
     const { prompt, command, context, imageUrl } = await req.json();
@@ -65,7 +57,8 @@ PERBAIKAN YANG HARUS DILAKUKAN:
 4. Pastikan paragraf dibungkus <p> dengan benar
 5. Perbaiki format list <ul> dan <ol>
 6. Hapus spasi ganda atau baris kosong berlebih
-7. JANGAN ubah kata-kata atau redaksi kalimat, HANYA format HTML-nya saja.
+7. JIKA teks terlihat seperti data tabel atau skema database (misal: daftar Sheet dan kolom yang dipisahkan spasi), ubah struktur tersebut menjadi tabel HTML (<table>, <thead>, <tbody>, <tr>, <th>, <td>) dengan class "table-auto w-full border-collapse border border-gray-300 my-4" dan beri styling border/padding di <td>/<th>.
+8. JANGAN ubah kata-kata atau redaksi kalimat, HANYA format HTML-nya saja.
 
 RETURN: Hanya kode HTML yang sudah dirapikan.`;
     } else if (command === 'fix_grammar') {
@@ -107,6 +100,22 @@ Contoh format:
 </ul>
 
 Langsung berikan listnya saja.`;
+    } else if (command === 'edit_selection') {
+        systemInstruction += `
+
+TUGAS: Modifikasi teks/HTML yang diberikan oleh pengguna sesuai dengan instruksi.
+
+INSTRUKSI MODIFIKASI:
+${prompt}
+
+TEKS/HTML YANG HARUS DIMODIFIKASI:
+${context}
+
+ATURAN:
+1. Pahami konteks teks asli dan terapkan instruksi dari pengguna.
+2. JANGAN mengubah struktur HTML secara drastis jika tidak diminta.
+3. Kembalikan HANYA teks/HTML yang sudah dimodifikasi, tanpa pengantar, tanpa penjelasan, dan jangan gunakan markdown block (\`\`\`html).
+4. Gunakan gaya bahasa non-formal, santai, dan ramah seperti asisten penulis artikel blog Indonesia.`;
     } else if (command === 'generate') {
         systemInstruction += `
 
@@ -157,7 +166,29 @@ INSTRUKSI KHUSUS (VISUAL & FORMULA):
     }
 
     try {
-        console.log("Generating with model glm-4.7 on Z.Ai...");
+        const supabase = await createClient();
+        const { data } = await supabase.from('site_settings').select('key, value').in('key', ['openrouter_api_key', 'openrouter_base_url', 'primary_ai_model']);
+        
+        const openrouterKey = data?.find(s => s.key === 'openrouter_api_key')?.value || '';
+        const openrouterBaseUrl = data?.find(s => s.key === 'openrouter_base_url')?.value || 'https://openrouter.ai/api/v1';
+        const primaryAiModel = data?.find(s => s.key === 'primary_ai_model')?.value || '';
+
+        let modelInstance;
+        
+        if (primaryAiModel && openrouterKey) {
+            const openrouter = createOpenAICompatible({
+                name: 'openrouter',
+                apiKey: openrouterKey,
+                baseURL: openrouterBaseUrl,
+            });
+            modelInstance = openrouter(primaryAiModel);
+            console.log(`Generating with primary model ${primaryAiModel} on 9Router...`);
+        } else if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+            modelInstance = google('gemini-2.5-flash');
+            console.log("Generating with fallback model gemini-2.5-flash...");
+        } else {
+            throw new Error("No AI provider configured.");
+        }
 
         const messages: any[] = [
             { role: 'system', content: systemInstruction },
@@ -178,9 +209,9 @@ INSTRUKSI KHUSUS (VISUAL & FORMULA):
             });
         }
 
-        // Use streamText to prevent Vercel 504 timeouts on long generations
+        // Use streamText
         const result = await streamText({
-            model: zai('glm-4.7'),
+            model: modelInstance,
             messages: messages,
         });
 

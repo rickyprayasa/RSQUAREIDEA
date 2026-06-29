@@ -1,14 +1,15 @@
 import { google } from '@ai-sdk/google'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
-import { generateText, LanguageModel } from 'ai'
+import { streamText, LanguageModel } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 
 // Base Gemini models that are consistently reliable
 const BASE_GEMINI_MODELS = [
     { provider: 'google', id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+    { provider: 'openrouter', id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash (OpenRouter)' },
     { provider: 'google', id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite' },
     { provider: 'google', id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
-    { provider: 'google', id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite' },
+    { provider: 'openrouter', id: 'google/gemini-2.0-flash-lite-preview-02-05:free', name: 'Gemini 2.0 Flash Lite (OpenRouter)' },
 ]
 
 // Default OpenRouter fallback in case the API fetch fails
@@ -71,7 +72,7 @@ export async function getAvailableModels(): Promise<{ provider: string; id: stri
 }
 
 interface GenerateResult {
-    result: Awaited<ReturnType<typeof generateText>>
+    result: any
     usedModel: { provider: string; id: string; name: string }
     attempts: number
 }
@@ -83,18 +84,24 @@ async function getApiKeys() {
         const { data } = await supabase
             .from('site_settings')
             .select('key, value')
-            .in('key', ['openrouter_api_key'])
+            .in('key', ['openrouter_api_key', 'openrouter_base_url', 'primary_ai_model'])
         
         const openrouterKey = data?.find(s => s.key === 'openrouter_api_key')?.value || ''
+        const openrouterBaseUrl = data?.find(s => s.key === 'openrouter_base_url')?.value || 'https://openrouter.ai/api/v1'
+        const primaryAiModel = data?.find(s => s.key === 'primary_ai_model')?.value || ''
         
         return {
             googleKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || '',
             openrouterKey,
+            openrouterBaseUrl,
+            primaryAiModel,
         }
     } catch {
         return {
             googleKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || '',
             openrouterKey: '',
+            openrouterBaseUrl: 'https://openrouter.ai/api/v1',
+            primaryAiModel: '',
         }
     }
 }
@@ -120,29 +127,39 @@ export async function generateWithFallback(options: {
     temperature?: number,
     tier?: 'standard' | 'high'
 }): Promise<GenerateResult> {
-    const { googleKey, openrouterKey } = await getApiKeys()
+    const { googleKey, openrouterKey, openrouterBaseUrl, primaryAiModel } = await getApiKeys()
     
     let openrouterProvider: ReturnType<typeof createOpenAICompatible> | null = null
     if (openrouterKey) {
         openrouterProvider = createOpenAICompatible({
             name: 'openrouter',
             apiKey: openrouterKey,
-            baseURL: 'https://openrouter.ai/api/v1',
+            baseURL: openrouterBaseUrl,
         })
     }
 
     let attempts = 0
+    const MAX_RETRIES = 2
     let lastError: any = null
     let fallbackModels = await getAvailableModels()
 
     // If high tier is requested, prepend Pro/Reasoning models
     if (options.tier === 'high') {
         const highTierModels = [
-            { provider: 'google', id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro' },
             { provider: 'google', id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
+            { provider: 'openrouter', id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro (OpenRouter)' },
+            { provider: 'openrouter', id: 'google/gemini-pro-1.5', name: 'Gemini 1.5 Pro (OpenRouter)' },
             { provider: 'google', id: 'gemini-2.0-pro-exp-02-05', name: 'Gemini 2.0 Pro Exp' },
         ]
         fallbackModels = [...highTierModels, ...fallbackModels]
+    }
+
+    // If user selected a specific model, prioritize it above all else
+    if (primaryAiModel) {
+        fallbackModels = [
+            { provider: 'openrouter', id: primaryAiModel, name: primaryAiModel },
+            ...fallbackModels.filter(m => m.id !== primaryAiModel)
+        ]
     }
 
     for (const modelConfig of fallbackModels) {
@@ -152,52 +169,73 @@ export async function generateWithFallback(options: {
 
         let modelInstance: LanguageModel
         
+        if (modelConfig.provider === 'google') {
+            modelInstance = google(modelConfig.id)
+        } else if (modelConfig.provider === 'openrouter' && openrouterProvider) {
+            modelInstance = openrouterProvider(modelConfig.id)
+        } else {
+            continue 
+        }
+
+        attempts++
+        console.log(`[AI Router] Attempting generation with ${modelConfig.provider}/${modelConfig.id}...`)
+
+        const generateOptions: any = {
+            model: modelInstance,
+            system: options.system,
+            maxOutputTokens: options.maxTokens,
+            temperature: options.temperature,
+        }
+
+        if (options.messages) {
+            generateOptions.messages = options.messages
+        } else if (options.prompt) {
+            generateOptions.prompt = options.prompt
+        }
+            
+        let resultText = '';
+        let usageData = {};
+        let resultObj = null;
+
         try {
-            if (modelConfig.provider === 'google') {
-                modelInstance = google(modelConfig.id)
-            } else if (modelConfig.provider === 'openrouter' && openrouterProvider) {
-                modelInstance = openrouterProvider(modelConfig.id)
-            } else {
-                continue // Should not reach here based on previous checks
-            }
-
-            console.log(`[AI Router] Attempting generation with ${modelConfig.provider}/${modelConfig.id}...`)
-            attempts++
-
-            const generateOptions: any = {
-                model: modelInstance,
-                system: options.system,
-                maxOutputTokens: options.maxTokens,
-                temperature: options.temperature,
-            }
-
-            if (options.messages) {
-                generateOptions.messages = options.messages
-            } else if (options.prompt) {
-                generateOptions.prompt = options.prompt
-            }
-
-            const result = await generateText(generateOptions)
-
-            console.log(`[AI Router] Success with ${modelConfig.id}!`)
-            
-            return {
-                result,
-                usedModel: modelConfig,
-                attempts
-            }
-
-        } catch (error) {
-            console.warn(`[AI Router] Model ${modelConfig.id} failed:`, error instanceof Error ? error.message : error)
+            // Use streamText for robustness with proxies that force SSE streams
+            const streamResult = await streamText(generateOptions)
+            resultText = await streamResult.text
+            usageData = await streamResult.usage
+            resultObj = { ...streamResult, text: resultText, usage: usageData }
+        } catch (error: any) {
             lastError = error
-            
-            // If the error indicates a bad API key or invalid request, we shouldn't retry with THIS provider
-            // However, since we might have another provider (e.g. OpenRouter), we just continue to the next model
-            // But if it's a completely fatal error that applies to everything, we might throw.
             if (!isRetryableError(error)) {
-                console.warn(`[AI Router] Non-retryable error encountered for ${modelConfig.provider}. Continuing to next model...`)
+                console.error(`[AI Router] Model ${modelConfig.id} non-retryable error:`, error)
                 continue
             }
+            
+            console.warn(`[AI Router] Model ${modelConfig.id} failed:`, error.message)
+            
+            // Retry logic
+            if (attempts < MAX_RETRIES) {
+                attempts++
+                console.log(`[AI Router] Retrying ${modelConfig.id} (Attempt ${attempts}/${MAX_RETRIES})...`)
+                await new Promise(r => setTimeout(r, 1000 * attempts))
+                continue // Retry same model
+            } else {
+                console.warn(`[AI Router] Model ${modelConfig.id} exhausted retries, moving to next model...`)
+                continue // Move to next model
+            }
+        }
+
+        console.log(`[AI Router] Success with ${modelConfig.id}!`)
+        
+        // Strip <think> tags from DeepSeek models
+        let finalOutput = resultText;
+        if (modelConfig.id.includes('deepseek')) {
+            finalOutput = finalOutput.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+        }
+
+        return {
+            result: { ...resultObj, text: finalOutput } as any,
+            usedModel: modelConfig,
+            attempts
         }
     }
 

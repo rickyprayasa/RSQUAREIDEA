@@ -149,3 +149,111 @@ export async function GET(request: NextRequest) {
         )
     }
 }
+
+export async function PATCH(request: NextRequest) {
+    try {
+        const session = await getSession()
+
+        // Only admins/superadmins can edit users
+        if (!session || !['admin', 'superadmin'].includes(session.role)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const { id, name, role, password } = await request.json()
+
+        if (!id || !name || !role) {
+            return NextResponse.json(
+                { error: 'ID, name, and role are required' },
+                { status: 400 }
+            )
+        }
+
+        const { createClient } = require('@supabase/supabase-js')
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                }
+            }
+        )
+
+        // Update profile in users table
+        const { error: profileError } = await supabase
+            .from('users')
+            .update({ name, role })
+            .eq('id', id)
+
+        if (profileError) {
+            return NextResponse.json({ error: profileError.message }, { status: 400 })
+        }
+
+        // If password is provided, update it in auth
+        if (password && password.trim() !== '') {
+            const { error: authError } = await supabase.auth.admin.updateUserById(id, { password })
+            if (authError) {
+                return NextResponse.json({ error: `Profil diperbarui, tapi gagal mengubah password: ${authError.message}` }, { status: 400 })
+            }
+        }
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error('Error updating user:', error)
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        )
+    }
+}
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const session = await getSession()
+
+        // Only superadmins or admins can delete users
+        if (!session || !['admin', 'superadmin'].includes(session.role)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const { searchParams } = new URL(request.url)
+        const id = searchParams.get('id')
+
+        if (!id) {
+            return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+        }
+
+        // Prevent self deletion
+        if (id === session.id) {
+            return NextResponse.json({ error: 'Anda tidak dapat menghapus akun Anda sendiri.' }, { status: 400 })
+        }
+
+        const { createClient } = require('@supabase/supabase-js')
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                }
+            }
+        )
+
+        // Delete from auth (cascades to public.users)
+        const { error: authError } = await supabase.auth.admin.deleteUser(id)
+
+        if (authError) {
+            return NextResponse.json({ error: authError.message }, { status: 400 })
+        }
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error('Error deleting user:', error)
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        )
+    }
+}

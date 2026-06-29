@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+// Pure service-role client to bypass RLS
+function getServiceClient() {
+    const { createClient } = require('@supabase/supabase-js')
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+}
 import { getSession } from '@/lib/auth'
 
 export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -11,7 +19,7 @@ export async function POST(request: NextRequest, props: { params: Promise<{ id: 
         }
 
         const data = await request.json()
-        const supabase = await createAdminClient()
+        const supabase = getServiceClient()
         
         const { data: task, error } = await supabase
             .from('project_tasks')

@@ -1,17 +1,32 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { LayoutDashboard, CheckSquare, Clock, Plus, FolderOpen, Folder, Mail, Phone, Loader2, ArrowRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { LayoutDashboard, CheckSquare, Clock, Plus, FolderOpen, Folder, Mail, Phone, Loader2, ArrowRight, X } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProjectsDashboard() {
     const [projects, setProjects] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [newProject, setNewProject] = useState({
+        name: '',
+        description: '',
+        client_name: '',
+        client_email: '',
+        client_phone: ''
+    })
+    const [submitting, setSubmitting] = useState(false)
+    const [toast, setToast] = useState<{ show: boolean; msg: string; type: 'success' | 'error' }>({ show: false, msg: '', type: 'success' })
 
     useEffect(() => {
         fetchProjects()
     }, [])
+
+    const showToast = (msg: string, type: 'success' | 'error') => {
+        setToast({ show: true, msg, type })
+        setTimeout(() => setToast({ show: false, msg: '', type: 'success' }), 3000)
+    }
 
     const fetchProjects = async () => {
         try {
@@ -27,9 +42,44 @@ export default function ProjectsDashboard() {
         }
     }
 
-    const getProgress = (tasks: any[]) => {
+    const handleCreateProject = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!newProject.name.trim()) return
+
+        setSubmitting(true)
+        try {
+            const res = await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newProject)
+            })
+            const data = await res.json()
+            if (data.success) {
+                showToast('Proyek berhasil dibuat!', 'success')
+                setIsModalOpen(false)
+                setNewProject({
+                    name: '',
+                    description: '',
+                    client_name: '',
+                    client_email: '',
+                    client_phone: ''
+                })
+                fetchProjects()
+            } else {
+                showToast(data.error || 'Gagal membuat proyek', 'error')
+            }
+        } catch (error) {
+            showToast('Terjadi kesalahan koneksi', 'error')
+        } finally {
+            setSubmitting(false)
+        }
+    }
+
+    const getProgress = (project: any) => {
+        if (project.status === 'completed') return 100
+        const tasks = project.project_tasks
         if (!tasks || tasks.length === 0) return 0
-        const doneTasks = tasks.filter(t => t.status === 'done').length
+        const doneTasks = tasks.filter((t: any) => t.status === 'done').length
         return Math.round((doneTasks / tasks.length) * 100)
     }
 
@@ -51,7 +101,10 @@ export default function ProjectsDashboard() {
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Workspace Dashboard</h1>
                     <p className="text-gray-500 mt-1">Kelola proyek aktif, pantau tugas, dan kerjakan dokumen proposal klien.</p>
                 </div>
-                <button className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-5 py-2.5 rounded-xl font-medium hover:from-orange-600 hover:to-amber-600 transition-all shadow-md shadow-orange-200">
+                <button 
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-5 py-2.5 rounded-xl font-medium hover:from-orange-600 hover:to-amber-600 transition-all shadow-md shadow-orange-200"
+                >
                     <Plus className="h-5 w-5" />
                     Proyek Manual
                 </button>
@@ -132,7 +185,7 @@ export default function ProjectsDashboard() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {projects.map((project, index) => {
-                            const progress = getProgress(project.project_tasks)
+                            const progress = getProgress(project)
                             return (
                                 <motion.div
                                     key={project.id}
@@ -207,6 +260,115 @@ export default function ProjectsDashboard() {
                     </div>
                 )}
             </div>
+            
+            {/* Modal & Toast */}
+            {toast.show && (
+                <div className={`fixed top-4 right-4 z-[9999] px-4 py-3 rounded-xl shadow-xl text-white font-medium flex items-center gap-2 transition-all ${toast.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                    {toast.msg}
+                </div>
+            )}
+
+            <AnimatePresence>
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-500 to-amber-500"></div>
+                            
+                            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                                <h3 className="text-xl font-bold text-gray-950">Buat Proyek Manual</h3>
+                                <button 
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 p-1.5 rounded-lg transition-colors"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleCreateProject} className="p-6 space-y-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Nama Proyek *</label>
+                                    <input 
+                                        type="text" 
+                                        required
+                                        placeholder="Contoh: Website E-Commerce Toko Baju"
+                                        value={newProject.name}
+                                        onChange={e => setNewProject({...newProject, name: e.target.value})}
+                                        className="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:ring-orange-200 focus:ring-1 focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all text-gray-950"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Deskripsi Proyek</label>
+                                    <textarea 
+                                        placeholder="Jelaskan detail request kustom proyek..."
+                                        rows={3}
+                                        value={newProject.description}
+                                        onChange={e => setNewProject({...newProject, description: e.target.value})}
+                                        className="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:ring-orange-200 focus:ring-1 focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all text-gray-950 resize-y"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Nama Klien</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Nama Klien"
+                                            value={newProject.client_name}
+                                            onChange={e => setNewProject({...newProject, client_name: e.target.value})}
+                                            className="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:ring-orange-200 focus:ring-1 focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all text-gray-950"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Nomor HP Klien</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Nomor HP Klien"
+                                            value={newProject.client_phone}
+                                            onChange={e => setNewProject({...newProject, client_phone: e.target.value})}
+                                            className="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:ring-orange-200 focus:ring-1 focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all text-gray-950"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Klien</label>
+                                    <input 
+                                        type="email" 
+                                        placeholder="emailklien@domain.com"
+                                        value={newProject.client_email}
+                                        onChange={e => setNewProject({...newProject, client_email: e.target.value})}
+                                        className="w-full bg-gray-50 border border-gray-200 focus:border-orange-500 focus:ring-orange-200 focus:ring-1 focus:bg-white rounded-xl px-4 py-2.5 text-sm outline-none transition-all text-gray-950"
+                                    />
+                                </div>
+
+                                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-xl transition-all text-sm"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        disabled={submitting}
+                                        className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-2.5 rounded-xl font-medium hover:from-orange-600 hover:to-amber-600 transition-all shadow-md shadow-orange-200 disabled:opacity-50 text-sm"
+                                    >
+                                        {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                                        Buat Proyek
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

@@ -59,6 +59,55 @@ export async function PATCH(request: NextRequest) {
 
         if (error) throw error
 
+        // Sync with PM projects
+        try {
+            const { createClient } = require('@supabase/supabase-js')
+            const serviceClient = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+                { auth: { autoRefreshToken: false, persistSession: false } }
+            )
+
+            const { data: existingProject } = await serviceClient
+                .from('projects')
+                .select('id')
+                .eq('source_type', 'template_requests')
+                .eq('source_id', data.id)
+                .maybeSingle()
+
+            if (data.status === 'in_progress' && !existingProject) {
+                const { data: reqDetails } = await supabase
+                    .from('template_requests')
+                    .select('*')
+                    .eq('id', data.id)
+                    .single()
+
+                if (reqDetails) {
+                    await serviceClient.from('projects').insert({
+                        name: `Project: ${reqDetails.company || reqDetails.name}`,
+                        description: reqDetails.description || '-',
+                        client_name: reqDetails.name,
+                        client_email: reqDetails.email,
+                        client_phone: reqDetails.phone || null,
+                        source_type: 'template_requests',
+                        source_id: reqDetails.id,
+                        status: 'active'
+                    })
+                }
+            } else if (existingProject) {
+                let projectStatus = 'active'
+                if (data.status === 'completed') projectStatus = 'completed'
+                else if (data.status === 'rejected') projectStatus = 'archived'
+
+                await serviceClient
+                    .from('projects')
+                    .update({ status: projectStatus })
+                    .eq('id', existingProject.id)
+            }
+        } catch (syncErr) {
+            console.error('Error syncing project on PATCH:', syncErr)
+        }
+
         return NextResponse.json({ success: true })
     } catch (error) {
         console.error('Error:', error)

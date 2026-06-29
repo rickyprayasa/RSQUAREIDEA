@@ -100,6 +100,8 @@ interface SettingsData {
     duitku_production: string
     // AI settings
     openrouter_api_key: string
+    openrouter_base_url: string
+    primary_ai_model: string
 }
 
 const defaultSettings: SettingsData = {
@@ -169,6 +171,8 @@ Tim RSQUARE`,
     duitku_production: 'false',
     // AI settings
     openrouter_api_key: '',
+    openrouter_base_url: 'https://openrouter.ai/api/v1',
+    primary_ai_model: '',
 }
 
 const tabs = [
@@ -205,6 +209,21 @@ export default function SettingsPage() {
     const [paymentForm, setPaymentForm] = useState({ name: '', bankName: '', accountNumber: '', accountName: '' })
     const [savingPayment, setSavingPayment] = useState(false)
     const [deletingPaymentId, setDeletingPaymentId] = useState<number | null>(null)
+
+    const [aiModels, setAiModels] = useState<{ id: string; name: string }[]>([])
+    const [loadingAiModels, setLoadingAiModels] = useState(false)
+
+    const fetchAiModels = async () => {
+        setLoadingAiModels(true)
+        try {
+            const res = await fetch('/api/admin/ai-models')
+            const data = await res.json()
+            if (data.success && data.models) {
+                setAiModels(data.models)
+            }
+        } catch (err) { console.error('Gagal mengambil model AI', err) }
+        finally { setLoadingAiModels(false) }
+    }
 
     const fetchPaymentMethods = async () => {
         setLoadingPayments(true)
@@ -310,6 +329,7 @@ export default function SettingsPage() {
     // Auto-fetch payment methods when switching to payment tab
     useEffect(() => {
         if (activeTab === 'payment') fetchPaymentMethods()
+        if (activeTab === 'ai') fetchAiModels()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab])
 
@@ -1436,6 +1456,9 @@ export default function SettingsPage() {
                     <AiSettings
                         settings={settings}
                         handleChange={handleChange}
+                        aiModels={aiModels}
+                        loadingAiModels={loadingAiModels}
+                        fetchAiModels={fetchAiModels}
                     />
                 )}
             </motion.div>
@@ -1765,7 +1788,19 @@ function DuitkuSettings({ settings, handleChange }: { settings: SettingsData, ha
     )
 }
 
-function AiSettings({ settings, handleChange }: { settings: SettingsData, handleChange: (key: keyof SettingsData, value: string) => void }) {
+function AiSettings({ 
+    settings, 
+    handleChange,
+    aiModels,
+    loadingAiModels,
+    fetchAiModels 
+}: { 
+    settings: SettingsData, 
+    handleChange: (key: keyof SettingsData, value: string) => void,
+    aiModels: { id: string; name: string }[],
+    loadingAiModels: boolean,
+    fetchAiModels: () => void
+}) {
     const [testing, setTesting] = useState(false)
     const [testResult, setTestResult] = useState<{
         success?: boolean
@@ -1781,7 +1816,15 @@ function AiSettings({ settings, handleChange }: { settings: SettingsData, handle
         setTesting(true)
         setTestResult(null)
         try {
-            const res = await fetch('/api/ai/test', { method: 'POST' })
+            const res = await fetch('/api/ai/test', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    openrouter_api_key: settings.openrouter_api_key,
+                    openrouter_base_url: settings.openrouter_base_url,
+                    primary_ai_model: settings.primary_ai_model
+                })
+            })
             const data = await res.json()
             setTestResult(data)
         } catch (err) {
@@ -1831,6 +1874,62 @@ function AiSettings({ settings, handleChange }: { settings: SettingsData, handle
                 <p className="text-xs text-gray-500 mt-1.5">
                     Tambahkan API Key <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:text-violet-700 font-medium underline">OpenRouter</a> untuk menambah pool model AI gratis (DeepSeek R1/V3, Llama 3, Qwen). Jika dikosongkan, sistem hanya akan menggunakan model Google Gemini.
                 </p>
+            </div>
+
+            <div className="mb-4 md:mb-6">
+                <label className="text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2 flex items-center gap-1.5 md:gap-2">
+                    <LinkIcon className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500" />
+                    OpenRouter Base URL (Opsional / Untuk 9Router)
+                </label>
+                <div className="relative">
+                    <input
+                        type="text"
+                        value={settings.openrouter_base_url || 'https://openrouter.ai/api/v1'}
+                        onChange={(e) => handleChange('openrouter_base_url', e.target.value)}
+                        onBlur={fetchAiModels}
+                        placeholder="https://openrouter.ai/api/v1"
+                        className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all font-mono"
+                    />
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5">
+                    Gunakan <code>http://localhost:20128/v1</code> jika Anda menggunakan <a href="https://github.com/9router/9router" target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:text-violet-700 font-medium underline">9Router Proxy</a> lokal. Biarkan default jika Anda menggunakan OpenRouter asli.
+                </p>
+            </div>
+
+            <div className="mb-4 md:mb-6">
+                <label className="text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2 flex items-center gap-1.5 md:gap-2">
+                    <Brain className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500" />
+                    Model AI Default (Opsional)
+                </label>
+                <div className="relative">
+                    <select
+                        value={settings.primary_ai_model || ''}
+                        onChange={(e) => handleChange('primary_ai_model', e.target.value)}
+                        className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all appearance-none"
+                    >
+                        <option value="">-- Otomatis (Gunakan Router Bawaan RSQUARE) --</option>
+                        {loadingAiModels ? (
+                            <option disabled>Memuat daftar model...</option>
+                        ) : (
+                            aiModels.map(model => (
+                                <option key={model.id} value={model.id}>{model.name} ({model.id})</option>
+                            ))
+                        )}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+                <div className="flex justify-between items-center mt-1.5">
+                    <p className="text-xs text-gray-500">
+                        Pilih model spesifik dari OpenRouter/9Router yang ingin diprioritaskan.
+                    </p>
+                    <button onClick={fetchAiModels} type="button" className="text-xs text-violet-600 hover:underline flex items-center gap-1">
+                        <Loader2 className={`w-3 h-3 ${loadingAiModels ? 'animate-spin' : ''}`} /> Refresh Model
+                    </button>
+                </div>
             </div>
 
             {/* Test AI Connection */}
