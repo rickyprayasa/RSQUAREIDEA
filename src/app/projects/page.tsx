@@ -75,6 +75,25 @@ export default function ProjectsDashboard() {
         }
     }
 
+    const handleCompleteProject = async (projectId: string) => {
+        try {
+            const res = await fetch(`/api/projects/${projectId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'completed' })
+            })
+            const data = await res.json()
+            if (data.success) {
+                showToast('Proyek berhasil diselesaikan!', 'success')
+                fetchProjects()
+            } else {
+                showToast(data.error || 'Gagal menyelesaikan proyek', 'error')
+            }
+        } catch (error) {
+            showToast('Terjadi kesalahan koneksi', 'error')
+        }
+    }
+
     const getProgress = (project: any) => {
         if (project.status === 'completed') return 100
         const tasks = project.project_tasks
@@ -248,8 +267,22 @@ export default function ProjectsDashboard() {
                                                 <span className="text-xs text-gray-400 font-medium">
                                                     {new Date(project.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                 </span>
-                                                <div className="flex items-center gap-1 text-sm font-bold text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
-                                                    Buka Workspace <ArrowRight className="h-4 w-4" />
+                                                <div className="flex items-center gap-3">
+                                                    {project.status === 'active' && progress === 100 && (
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                handleCompleteProject(project.id);
+                                                            }}
+                                                            className="px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-lg hover:bg-green-600 transition-colors shadow-sm z-20 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
+                                                        >
+                                                            Selesaikan
+                                                        </button>
+                                                    )}
+                                                    <div className="flex items-center gap-1 text-sm font-bold text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                                                        Buka Workspace <ArrowRight className="h-4 w-4" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
