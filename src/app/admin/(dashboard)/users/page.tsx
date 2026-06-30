@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Loader2, Users, Mail, Shield, AlertTriangle, Edit2, Trash2, X } from 'lucide-react'
+import Portal from '@/components/Portal'
 import { motion } from 'framer-motion'
 
 export default function UsersPage() {
@@ -243,7 +244,8 @@ export default function UsersPage() {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+                <Portal>
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -331,11 +333,13 @@ export default function UsersPage() {
                         </div>
                     </motion.div>
                 </div>
+                </Portal>
             )}
 
             {/* Edit Modal */}
             {showEditModal && selectedUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+                <Portal>
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -414,11 +418,13 @@ export default function UsersPage() {
                         </div>
                     </motion.div>
                 </div>
+                </Portal>
             )}
 
             {/* Delete Confirm Modal */}
             {showDeleteConfirm && selectedUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+                <Portal>
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -457,6 +463,7 @@ export default function UsersPage() {
                         </div>
                     </motion.div>
                 </div>
+                </Portal>
             )}
         </div>
     )

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useEffect as useClientEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -93,7 +94,10 @@ export default function RequestsPage() {
 
 
 
+    const [mounted, setMounted] = useState(false)
+
     useEffect(() => {
+        setMounted(true)
         fetchRequests()
         fetchInvoices()
     }, [])
@@ -453,7 +457,7 @@ export default function RequestsPage() {
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`fixed top-4 right-4 z-[100] px-6 py-3 rounded-xl shadow-2xl text-white font-medium ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
+                    className={`fixed top-4 right-4 z-[10000] px-6 py-3 rounded-xl shadow-2xl text-white font-medium ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
                 >
                     {toast.message}
                 </motion.div>
@@ -577,8 +581,8 @@ export default function RequestsPage() {
             )}
 
             {/* Detail Modal */}
-            {selectedRequest && !showDeliver && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            {mounted && selectedRequest && !showDeliver && createPortal(
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -672,22 +676,45 @@ export default function RequestsPage() {
                                 )}
 
                                 {/* Status Actions */}
-                                <div className="flex gap-3 pt-6 mt-4 border-t border-gray-100">
-                                    <button
-                                        onClick={() => handleUpdateStatus(selectedRequest.id, 'in_progress')}
-                                        className="flex-[2] flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:from-indigo-700 hover:to-purple-700 transition-colors shadow-md shadow-indigo-200"
-                                    >
-                                        <Play className="h-5 w-5" />
-                                        Terima & Kirim ke Project Management
-                                    </button>
-                                    <button
-                                        onClick={() => handleUpdateStatus(selectedRequest.id, 'rejected')}
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold hover:bg-red-100 transition-colors"
-                                    >
-                                        <XCircle className="h-5 w-5" />
-                                        Tolak
-                                    </button>
-                                </div>
+                                {selectedRequest.status === 'pending' && (
+                                    <div className="flex gap-3 pt-6 mt-4 border-t border-gray-100">
+                                        <button
+                                            onClick={() => handleUpdateStatus(selectedRequest.id, 'in_progress')}
+                                            className="flex-[2] flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold hover:from-indigo-700 hover:to-purple-700 transition-colors shadow-md shadow-indigo-200"
+                                        >
+                                            <Play className="h-5 w-5" />
+                                            Terima & Kirim ke Project Management
+                                        </button>
+                                        <button
+                                            onClick={() => handleUpdateStatus(selectedRequest.id, 'rejected')}
+                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold hover:bg-red-100 transition-colors"
+                                        >
+                                            <XCircle className="h-5 w-5" />
+                                            Tolak
+                                        </button>
+                                    </div>
+                                )}
+                                {selectedRequest.status === 'in_progress' && (
+                                    <div className="pt-6 mt-4 border-t border-gray-100 text-center">
+                                        <div className="inline-flex items-center gap-2 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl font-bold text-sm w-full justify-center">
+                                            <Play className="h-5 w-5" /> Sedang Dikerjakan di Project Management
+                                        </div>
+                                    </div>
+                                )}
+                                {selectedRequest.status === 'completed' && (
+                                    <div className="pt-6 mt-4 border-t border-gray-100 text-center">
+                                        <div className="inline-flex items-center gap-2 px-4 py-3 bg-green-50 text-green-700 rounded-xl font-bold text-sm w-full justify-center">
+                                            <Check className="h-5 w-5" /> Proyek Telah Selesai
+                                        </div>
+                                    </div>
+                                )}
+                                {selectedRequest.status === 'rejected' && (
+                                    <div className="pt-6 mt-4 border-t border-gray-100 text-center">
+                                        <div className="inline-flex items-center gap-2 px-4 py-3 bg-red-50 text-red-700 rounded-xl font-bold text-sm w-full justify-center">
+                                            <XCircle className="h-5 w-5" /> Permintaan Telah Ditolak
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Invoice Actions */}
                                 <div className="flex gap-3">
@@ -702,12 +729,13 @@ export default function RequestsPage() {
                             </div>
                         </div>
                     </motion.div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Deliver App Modal */}
-            {showDeliver && selectedRequest && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            {mounted && showDeliver && selectedRequest && createPortal(
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -788,7 +816,8 @@ export default function RequestsPage() {
                             </div>
                         </div>
                     </motion.div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Delete Confirm Modal */}
@@ -803,8 +832,8 @@ export default function RequestsPage() {
             />
 
             {/* Fullscreen PRD Preview Modal */}
-            {showPrdModal && prdContent && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 sm:p-6">
+            {mounted && showPrdModal && prdContent && createPortal(
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 sm:p-6">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -868,12 +897,13 @@ export default function RequestsPage() {
                             />
                         </div>
                     </motion.div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Fullscreen Proposal Preview Modal */}
-            {showProposalModal && proposalContent && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 sm:p-6">
+            {mounted && showProposalModal && proposalContent && createPortal(
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 sm:p-6">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -944,12 +974,13 @@ export default function RequestsPage() {
                             />
                         </div>
                     </motion.div>
-                </div>
+                </div>,
+                document.body
             )}
             
             {/* Send Proposal Confirm Modal */}
-            {showSendProposalModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4 sm:p-6">
+            {mounted && showSendProposalModal && createPortal(
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 sm:p-6">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1004,7 +1035,8 @@ export default function RequestsPage() {
                             </div>
                         </div>
                     </motion.div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     )

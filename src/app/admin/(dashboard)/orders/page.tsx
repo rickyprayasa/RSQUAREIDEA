@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ShoppingCart, Clock, CheckCircle, XCircle, Eye, ChevronDown, Mail, Phone, Package, Trash2, Loader2, Image as ImageIcon, Check, X, ZoomIn, ZoomOut } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Portal from '@/components/Portal'
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal'
 
 interface PaymentConfirmation {
@@ -414,7 +415,8 @@ export default function OrdersPage() {
             {/* Order Detail Modal */}
             <AnimatePresence>
                 {selectedOrder && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <Portal>
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -611,17 +613,19 @@ export default function OrdersPage() {
                             </div>
                         </motion.div>
                     </div>
+                    </Portal>
                 )}
             </AnimatePresence>
 
             {/* Image Zoom Modal */}
             <AnimatePresence>
                 {zoomedImage && (
+                    <Portal>
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+                        className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
                         onClick={() => setZoomedImage(null)}
                     >
                         <button
@@ -647,6 +651,7 @@ export default function OrdersPage() {
                             onClick={(e) => e.stopPropagation()}
                         />
                     </motion.div>
+                    </Portal>
                 )}
             </AnimatePresence>
 

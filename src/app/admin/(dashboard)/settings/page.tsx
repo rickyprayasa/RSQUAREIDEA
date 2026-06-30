@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Portal from '@/components/Portal'
 import Image from 'next/image'
 import { AnimatePresence } from 'framer-motion'
 import { motion } from 'framer-motion'
@@ -994,7 +995,8 @@ export default function SettingsPage() {
                             {/* Add Payment Modal */}
                             <AnimatePresence>
                                 {showAddPayment && (
-                                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                                    <Portal>
+                                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowAddPayment(false)} />
                                         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
                                             <div className="p-6">
@@ -1028,6 +1030,7 @@ export default function SettingsPage() {
                                             </div>
                                         </motion.div>
                                     </div>
+                                    </Portal>
                                 )}
                             </AnimatePresence>
                         </div>

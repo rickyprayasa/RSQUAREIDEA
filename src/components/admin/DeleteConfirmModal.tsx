@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, X, Loader2 } from 'lucide-react'
 
@@ -22,9 +24,15 @@ export default function DeleteConfirmModal({
     itemName,
     isDeleting = false
 }: DeleteConfirmModalProps) {
-    if (!isOpen) return null
+    const [mounted, setMounted] = useState(false)
 
-    return (
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    if (!isOpen || !mounted) return null
+
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -103,6 +111,7 @@ export default function DeleteConfirmModal({
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     )
 }

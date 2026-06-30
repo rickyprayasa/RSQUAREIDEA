@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Portal from '@/components/Portal'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -578,7 +579,8 @@ export default function InvoicesPage() {
             {/* Detail Modal */}
             <AnimatePresence>
                 {selectedInvoice && !showDeliver && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <Portal>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -871,13 +873,15 @@ export default function InvoicesPage() {
                             </div>
                         </motion.div>
                     </div>
+                    </Portal>
                 )}
             </AnimatePresence>
 
             {/* Deliver Modal */}
             <AnimatePresence>
                 {showDeliver && selectedInvoice && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <Portal>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -954,13 +958,15 @@ export default function InvoicesPage() {
                             </div>
                         </motion.div>
                     </div>
+                    </Portal>
                 )}
             </AnimatePresence>
 
             {/* Create Invoice Modal */}
             <AnimatePresence>
                 {showCreate && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <Portal>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -1318,13 +1324,15 @@ export default function InvoicesPage() {
                             </div>
                         </motion.div>
                     </div>
+                    </Portal>
                 )}
             </AnimatePresence>
 
             {/* Delete Modal */}
             <AnimatePresence>
                 {deleteModal.isOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <Portal>
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -1365,6 +1373,7 @@ export default function InvoicesPage() {
                             </div>
                         </motion.div>
                     </div>
+                    </Portal>
                 )}
             </AnimatePresence>
         </div>

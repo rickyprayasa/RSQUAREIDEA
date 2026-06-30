@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Portal from '@/components/Portal'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, CreditCard, ExternalLink, Building, Pencil, QrCode, Loader2, Trash2, AlertTriangle } from 'lucide-react'
 
@@ -177,7 +178,8 @@ export default function PaymentsPage() {
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {deleteModal.isOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <Portal>
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -228,6 +230,7 @@ export default function PaymentsPage() {
                             </div>
                         </motion.div>
                     </div>
+                    </Portal>
                 )}
             </AnimatePresence>
         </div>
