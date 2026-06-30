@@ -62,6 +62,18 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
             return NextResponse.json({ error: error.message }, { status: 400 })
         }
 
+        // Auto-sync status with template_requests if applicable
+        if (data.status && project.source_type === 'template_requests' && project.source_id) {
+            let reqStatus = 'in_progress';
+            if (data.status === 'completed') reqStatus = 'completed';
+            else if (data.status === 'archived' || data.status === 'on_hold') reqStatus = 'in_progress'; // or keep as is? Maybe pending? Let's just use in_progress unless completed.
+            
+            await supabase
+                .from('template_requests')
+                .update({ status: reqStatus })
+                .eq('id', project.source_id);
+        }
+
         return NextResponse.json({ success: true, project })
     } catch (error) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
