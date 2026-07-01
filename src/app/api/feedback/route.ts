@@ -6,6 +6,16 @@ import { notifyNewFeedback } from '@/lib/notifications'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+}
+
+export async function OPTIONS() {
+    return NextResponse.json({}, { headers: corsHeaders })
+}
+
 function getVoucherEmailHtml(name: string, voucherCode: string): string {
     return `
 <!DOCTYPE html>
@@ -203,7 +213,7 @@ export async function POST(request: NextRequest) {
 
         if (error) {
             console.error('Error creating feedback:', error)
-            return NextResponse.json({ error: error.message, success: false }, { status: 500 })
+            return NextResponse.json({ error: error.message, success: false }, { status: 500, headers: corsHeaders })
         }
 
         // Check if this is an invited customer (has invite token)
@@ -299,9 +309,9 @@ export async function POST(request: NextRequest) {
             productTitle: data.templateName,
         }).catch(console.error)
 
-        return NextResponse.json({ feedback, success: true, voucherSent, voucherDebug, isInvited })
+        return NextResponse.json({ feedback, success: true, voucherSent, voucherDebug, isInvited }, { headers: corsHeaders })
     } catch (error) {
         console.error('Error:', error)
-        return NextResponse.json({ error: 'Gagal mengirim feedback. Silakan coba lagi.', success: false }, { status: 500 })
+        return NextResponse.json({ error: 'Gagal mengirim feedback. Silakan coba lagi.', success: false }, { status: 500, headers: corsHeaders })
     }
 }
