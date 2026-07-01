@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
                 email: email,
                 phone: null,
                 source: 'wllt_e_app',
-                notes: `Registered via WLLT-e Capacitor App`,
+                notes: `WLLT-e Playstore`,
                 tags: ['new_customer'],
                 status: 'active',
                 purchased_products: [PRODUCT_TITLE],
