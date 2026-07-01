@@ -49,6 +49,7 @@ interface Customer {
 
 const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
     website: { label: 'Website', color: 'bg-green-100 text-green-700' },
+    wllt_e_app: { label: 'WLLT-e App', color: 'bg-emerald-100 text-emerald-700' },
     lynk_id: { label: 'Lynk.id', color: 'bg-purple-100 text-purple-700' },
     karyakarsa: { label: 'Karyakarsa', color: 'bg-blue-100 text-blue-700' },
     mayar: { label: 'Mayar', color: 'bg-orange-100 text-orange-700' },
