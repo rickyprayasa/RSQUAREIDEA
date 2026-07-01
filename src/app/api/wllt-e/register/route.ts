@@ -33,24 +33,60 @@ export async function POST(request: NextRequest) {
         }
 
         const supabase = await createAdminClient()
+        const PRODUCT_TITLE = 'WLLT-e Smart Financial Dashboard'
+        const PRODUCT_ID = 4 // As seen in WLLT-e Smart Financial Dashboard order ID if needed, but we can leave it null if unknown
+
+        // Create Order Function
+        const createFreeOrder = async (customerName: string, customerEmail: string) => {
+            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+            const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase()
+            const orderNumber = `RSQ-${dateStr}-${randomStr}`
+
+            await supabase.from('orders').insert({
+                order_number: orderNumber,
+                customer_email: customerEmail,
+                customer_name: customerName,
+                product_title: PRODUCT_TITLE,
+                amount: 0,
+                payment_method: 'free',
+                status: 'selesai',
+                notes: JSON.stringify([{ productTitle: PRODUCT_TITLE, price: 0 }])
+            })
+        }
 
         // Check if customer with this email already exists
         const { data: existing } = await supabase
             .from('customers')
-            .select('id, name')
+            .select('id, name, purchased_products, total_orders')
             .eq('email', email)
             .single()
 
         if (existing) {
-            // Update last_activity_at for returning user
-            await supabase
-                .from('customers')
-                .update({ last_activity_at: new Date().toISOString() })
-                .eq('id', existing.id)
+            // Check if they already have this product
+            const currentProducts = existing.purchased_products || []
+            const hasProduct = currentProducts.includes(PRODUCT_TITLE)
+
+            if (!hasProduct) {
+                await supabase
+                    .from('customers')
+                    .update({ 
+                        last_activity_at: new Date().toISOString(),
+                        purchased_products: [...currentProducts, PRODUCT_TITLE],
+                        total_orders: (existing.total_orders || 0) + 1
+                    })
+                    .eq('id', existing.id)
+                
+                await createFreeOrder(existing.name || username, email)
+            } else {
+                await supabase
+                    .from('customers')
+                    .update({ last_activity_at: new Date().toISOString() })
+                    .eq('id', existing.id)
+            }
 
             return NextResponse.json({
                 success: true,
-                message: 'Customer already exists, updated activity',
+                message: 'Customer already exists, updated activity and products',
                 customerId: existing.id,
                 isExisting: true,
             }, { headers: corsHeaders })
@@ -67,7 +103,8 @@ export async function POST(request: NextRequest) {
                 notes: `Registered via WLLT-e Capacitor App`,
                 tags: ['new_customer'],
                 status: 'active',
-                total_orders: 0,
+                purchased_products: [PRODUCT_TITLE],
+                total_orders: 1,
                 total_spent: 0,
                 last_activity_at: new Date().toISOString(),
             })
@@ -78,6 +115,9 @@ export async function POST(request: NextRequest) {
             console.error('Error creating WLLT-e customer:', error)
             return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders })
         }
+
+        // Create order for new customer
+        await createFreeOrder(username, email)
 
         return NextResponse.json({
             success: true,
