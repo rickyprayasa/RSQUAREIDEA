@@ -2,8 +2,10 @@
 
 import React from 'react'
 import { FileText, ClipboardList, PenTool, CheckCircle2, ChevronRight, AlertTriangle, Play, FileCheck } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
-export default function ProjectSOP({ project, onNavigate }: { project: any, onNavigate: (tab: 'board' | 'documents' | 'settings') => void }) {
+export default function ProjectSOP({ project, onNavigate }: { project: any, onNavigate: (tab: 'documents' | 'settings') => void }) {
+    const router = useRouter()
     
     return (
         <div className="p-8 max-w-5xl mx-auto h-full overflow-y-auto custom-scrollbar pb-24">
@@ -90,7 +92,7 @@ export default function ProjectSOP({ project, onNavigate }: { project: any, onNa
                         </p>
                         <div className="flex flex-wrap gap-2">
                             <button 
-                                onClick={() => onNavigate('board')}
+                                onClick={() => router.push(`/projects/tasks`)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg text-xs font-semibold transition-colors shadow-sm"
                             >
                                 <Play className="h-3.5 w-3.5" /> Kelola Task (Kanban)
