@@ -15,7 +15,10 @@ export async function getSession() {
         .eq('id', user.id)
         .single()
 
-    return profile
+    return {
+        ...profile,
+        avatar_url: user.user_metadata?.avatar_url || null
+    }
 }
 
 export async function login(email: string, password: string) {
@@ -48,7 +51,10 @@ export async function login(email: string, password: string) {
 
     return { 
         success: true, 
-        user: profile
+        user: {
+            ...profile,
+            avatar_url: data.user.user_metadata?.avatar_url || null
+        }
     }
 }
 

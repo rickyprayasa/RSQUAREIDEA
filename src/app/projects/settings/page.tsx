@@ -14,8 +14,10 @@ export default function WorkspaceSettingsPage() {
     const [profile, setProfile] = useState({
         name: '',
         email: '',
-        role: ''
+        role: '',
+        avatar_url: ''
     })
+    const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
     // Password State
     const [currentPassword, setCurrentPassword] = useState('')
@@ -39,7 +41,8 @@ export default function WorkspaceSettingsPage() {
                     setProfile({
                         name: data.user.name || '',
                         email: data.user.email || '',
-                        role: data.user.role || ''
+                        role: data.user.role || '',
+                        avatar_url: data.user.avatar_url || ''
                     })
                 } else {
                     router.push('/login')
@@ -62,7 +65,7 @@ export default function WorkspaceSettingsPage() {
             const res = await fetch('/api/auth/profile', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: profile.name })
+                body: JSON.stringify({ name: profile.name, avatar_url: profile.avatar_url })
             })
             const data = await res.json()
             
@@ -76,6 +79,51 @@ export default function WorkspaceSettingsPage() {
         } finally {
             setSaving(false)
             // Auto hide message
+            setTimeout(() => setMessage({ text: '', type: '' }), 3000)
+        }
+    }
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploadingAvatar(true)
+        setMessage({ text: '', type: '' })
+
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('bucket', 'thumbnails')
+            formData.append('folder', 'avatars')
+
+            const uploadRes = await fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formData
+            })
+            const uploadData = await uploadRes.json()
+
+            if (!uploadRes.ok) throw new Error(uploadData.error || 'Gagal upload foto')
+
+            const newAvatarUrl = uploadData.url
+
+            // Update profile
+            const res = await fetch('/api/auth/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: profile.name, avatar_url: newAvatarUrl })
+            })
+            const data = await res.json()
+            
+            if (data.success) {
+                setProfile({ ...profile, avatar_url: newAvatarUrl })
+                setMessage({ text: 'Foto profil berhasil diperbarui.', type: 'success' })
+            } else {
+                throw new Error(data.error || 'Gagal menyimpan foto profil')
+            }
+        } catch (error: any) {
+            setMessage({ text: error.message || 'Terjadi kesalahan.', type: 'error' })
+        } finally {
+            setUploadingAvatar(false)
             setTimeout(() => setMessage({ text: '', type: '' }), 3000)
         }
     }
@@ -146,10 +194,27 @@ export default function WorkspaceSettingsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-6"
                     >
-                        <div className="h-20 w-20 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center flex-shrink-0 border border-orange-200 shadow-inner">
-                            <span className="text-3xl font-black text-orange-500">
-                                {profile.name ? profile.name.substring(0, 2).toUpperCase() : 'PM'}
-                            </span>
+                        <div className="relative group cursor-pointer" onClick={() => document.getElementById('avatar-upload')?.click()}>
+                            <div className="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center flex-shrink-0 border border-gray-200 shadow-inner overflow-hidden relative">
+                                {uploadingAvatar ? (
+                                    <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+                                ) : profile.avatar_url ? (
+                                    <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <img src="/images/rsquare-logo.png" alt="Logo" className="w-full h-full object-contain p-2" />
+                                )}
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="text-white text-xs font-bold">Ubah</span>
+                                </div>
+                            </div>
+                            <input 
+                                type="file" 
+                                id="avatar-upload" 
+                                accept="image/png, image/jpeg, image/webp" 
+                                className="hidden" 
+                                onChange={handleAvatarUpload}
+                                disabled={uploadingAvatar}
+                            />
                         </div>
                         <div>
                             <h3 className="text-xl font-bold text-gray-900">{profile.name || 'Pengguna'}</h3>

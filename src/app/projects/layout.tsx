@@ -194,8 +194,12 @@ export default function ProjectsLayout({
                         <div className="h-6 w-px bg-gray-200"></div>
                         
                         <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-semibold text-sm border border-orange-200 shadow-sm">
-                                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                            <div className="h-9 w-9 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 border border-gray-200 shadow-sm overflow-hidden">
+                                {user?.avatar_url ? (
+                                    <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <img src="/images/rsquare-logo.png" alt="Logo" className="w-full h-full object-contain p-1" />
+                                )}
                             </div>
                             <div className="hidden sm:block text-left mr-2">
                                 <p className="text-sm font-semibold text-gray-900 leading-tight">{user?.name || 'User'}</p>

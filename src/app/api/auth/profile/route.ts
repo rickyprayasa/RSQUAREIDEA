@@ -10,7 +10,7 @@ export async function PATCH(request: NextRequest) {
         }
 
         const data = await request.json()
-        const { name } = data
+        const { name, avatar_url } = data
 
         if (!name || name.trim() === '') {
             return NextResponse.json({ error: 'Nama tidak boleh kosong' }, { status: 400 })
@@ -19,14 +19,25 @@ export async function PATCH(request: NextRequest) {
         const supabase = await createAdminClient()
 
         // Update profile in users table
-        const { error } = await supabase
+        const { error: dbError } = await supabase
             .from('users')
             .update({ name })
             .eq('id', session.id)
 
-        if (error) {
-            console.error('Error updating profile:', error)
-            return NextResponse.json({ error: error.message }, { status: 500 })
+        if (dbError) {
+            console.error('Error updating profile:', dbError)
+            return NextResponse.json({ error: dbError.message }, { status: 500 })
+        }
+
+        if (avatar_url !== undefined) {
+            const { error: authError } = await supabase.auth.admin.updateUserById(
+                session.id,
+                { user_metadata: { avatar_url } }
+            )
+            if (authError) {
+                console.error('Error updating auth metadata:', authError)
+                return NextResponse.json({ error: authError.message }, { status: 500 })
+            }
         }
 
         return NextResponse.json({ success: true, message: 'Profil berhasil diperbarui' })
