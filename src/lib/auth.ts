@@ -15,8 +15,13 @@ export async function getSession() {
         .eq('id', user.id)
         .single()
 
+    if (!profile) return null
+
     return {
-        ...profile,
+        id: profile.id,
+        email: profile.email,
+        name: profile.name,
+        role: profile.role,
         avatar_url: user.user_metadata?.avatar_url || null
     }
 }
@@ -52,7 +57,10 @@ export async function login(email: string, password: string) {
     return { 
         success: true, 
         user: {
-            ...profile,
+            id: profile.id,
+            email: profile.email,
+            name: profile.name,
+            role: profile.role,
             avatar_url: data.user.user_metadata?.avatar_url || null
         }
     }

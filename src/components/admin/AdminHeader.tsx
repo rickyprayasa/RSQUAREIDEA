@@ -18,10 +18,11 @@ interface Notification {
 
 interface AdminHeaderProps {
     user: {
-        id: number
+        id: string | number
         email: string
         name: string
         role: string
+        avatar_url?: string | null
     }
 }
 
