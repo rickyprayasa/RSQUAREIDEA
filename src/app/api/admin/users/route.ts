@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth'
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Use standard @supabase/supabase-js to ensure Service Role Key is used purely without user session overriding it, bypassing RLS.
-        const { createClient } = require('@supabase/supabase-js')
+        
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!,

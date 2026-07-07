@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { LayoutDashboard, FileText, Settings, ArrowLeft, Loader2, Save, Trash2, X, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
-import KanbanBoard from '@/components/projects/KanbanBoard'
 import ProjectDocuments from '@/components/projects/ProjectDocuments'
 import ProjectSOP from '@/components/projects/ProjectSOP'
 
@@ -13,7 +12,7 @@ export default function ProjectWorkspace() {
     const router = useRouter()
     const [project, setProject] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState<'sop' | 'board' | 'documents' | 'settings'>('sop')
+    const [activeTab, setActiveTab] = useState<'sop' | 'documents' | 'settings'>('sop')
     const [isSavingSettings, setIsSavingSettings] = useState(false)
     const [isDeletingProject, setIsDeletingProject] = useState(false)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -140,14 +139,7 @@ export default function ProjectWorkspace() {
                     >
                         <FileText className="h-4 w-4" /> SOP & Alur Kerja
                     </button>
-                    <button
-                        onClick={() => setActiveTab('board')}
-                        className={`pb-3 px-1 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                            activeTab === 'board' ? 'border-orange-600 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'
-                        }`}
-                    >
-                        <LayoutDashboard className="h-4 w-4" /> Board (Kanban)
-                    </button>
+
                     <button
                         onClick={() => setActiveTab('documents')}
                         className={`pb-3 px-1 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors ${
@@ -170,7 +162,7 @@ export default function ProjectWorkspace() {
             {/* Content Area */}
             <div className="flex-1 overflow-hidden bg-gray-50">
                 {activeTab === 'sop' && <ProjectSOP project={project} onNavigate={(tab) => setActiveTab(tab)} />}
-                {activeTab === 'board' && <KanbanBoard project={project} />}
+
                 {activeTab === 'documents' && <ProjectDocuments project={project} />}
                 {activeTab === 'settings' && (
                     <div className="p-8 max-w-4xl mx-auto h-full overflow-y-auto custom-scrollbar space-y-8 pb-24">

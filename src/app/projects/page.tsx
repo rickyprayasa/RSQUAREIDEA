@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LayoutDashboard, CheckSquare, Clock, Plus, FolderOpen, Folder, Mail, Phone, Loader2, ArrowRight, X } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, Clock, Plus, FolderOpen, Folder, Mail, Phone, Loader2, ArrowRight, X, Copy, Info } from 'lucide-react'
 import Link from 'next/link'
+import { createPortal } from 'react-dom'
 
 export default function ProjectsDashboard() {
     const [projects, setProjects] = useState<any[]>([])
@@ -18,14 +19,24 @@ export default function ProjectsDashboard() {
     })
     const [submitting, setSubmitting] = useState(false)
     const [toast, setToast] = useState<{ show: boolean; msg: string; type: 'success' | 'error' }>({ show: false, msg: '', type: 'success' })
+    const [selectedProject, setSelectedProject] = useState<any | null>(null)
+    const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
+        setMounted(true)
         fetchProjects()
     }, [])
 
     const showToast = (msg: string, type: 'success' | 'error') => {
         setToast({ show: true, msg, type })
         setTimeout(() => setToast({ show: false, msg: '', type: 'success' }), 3000)
+    }
+
+    const handleCopy = (text: string, label: string, e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        navigator.clipboard.writeText(text)
+        showToast(`${label} disalin!`, 'success')
     }
 
     const fetchProjects = async () => {
@@ -212,8 +223,10 @@ export default function ProjectsDashboard() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.1 }}
                                 >
-                                    <Link href={`/projects/${project.id}`}>
-                                        <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-orange-200 transition-all duration-300 group cursor-pointer h-full flex flex-col relative overflow-hidden">
+                                    <div 
+                                        onClick={() => setSelectedProject(project)}
+                                        className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-orange-200 transition-all duration-300 group cursor-pointer h-full flex flex-col relative overflow-hidden"
+                                    >
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
                                             
                                             <div className="flex items-start justify-between mb-5 relative z-10">
@@ -237,14 +250,32 @@ export default function ProjectsDashboard() {
                                                 </p>
 
                                                 <div className="space-y-2 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-100/50">
-                                                    <div className="flex items-center gap-2 text-xs text-gray-600">
-                                                        <Mail className="h-3.5 w-3.5 text-gray-400" />
-                                                        <span className="truncate">{project.client_email}</span>
+                                                    <div className="flex items-center justify-between text-xs text-gray-600 group/copy">
+                                                        <div className="flex items-center gap-2 truncate pr-2">
+                                                            <Mail className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                                            <span className="truncate">{project.client_email}</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={(e) => handleCopy(project.client_email, 'Email', e)}
+                                                            className="p-1.5 hover:bg-gray-200 rounded-md opacity-0 group-hover/copy:opacity-100 transition-opacity flex-shrink-0"
+                                                            title="Salin Email"
+                                                        >
+                                                            <Copy className="h-3.5 w-3.5" />
+                                                        </button>
                                                     </div>
                                                     {project.client_phone && (
-                                                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                                                            <Phone className="h-3.5 w-3.5 text-gray-400" />
-                                                            <span>{project.client_phone}</span>
+                                                        <div className="flex items-center justify-between text-xs text-gray-600 group/copy">
+                                                            <div className="flex items-center gap-2 truncate pr-2">
+                                                                <Phone className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                                                <span>{project.client_phone}</span>
+                                                            </div>
+                                                            <button
+                                                                onClick={(e) => handleCopy(project.client_phone, 'Nomor HP', e)}
+                                                                className="p-1.5 hover:bg-gray-200 rounded-md opacity-0 group-hover/copy:opacity-100 transition-opacity flex-shrink-0"
+                                                                title="Salin Nomor HP"
+                                                            >
+                                                                <Copy className="h-3.5 w-3.5" />
+                                                            </button>
                                                         </div>
                                                     )}
                                                 </div>
@@ -280,13 +311,27 @@ export default function ProjectsDashboard() {
                                                             Selesaikan
                                                         </button>
                                                     )}
-                                                    <div className="flex items-center gap-1 text-sm font-bold text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            setSelectedProject(project);
+                                                        }}
+                                                        className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors z-20 opacity-0 group-hover:opacity-100"
+                                                        title="Detail Proyek"
+                                                    >
+                                                        <Info className="h-4 w-4" />
+                                                    </button>
+                                                    <Link 
+                                                        href={`/projects/${project.id}`}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="flex items-center gap-1 text-sm font-bold text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0 hover:text-orange-700"
+                                                    >
                                                         Buka Workspace <ArrowRight className="h-4 w-4" />
-                                                    </div>
+                                                    </Link>
                                                 </div>
                                             </div>
                                         </div>
-                                    </Link>
                                 </motion.div>
                             )
                         })}
@@ -295,11 +340,14 @@ export default function ProjectsDashboard() {
             </div>
             
             {/* Modal & Toast */}
-            {toast.show && (
-                <div className={`fixed top-4 right-4 z-[9999] px-4 py-3 rounded-xl shadow-xl text-white font-medium flex items-center gap-2 transition-all ${toast.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`}>
-                    {toast.msg}
-                </div>
-            )}
+            {mounted && createPortal(
+                <>
+                    {toast.show && (
+                        <div className={`fixed top-4 right-4 z-[9999] px-4 py-3 rounded-xl shadow-xl text-white font-medium flex items-center gap-2 transition-all ${toast.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                            {toast.msg}
+                        </div>
+                    )}
+
 
             <AnimatePresence>
                 {isModalOpen && (
@@ -402,6 +450,96 @@ export default function ProjectsDashboard() {
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* Detail Project Modal */}
+            <AnimatePresence>
+                {selectedProject && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative max-h-[90vh] flex flex-col"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+                            
+                            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                                <h3 className="text-xl font-bold text-gray-950">Detail Proyek</h3>
+                                <button 
+                                    onClick={() => setSelectedProject(null)}
+                                    className="text-gray-400 hover:text-gray-600 bg-white hover:bg-gray-100 p-1.5 rounded-lg transition-colors border shadow-sm"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+                                <div>
+                                    <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Nama Proyek</h4>
+                                    <p className="text-lg font-bold text-gray-900">{selectedProject.name}</p>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                    <div>
+                                        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Klien</h4>
+                                        <p className="font-medium text-gray-900">{selectedProject.client_name || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Status</h4>
+                                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                                            selectedProject.status === 'active' ? 'bg-blue-100 text-blue-700' :
+                                            selectedProject.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                            'bg-gray-200 text-gray-700'
+                                        }`}>
+                                            {selectedProject.status === 'active' ? 'Berjalan' : 
+                                             selectedProject.status === 'completed' ? 'Selesai' : selectedProject.status}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Kontak Klien</h4>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-orange-50 rounded-lg text-orange-600"><Mail className="h-4 w-4" /></div>
+                                            <div>
+                                                <p className="text-xs text-gray-500">Email</p>
+                                                <p className="font-medium text-gray-900">{selectedProject.client_email}</p>
+                                            </div>
+                                        </div>
+                                        {selectedProject.client_phone && (
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-orange-50 rounded-lg text-orange-600"><Phone className="h-4 w-4" /></div>
+                                                <div>
+                                                    <p className="text-xs text-gray-500">Nomor HP</p>
+                                                    <p className="font-medium text-gray-900">{selectedProject.client_phone}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Deskripsi Lengkap</h4>
+                                    <div className="bg-white border border-gray-200 rounded-2xl p-5 text-gray-700 whitespace-pre-wrap leading-relaxed shadow-sm">
+                                        {selectedProject.description || <span className="text-gray-400 italic">Tidak ada deskripsi proyek.</span>}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                                <Link 
+                                    href={`/projects/${selectedProject.id}`}
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-blue-700 transition-all shadow-md text-sm"
+                                >
+                                    Buka Workspace <ArrowRight className="h-4 w-4" />
+                                </Link>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            </>, document.body)}
         </div>
     )
 }

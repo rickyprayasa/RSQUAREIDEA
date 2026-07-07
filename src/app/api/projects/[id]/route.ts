@@ -1,8 +1,9 @@
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 
 function getServiceClient() {
-    const { createClient } = require('@supabase/supabase-js')
+    
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { User, Mail, Save, Shield, Loader2, AlertCircle } from 'lucide-react'
+import { User, Mail, Save, Shield, Loader2, AlertCircle, Key, Eye, EyeOff, Lock, CheckCircle2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { calculatePasswordStrength, validatePasswordRequirements } from '@/lib/password-strength'
 
 export default function WorkspaceSettingsPage() {
     const router = useRouter()
@@ -15,6 +16,19 @@ export default function WorkspaceSettingsPage() {
         email: '',
         role: ''
     })
+
+    // Password State
+    const [currentPassword, setCurrentPassword] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
+    const [showCurrent, setShowCurrent] = useState(false)
+    const [showNew, setShowNew] = useState(false)
+    const [showConfirm, setShowConfirm] = useState(false)
+    const [pwdLoading, setPwdLoading] = useState(false)
+    const [pwdMessage, setPwdMessage] = useState({ text: '', type: '' })
+
+    const passwordStrength = calculatePasswordStrength(newPassword)
+    const passwordValidation = validatePasswordRequirements(newPassword)
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -66,6 +80,48 @@ export default function WorkspaceSettingsPage() {
         }
     }
 
+    const handleChangePassword = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setPwdMessage({ text: '', type: '' })
+        setPwdLoading(true)
+
+        if (newPassword !== confirmPassword) {
+            setPwdMessage({ text: 'Password baru dan konfirmasi password tidak cocok', type: 'error' })
+            setPwdLoading(false)
+            return
+        }
+
+        try {
+            const res = await fetch('/api/admin/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentPassword, newPassword }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                if (data.errors) {
+                    setPwdMessage({ text: data.errors.join('. '), type: 'error' })
+                } else {
+                    setPwdMessage({ text: data.error || 'Gagal mengubah password', type: 'error' })
+                }
+                return
+            }
+
+            setPwdMessage({ text: data.message || 'Password berhasil diubah!', type: 'success' })
+            
+            // Redirect to login after a short delay since session is cleared
+            setTimeout(() => {
+                router.push('/api/auth/logout') // or whatever route logs them out
+            }, 2000)
+        } catch (err) {
+            setPwdMessage({ text: 'Terjadi kesalahan. Silakan coba lagi.', type: 'error' })
+        } finally {
+            setPwdLoading(false)
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -81,13 +137,36 @@ export default function WorkspaceSettingsPage() {
                 <p className="text-gray-500 mt-1">Konfigurasi akun dan informasi profil Anda.</p>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column: Form */}
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8"
-                >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column: Avatar & Profile Form */}
+                <div className="space-y-8">
+                    {/* Horizontal Avatar Card */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-6"
+                    >
+                        <div className="h-20 w-20 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center flex-shrink-0 border border-orange-200 shadow-inner">
+                            <span className="text-3xl font-black text-orange-500">
+                                {profile.name ? profile.name.substring(0, 2).toUpperCase() : 'PM'}
+                            </span>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900">{profile.name || 'Pengguna'}</h3>
+                            <p className="text-sm text-gray-500 mb-2">{profile.email}</p>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-bold border border-orange-100">
+                                <Shield className="h-3 w-3" />
+                                {profile.role.toUpperCase()}
+                            </span>
+                        </div>
+                    </motion.div>
+
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8"
+                    >
                     <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                         <User className="h-5 w-5 text-orange-500" /> Informasi Pribadi
                     </h2>
@@ -151,28 +230,167 @@ export default function WorkspaceSettingsPage() {
                         </div>
                     </form>
                 </motion.div>
+                </div>
                 
-                {/* Right Column: Info / Avatar */}
+                {/* Right Column: Change Password & Tips */}
+                <div className="space-y-8">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8"
+                    >
+                    <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        <Key className="h-5 w-5 text-orange-500" /> Ganti Password
+                    </h2>
+                    
+                    <form onSubmit={handleChangePassword} className="space-y-6">
+                        {/* Current Password */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Password Saat Ini</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Key className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type={showCurrent ? 'text' : 'password'}
+                                    required
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    className="block w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-sm"
+                                    placeholder="Masukkan password saat ini"
+                                />
+                                <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    {showCurrent ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* New Password */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Password Baru</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type={showNew ? 'text' : 'password'}
+                                    required
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="block w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-sm"
+                                    placeholder="Masukkan password baru"
+                                />
+                                <button type="button" onClick={() => setShowNew(!showNew)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    {showNew ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+                                </button>
+                            </div>
+
+                            {newPassword && (
+                                <div className="mt-3 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-600">Kekuatan password:</span>
+                                        <span className={`text-xs font-semibold ${
+                                            passwordStrength.color === 'red' ? 'text-red-600' :
+                                            passwordStrength.color === 'orange' ? 'text-orange-600' :
+                                            passwordStrength.color === 'yellow' ? 'text-yellow-600' :
+                                            passwordStrength.color === 'lime' ? 'text-lime-600' : 'text-green-600'
+                                        }`}>{passwordStrength.label}</span>
+                                    </div>
+                                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${(passwordStrength.score + 1) * 20}%` }}
+                                            className={`h-full ${
+                                                passwordStrength.color === 'red' ? 'bg-red-500' :
+                                                passwordStrength.color === 'orange' ? 'bg-orange-500' :
+                                                passwordStrength.color === 'yellow' ? 'bg-yellow-500' :
+                                                passwordStrength.color === 'lime' ? 'bg-lime-500' : 'bg-green-500'
+                                            }`}
+                                        />
+                                    </div>
+                                    {passwordValidation.errors.length > 0 && (
+                                        <div className="mt-2 p-2 bg-gray-50 rounded-lg">
+                                            <ul className="space-y-0.5">
+                                                {passwordValidation.errors.map((error, idx) => (
+                                                    <li key={idx} className="text-xs text-red-600 flex items-center gap-1">
+                                                        <Lock className="h-3 w-3" /> {error}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Confirm Password */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type={showConfirm ? 'text' : 'password'}
+                                    required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="block w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-sm"
+                                    placeholder="Ulangi password baru"
+                                />
+                                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    {showConfirm ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+                                </button>
+                            </div>
+                            {confirmPassword && (
+                                <div className={`mt-2 text-xs flex items-center gap-1 ${newPassword === confirmPassword ? 'text-green-600' : 'text-red-600'}`}>
+                                    {newPassword === confirmPassword ? (
+                                        <><CheckCircle2 className="h-3 w-3" /> Password cocok</>
+                                    ) : (
+                                        <><Lock className="h-3 w-3" /> Password tidak cocok</>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {pwdMessage.text && (
+                            <div className={`p-4 rounded-xl text-sm font-medium flex items-start gap-2 ${pwdMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                                {pwdMessage.type === 'success' ? <CheckCircle2 className="h-5 w-5 flex-shrink-0" /> : <AlertCircle className="h-5 w-5 flex-shrink-0" />}
+                                <span>{pwdMessage.text}</span>
+                            </div>
+                        )}
+
+                        <div className="pt-4 border-t border-gray-100">
+                            <button
+                                type="submit"
+                                disabled={pwdLoading || !currentPassword || !newPassword || !confirmPassword || !passwordValidation.valid || newPassword !== confirmPassword}
+                                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-3 rounded-xl font-medium hover:from-orange-600 hover:to-amber-600 transition-all shadow-md shadow-orange-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {pwdLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Shield className="h-5 w-5" />}
+                                {pwdLoading ? 'Memproses...' : 'Ganti Password'}
+                            </button>
+                        </div>
+                    </form>
+                </motion.div>
+
+                {/* Security Tips */}
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 flex flex-col items-center text-center h-fit"
+                    transition={{ delay: 0.3 }}
+                    className="w-full bg-blue-50 rounded-2xl p-6 border border-blue-100"
                 >
-                    <div className="h-24 w-24 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center mb-4 border border-orange-200 shadow-inner">
-                        <span className="text-3xl font-black text-orange-500">
-                            {profile.name ? profile.name.substring(0, 2).toUpperCase() : 'PM'}
-                        </span>
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900">{profile.name || 'Pengguna'}</h3>
-                    <p className="text-sm text-gray-500 mb-6">{profile.email}</p>
-                    
-                    <div className="w-full bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        <p className="text-xs text-gray-500 leading-relaxed text-left">
-                            <strong>Penting:</strong> Pembaruan kata sandi saat ini hanya dapat dilakukan melalui Administrator sistem. Silakan hubungi tim IT jika Anda kehilangan akses.
+                    <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <Shield className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <p className="text-sm text-blue-800 leading-relaxed text-left">
+                            <strong>Keamanan Akun:</strong> Pastikan Anda menggunakan password yang kuat. Hindari kata sandi umum dan gunakan kombinasi huruf, angka, serta karakter unik. Jangan membagikan informasi ini kepada siapapun.
                         </p>
                     </div>
                 </motion.div>
+                </div>
             </div>
         </div>
     )
