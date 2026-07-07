@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
@@ -63,7 +63,7 @@ export async function PATCH(request: NextRequest) {
         // Sync with PM projects
         try {
             
-            const serviceClient = createClient(
+            const serviceClient = createSupabaseClient(
                 process.env.NEXT_PUBLIC_SUPABASE_URL!,
                 process.env.SUPABASE_SERVICE_ROLE_KEY!,
                 { auth: { autoRefreshToken: false, persistSession: false } }
