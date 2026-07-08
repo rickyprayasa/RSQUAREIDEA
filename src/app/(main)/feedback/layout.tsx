@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import ClientLayout from './ClientLayout'
 
 export const metadata: Metadata = {
     robots: {
@@ -12,10 +11,10 @@ export const metadata: Metadata = {
     },
 }
 
-export default function ProjectsLayout({
+export default function FeedbackLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    return <ClientLayout>{children}</ClientLayout>
+    return <>{children}</>
 }
