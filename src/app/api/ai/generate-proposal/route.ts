@@ -13,7 +13,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { description, templateName, clientName, previousContent } = await req.json()
+        const { description, templateName, clientName, previousContent, manualContext } = await req.json()
 
         if (!description) {
             return NextResponse.json({ error: 'Deskripsi request tidak boleh kosong.' }, { status: 400 })
@@ -32,29 +32,46 @@ The Proposal must include the following sections:
 5. <h2>Kebutuhan Data & Integrasi</h2>: What needs to be provided by the client.
 6. <h2>Penutup</h2>: A professional closing statement.`
 
+        // Extract image URLs if any
+        const imageUrls: string[] = []
+        if (manualContext) {
+            const imgRegex = /<img[^>]+src="([^">]+)"/g
+            let match
+            while ((match = imgRegex.exec(manualContext)) !== null) {
+                imageUrls.push(match[1])
+            }
+        }
+
+        const cleanManualContext = manualContext ? manualContext.replace(/<[^>]+>/g, '').trim() : ''
+
         const userPrompt = `Tolong buatkan draf Proposal Proyek berdasarkan informasi berikut ini:
 
 - **Nama Klien**: ${clientName || 'Klien'}
 - **Nama Aplikasi / Project**: ${templateName || 'Tidak disebutkan'}
 
 **Kebutuhan/Deskripsi Klien:**
-"${description}"`
+"${description}"
+${cleanManualContext ? `\n**Konteks Tambahan (Hasil Follow-up Manual Klien):**\n"${cleanManualContext}"` : ''}`
 
-        let aiMessages: any[] = []
+        // Construct user content array for Multimodal
+        const userContent: any[] = [{ type: 'text', text: userPrompt }]
+        for (const url of imageUrls) {
+            userContent.push({ type: 'image', image: url })
+        }
+
+        let aiMessages: any[] = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userContent }
+        ]
+
         if (previousContent) {
-            aiMessages = [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt },
-                { role: 'assistant', content: previousContent },
-                { role: 'user', content: 'Lanjutkan dokumen tersebut persis dari kata terakhir yang terpotong. Jangan mengulang kalimat sebelumnya dan jangan menambahkan pengantar.' }
-            ]
+            aiMessages.push({ role: 'assistant', content: previousContent })
+            aiMessages.push({ role: 'user', content: 'Lanjutkan dokumen tersebut persis dari kata terakhir yang terpotong. Jangan mengulang kalimat sebelumnya dan jangan menambahkan pengantar.' })
         }
 
         // Generate using fallback router
         const { result, usedModel } = await generateWithFallback({
-            system: previousContent ? undefined : systemPrompt,
-            prompt: previousContent ? undefined : userPrompt,
-            messages: previousContent ? aiMessages : undefined,
+            messages: aiMessages,
             temperature: 0.7,
             maxTokens: 3000,
             tier: 'high'

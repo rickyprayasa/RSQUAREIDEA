@@ -12,7 +12,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { description, templateName, prdContent, previousContent } = await req.json()
+        const { description, templateName, prdContent, previousContent, manualContext } = await req.json()
 
         if (!description) {
             return NextResponse.json({ error: 'Deskripsi request tidak boleh kosong.' }, { status: 400 })
@@ -31,26 +31,42 @@ The output should include:
 5. <h2>3. Prompt untuk Struktur Database (Mermaid.js ER Diagram)</h2>: Write a prompt asking ChatGPT to generate an Entity Relationship diagram.
 6. <h2>4. Ringkasan Eksekutif (Project Context)</h2>: A well-structured summary of the project requirements that the user can feed to ChatGPT as context.`
 
+        // Extract image URLs if any
+        const imageUrls: string[] = []
+        if (manualContext) {
+            const imgRegex = /<img[^>]+src="([^">]+)"/g
+            let match
+            while ((match = imgRegex.exec(manualContext)) !== null) {
+                imageUrls.push(match[1])
+            }
+        }
+
+        const cleanManualContext = manualContext ? manualContext.replace(/<[^>]+>/g, '').trim() : ''
+
         const userPrompt = `Tolong buatkan Prompt Generator berdasarkan informasi berikut ini:
 
 - **Nama Aplikasi / Project**: ${templateName || 'Tidak disebutkan'}
 - **Deskripsi Klien:** "${description}"
-${prdContent ? `- **Konteks PRD Saat Ini:** ${prdContent.substring(0, 1000)}...` : ''}`
+${cleanManualContext ? `- **Konteks Tambahan (Follow-up Manual):** "${cleanManualContext}"\n` : ''}${prdContent ? `- **Konteks PRD Saat Ini:** ${prdContent.substring(0, 1000)}...` : ''}`
 
-        let aiMessages: any[] = []
+        // Construct user content array for Multimodal
+        const userContent: any[] = [{ type: 'text', text: userPrompt }]
+        for (const url of imageUrls) {
+            userContent.push({ type: 'image', image: url })
+        }
+
+        let aiMessages: any[] = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userContent }
+        ]
+
         if (previousContent) {
-            aiMessages = [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt },
-                { role: 'assistant', content: previousContent },
-                { role: 'user', content: 'Lanjutkan dokumen tersebut persis dari kata terakhir yang terpotong. Jangan mengulang kalimat sebelumnya dan jangan menambahkan pengantar.' }
-            ]
+            aiMessages.push({ role: 'assistant', content: previousContent })
+            aiMessages.push({ role: 'user', content: 'Lanjutkan dokumen tersebut persis dari kata terakhir yang terpotong. Jangan mengulang kalimat sebelumnya dan jangan menambahkan pengantar.' })
         }
 
         const { result, usedModel } = await generateWithFallback({
-            system: previousContent ? undefined : systemPrompt,
-            prompt: previousContent ? undefined : userPrompt,
-            messages: previousContent ? aiMessages : undefined,
+            messages: aiMessages,
             temperature: 0.7,
             maxTokens: 3000,
             tier: 'high'

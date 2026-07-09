@@ -100,7 +100,12 @@ interface SettingsData {
     duitku_api_key: string
     duitku_production: string
     // AI settings
+    google_api_key_1: string
+    google_api_key_2: string
+    google_api_key_3: string
     openrouter_api_key: string
+    openrouter_api_key_2: string
+    openrouter_api_key_3: string
     openrouter_base_url: string
     primary_ai_model: string
 }
@@ -171,7 +176,12 @@ Tim RSQUARE`,
     duitku_api_key: '',
     duitku_production: 'false',
     // AI settings
+    google_api_key_1: '',
+    google_api_key_2: '',
+    google_api_key_3: '',
     openrouter_api_key: '',
+    openrouter_api_key_2: '',
+    openrouter_api_key_3: '',
     openrouter_base_url: 'https://openrouter.ai/api/v1',
     primary_ai_model: '',
 }
@@ -1823,7 +1833,8 @@ function AiSettings({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    openrouter_api_key: settings.openrouter_api_key,
+                    openrouter_api_key: [settings.openrouter_api_key, settings.openrouter_api_key_2, settings.openrouter_api_key_3].filter(Boolean).join(','),
+                    google_api_key: [settings.google_api_key_1, settings.google_api_key_2, settings.google_api_key_3].filter(Boolean).join(','),
                     openrouter_base_url: settings.openrouter_base_url,
                     primary_ai_model: settings.primary_ai_model
                 })
@@ -1859,23 +1870,73 @@ function AiSettings({
                 </div>
             </div>
 
+            {/* Google Gemini Configuration */}
+            <div>
+                <label className="text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2 flex items-center gap-1.5 md:gap-2">
+                    <Key className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500" />
+                    Google Gemini API Keys (Opsional)
+                </label>
+                <div className="space-y-3">
+                    <input
+                        type="password"
+                        value={settings.google_api_key_1}
+                        onChange={(e) => handleChange('google_api_key_1', e.target.value)}
+                        placeholder="Key 1: AIzaSy..."
+                        className="w-full px-3 md:px-4 py-2 text-sm bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all placeholder:text-gray-400 font-mono"
+                    />
+                    <input
+                        type="password"
+                        value={settings.google_api_key_2}
+                        onChange={(e) => handleChange('google_api_key_2', e.target.value)}
+                        placeholder="Key 2: AIzaSy... (Opsional)"
+                        className="w-full px-3 md:px-4 py-2 text-sm bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all placeholder:text-gray-400 font-mono"
+                    />
+                    <input
+                        type="password"
+                        value={settings.google_api_key_3}
+                        onChange={(e) => handleChange('google_api_key_3', e.target.value)}
+                        placeholder="Key 3: AIzaSy... (Opsional)"
+                        className="w-full px-3 md:px-4 py-2 text-sm bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all placeholder:text-gray-400 font-mono"
+                    />
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5">
+                    Sistem akan mengacak key yang digunakan. Jika dikosongkan, sistem akan menggunakan key dari file <code className="bg-gray-100 px-1 rounded">.env.local</code>. Dapatkan key di <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:underline font-medium">Google AI Studio</a>.
+                </p>
+            </div>
+            
+            <div className="my-4 border-t border-gray-100"></div>
+
             {/* OpenRouter Configuration */}
             <div>
                 <label className="text-xs md:text-sm font-medium text-gray-700 mb-1.5 md:mb-2 flex items-center gap-1.5 md:gap-2">
                     <Key className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500" />
-                    OpenRouter API Key (Opsional)
+                    OpenRouter API Keys (Opsional)
                 </label>
-                <div className="relative">
+                <div className="space-y-3">
                     <input
                         type="password"
                         value={settings.openrouter_api_key}
                         onChange={(e) => handleChange('openrouter_api_key', e.target.value)}
-                        placeholder="sk-or-v1-..."
-                        className="w-full px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base bg-white border-2 border-gray-200 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all placeholder:text-gray-400 font-mono"
+                        placeholder="Key 1: sk-or-v1-..."
+                        className="w-full px-3 md:px-4 py-2 text-sm bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all placeholder:text-gray-400 font-mono"
+                    />
+                    <input
+                        type="password"
+                        value={settings.openrouter_api_key_2}
+                        onChange={(e) => handleChange('openrouter_api_key_2', e.target.value)}
+                        placeholder="Key 2: sk-or-v1-... (Opsional)"
+                        className="w-full px-3 md:px-4 py-2 text-sm bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all placeholder:text-gray-400 font-mono"
+                    />
+                    <input
+                        type="password"
+                        value={settings.openrouter_api_key_3}
+                        onChange={(e) => handleChange('openrouter_api_key_3', e.target.value)}
+                        placeholder="Key 3: sk-or-v1-... (Opsional)"
+                        className="w-full px-3 md:px-4 py-2 text-sm bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all placeholder:text-gray-400 font-mono"
                     />
                 </div>
                 <p className="text-xs text-gray-500 mt-1.5">
-                    Tambahkan API Key <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:text-violet-700 font-medium underline">OpenRouter</a> untuk menambah pool model AI gratis (DeepSeek R1/V3, Llama 3, Qwen). Jika dikosongkan, sistem hanya akan menggunakan model Google Gemini.
+                    Tambahkan API Key <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:text-violet-700 font-medium underline">OpenRouter</a> untuk menambah pool model AI gratis.
                 </p>
             </div>
 
@@ -2032,18 +2093,10 @@ function AiSettings({
                 <div className="flex items-start gap-3">
                     <Key className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
                     <div className="text-sm text-amber-800">
-                        <p className="font-medium mb-1">Konfigurasi API Key</p>
+                        <p className="font-medium mb-1">Rotasi API Key</p>
                         <p className="text-amber-600 mb-2">
-                            API key dikonfigurasi via environment variable <code className="bg-amber-100 px-1.5 py-0.5 rounded text-xs font-mono">GOOGLE_GENERATIVE_AI_API_KEY</code> di file <code className="bg-amber-100 px-1.5 py-0.5 rounded text-xs font-mono">.env.local</code>
+                            Isi beberapa API Key sekaligus pada form di atas. Sistem akan secara otomatis mengacak (rotasi) penggunaan API Key pada setiap kali request. Hal ini memecah beban request sehingga Anda tidak akan mudah terkena limit (429) dari Google atau OpenRouter.
                         </p>
-                        <a
-                            href="https://aistudio.google.com/apikey"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-amber-700 hover:text-amber-900 font-medium underline"
-                        >
-                            Dapatkan API Key dari Google AI Studio →
-                        </a>
                     </div>
                 </div>
             </div>

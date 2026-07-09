@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { FileText, Plus, Wand2, Mail, Save, FileCheck, Loader2, Trash2, X, Download, PenTool, ImageIcon, Sparkles } from 'lucide-react'
+import { FileText, Plus, Wand2, Mail, Save, FileCheck, Loader2, Trash2, X, Download, PenTool, ImageIcon, Sparkles, MessageSquarePlus } from 'lucide-react'
 import { RichTextEditor } from '@/components/admin/RichTextEditor'
 
 export default function ProjectDocuments({ project }: { project: any }) {
@@ -179,8 +179,10 @@ export default function ProjectDocuments({ project }: { project: any }) {
 
     const startGeneratePRD = () => {
         setPrdSetupModal(prev => ({ ...prev, isOpen: false }))
+        const manualContext = documents.find(d => d.title.includes('Konteks Tambahan'))?.content || ''
         startGeneration('prd', 'Product Requirements Document (PRD)', '/api/ai/generate-prd', {
             description: project.description || 'Proyek pengembangan sistem.',
+            manualContext,
             templateName: project.name,
             frontendStack: prdSetupModal.jsFramework,
             cssFramework: prdSetupModal.cssFramework
@@ -188,16 +190,20 @@ export default function ProjectDocuments({ project }: { project: any }) {
     }
 
     const handleGenerateProposal = () => {
+        const manualContext = documents.find(d => d.title.includes('Konteks Tambahan'))?.content || ''
         startGeneration('proposal', 'Proposal Penawaran (AI Generated)', '/api/ai/generate-proposal', {
             description: project.description || 'Proyek pengembangan sistem.',
+            manualContext,
             templateName: project.name,
             clientName: project.client_name
         })
     }
 
     const handleGenerateSOW = () => {
+        const manualContext = documents.find(d => d.title.includes('Konteks Tambahan'))?.content || ''
         startGeneration('proposal', 'Surat Perjanjian Kerja / SOW', '/api/ai/generate-sow', {
             description: project.description || 'Proyek pengembangan sistem.',
+            manualContext,
             templateName: project.name,
             clientName: project.client_name
         })
@@ -205,8 +211,10 @@ export default function ProjectDocuments({ project }: { project: any }) {
 
     const handleGenerateDesignPrompt = () => {
         const prdDoc = documents.find(d => d.type === 'prd')
+        const manualContext = documents.find(d => d.title.includes('Konteks Tambahan'))?.content || ''
         startGeneration('prd', 'Prompt Desain UI/UX & Diagram', '/api/ai/generate-design-prompt', {
             description: project.description || 'Proyek pengembangan sistem.',
+            manualContext,
             templateName: project.name,
             prdContent: prdDoc ? prdDoc.content : null
         })
@@ -287,6 +295,9 @@ Pastikan Anda menggunakan struktur file Google Apps Script yang direkomendasikan
                             <Plus className="h-4 w-4" />
                         </button>
                         <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-xl w-56 py-2 hidden group-hover:block z-50">
+                            <button onClick={() => handleCreateDoc('other', 'Konteks Tambahan (Follow-up)')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50">
+                                <MessageSquarePlus className="h-4 w-4 text-blue-500" /> Konteks Follow-up (Manual)
+                            </button>
                             <button onClick={() => handleCreateDoc('proposal', 'Draft Proposal')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-gray-400" /> Blank Document
                             </button>
@@ -326,6 +337,7 @@ Pastikan Anda menggunakan struktur file Google Apps Script yang direkomendasikan
                             >
                                 {doc.type === 'prd' ? <FileCheck className={`h-4 w-4 shrink-0 ${activeDoc?.id === doc.id ? 'text-indigo-600' : 'text-emerald-500'}`} /> : 
                                  doc.type === 'proposal' ? <FileText className={`h-4 w-4 shrink-0 ${activeDoc?.id === doc.id ? 'text-indigo-600' : 'text-amber-500'}`} /> : 
+                                 doc.title.includes('Konteks Tambahan') ? <MessageSquarePlus className={`h-4 w-4 shrink-0 ${activeDoc?.id === doc.id ? 'text-indigo-600' : 'text-blue-500'}`} /> : 
                                  <FileText className="h-4 w-4 shrink-0 text-gray-400" />}
                                 <span className="truncate overflow-hidden w-28">{doc.title}</span>
                             </button>
@@ -430,6 +442,10 @@ Pastikan Anda menggunakan struktur file Google Apps Script yang direkomendasikan
                             <button onClick={() => handleCreateDoc('proposal', 'Draft Proposal')} className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl font-medium transition-all shadow-sm">
                                 <FileText className="h-4 w-4 text-gray-400" />
                                 Blank Doc
+                            </button>
+                            <button onClick={() => handleCreateDoc('other', 'Konteks Tambahan (Follow-up)')} className="flex items-center gap-2 px-6 py-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl font-medium transition-all border border-blue-100">
+                                <MessageSquarePlus className="h-4 w-4" />
+                                Input Konteks Tambahan
                             </button>
                             <button onClick={handleGenerateProposal} disabled={isGenerating} className="flex items-center gap-2 px-6 py-3 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl font-medium transition-all">
                                 {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}

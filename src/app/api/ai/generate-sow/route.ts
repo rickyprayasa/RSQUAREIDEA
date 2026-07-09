@@ -12,7 +12,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { description, templateName, clientName } = await req.json()
+        const { description, templateName, clientName, manualContext } = await req.json()
 
         if (!description) {
             return NextResponse.json({ error: 'Deskripsi request tidak boleh kosong.' }, { status: 400 })
@@ -34,17 +34,40 @@ The SOW must include the following sections:
 8. <h2>Pasal 6: Keterlambatan Feedback Klien</h2>: If the client does not respond for 14 working days, the project is considered complete and DP is non-refundable.
 9. <h2>Penutup & Tanda Tangan</h2>: Space for signatures (Pihak Pertama & Pihak Kedua).`
 
+        // Extract image URLs if any
+        const imageUrls: string[] = []
+        if (manualContext) {
+            const imgRegex = /<img[^>]+src="([^">]+)"/g
+            let match
+            while ((match = imgRegex.exec(manualContext)) !== null) {
+                imageUrls.push(match[1])
+            }
+        }
+
+        const cleanManualContext = manualContext ? manualContext.replace(/<[^>]+>/g, '').trim() : ''
+
         const userPrompt = `Tolong buatkan draf SOW / Kontrak Kerja berdasarkan informasi berikut ini:
 
 - **Nama Klien (Pihak Kedua)**: ${clientName || 'Klien'}
 - **Nama Aplikasi / Project**: ${templateName || 'Tidak disebutkan'}
 
 **Kebutuhan/Deskripsi Klien:**
-"${description}"`
+"${description}"
+${cleanManualContext ? `\n**Konteks Tambahan (Hasil Follow-up Manual Klien):**\n"${cleanManualContext}"` : ''}`
+
+        // Construct user content array for Multimodal
+        const userContent: any[] = [{ type: 'text', text: userPrompt }]
+        for (const url of imageUrls) {
+            userContent.push({ type: 'image', image: url })
+        }
+
+        let aiMessages: any[] = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userContent }
+        ]
 
         const { result, usedModel } = await generateWithFallback({
-            system: systemPrompt,
-            prompt: userPrompt,
+            messages: aiMessages,
             temperature: 0.5,
             maxTokens: 3500,
             tier: 'high'

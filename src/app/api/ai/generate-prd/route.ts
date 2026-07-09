@@ -13,7 +13,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { requestId, template_name, templateName, description, budget, deadline, previousContent, frontendStack, cssFramework } = await req.json()
+        const { requestId, template_name, templateName, description, budget, deadline, previousContent, frontendStack, cssFramework, manualContext } = await req.json()
         
         const finalTemplateName = template_name || templateName || 'Tidak disebutkan'
 
@@ -46,6 +46,18 @@ The PRD must include the following sections:
 
 Remember to strictly enforce ${finalJsStack} and ${finalCssStack} throughout the document, especially in sections 5 and 6.`
 
+        // Extract image URLs if any
+        const imageUrls: string[] = []
+        if (manualContext) {
+            const imgRegex = /<img[^>]+src="([^">]+)"/g
+            let match
+            while ((match = imgRegex.exec(manualContext)) !== null) {
+                imageUrls.push(match[1])
+            }
+        }
+
+        const cleanManualContext = manualContext ? manualContext.replace(/<[^>]+>/g, '').trim() : ''
+
         const userPrompt = `Tolong buatkan PRD (Product Requirements Document) berdasarkan request kustom klien berikut ini:
 
 - **Jenis Aplikasi**: Google Web App (Google Apps Script + Google Sheets)
@@ -55,23 +67,28 @@ Remember to strictly enforce ${finalJsStack} and ${finalCssStack} throughout the
 - **Target Waktu**: ${deadline || 'Tidak disebutkan'}
 
 **Deskripsi Mentah Klien:**
-"${description}"`
+"${description}"
+${cleanManualContext ? `\n**Konteks Tambahan (Hasil Follow-up Manual Klien):**\n"${cleanManualContext}"` : ''}`
 
-        let aiMessages: any[] = []
+        // Construct user content array for Multimodal
+        const userContent: any[] = [{ type: 'text', text: userPrompt }]
+        for (const url of imageUrls) {
+            userContent.push({ type: 'image', image: url })
+        }
+
+        let aiMessages: any[] = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userContent }
+        ]
+
         if (previousContent) {
-            aiMessages = [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt },
-                { role: 'assistant', content: previousContent },
-                { role: 'user', content: 'Lanjutkan dokumen tersebut persis dari kata terakhir yang terpotong. Jangan mengulang kalimat sebelumnya dan jangan menambahkan pengantar.' }
-            ]
+            aiMessages.push({ role: 'assistant', content: previousContent })
+            aiMessages.push({ role: 'user', content: 'Lanjutkan dokumen tersebut persis dari kata terakhir yang terpotong. Jangan mengulang kalimat sebelumnya dan jangan menambahkan pengantar.' })
         }
 
         // Generate using fallback router
         const { result, usedModel } = await generateWithFallback({
-            system: previousContent ? undefined : systemPrompt,
-            prompt: previousContent ? undefined : userPrompt,
-            messages: previousContent ? aiMessages : undefined,
+            messages: aiMessages,
             temperature: 0.7,
             maxTokens: 4000,
             tier: 'high'

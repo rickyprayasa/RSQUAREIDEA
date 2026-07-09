@@ -1,20 +1,20 @@
-import { google } from '@ai-sdk/google'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import { streamText, LanguageModel } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 
 // Base Gemini models that are consistently reliable
 const BASE_GEMINI_MODELS = [
+    { provider: 'google', id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash' },
+    { provider: 'openrouter', id: 'google/gemini-3.5-flash', name: 'Gemini 3.5 Flash (OpenRouter)' },
     { provider: 'google', id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-    { provider: 'openrouter', id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash (OpenRouter)' },
     { provider: 'google', id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite' },
-    { provider: 'google', id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
-    { provider: 'openrouter', id: 'google/gemini-2.0-flash-lite-preview-02-05:free', name: 'Gemini 2.0 Flash Lite (OpenRouter)' },
+    { provider: 'openrouter', id: 'google/gemma-4-31b-it:free', name: 'Gemma 4 31B (OpenRouter Free)' },
 ]
 
 // Default OpenRouter fallback in case the API fetch fails
 const DEFAULT_OPENROUTER_MODELS = [
-    { provider: 'openrouter', id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 (Free)' },
+    { provider: 'openrouter', id: 'openrouter/free', name: 'OpenRouter Free Auto' },
 ]
 
 // Memory cache for OpenRouter dynamic models
@@ -84,21 +84,49 @@ async function getApiKeys() {
         const { data } = await supabase
             .from('site_settings')
             .select('key, value')
-            .in('key', ['openrouter_api_key', 'openrouter_base_url', 'primary_ai_model'])
+            .in('key', [
+                'openrouter_api_key', 'openrouter_api_key_2', 'openrouter_api_key_3',
+                'google_api_key_1', 'google_api_key_2', 'google_api_key_3',
+                'openrouter_base_url', 'primary_ai_model'
+            ])
         
-        const openrouterKey = data?.find(s => s.key === 'openrouter_api_key')?.value || ''
-        const openrouterBaseUrl = data?.find(s => s.key === 'openrouter_base_url')?.value || 'https://openrouter.ai/api/v1'
-        const primaryAiModel = data?.find(s => s.key === 'primary_ai_model')?.value || ''
+        const getValue = (key: string) => data?.find(s => s.key === key)?.value?.trim() || ''
+
+        const openrouterKeys = [
+            getValue('openrouter_api_key'),
+            getValue('openrouter_api_key_2'),
+            getValue('openrouter_api_key_3')
+        ].filter(Boolean).join(',')
+
+        const googleKeys = [
+            getValue('google_api_key_1'),
+            getValue('google_api_key_2'),
+            getValue('google_api_key_3')
+        ].filter(Boolean).join(',')
+
+        let openrouterBaseUrl = getValue('openrouter_base_url') || 'https://openrouter.ai/api/v1'
+        let primaryAiModel = getValue('primary_ai_model')
         
+        // Support multi-key rotation (comma separated)
+        const getRotatedKey = (keyString: string) => {
+            const keys = keyString.split(',').map(k => k.trim()).filter(Boolean)
+            if (keys.length === 0) return ''
+            // Randomly select a key to distribute the load and avoid rate limits
+            return keys[Math.floor(Math.random() * keys.length)]
+        }
+
+        // Use DB Google keys if exist, otherwise fallback to env
+        const finalGoogleKeys = googleKeys || process.env.GOOGLE_GENERATIVE_AI_API_KEY || ''
+
         return {
-            googleKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || '',
-            openrouterKey,
+            googleKey: getRotatedKey(finalGoogleKeys),
+            openrouterKey: getRotatedKey(openrouterKeys),
             openrouterBaseUrl,
             primaryAiModel,
         }
     } catch {
         return {
-            googleKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || '',
+            googleKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? process.env.GOOGLE_GENERATIVE_AI_API_KEY.split(',')[0].trim() : '',
             openrouterKey: '',
             openrouterBaseUrl: 'https://openrouter.ai/api/v1',
             primaryAiModel: '',
@@ -129,12 +157,19 @@ export async function generateWithFallback(options: {
 }): Promise<GenerateResult> {
     const { googleKey, openrouterKey, openrouterBaseUrl, primaryAiModel } = await getApiKeys()
     
+    // Instantiate providers with the rotated keys
+    const googleProvider = createGoogleGenerativeAI({ apiKey: googleKey })
+    
     let openrouterProvider: ReturnType<typeof createOpenAICompatible> | null = null
     if (openrouterKey) {
         openrouterProvider = createOpenAICompatible({
             name: 'openrouter',
             apiKey: openrouterKey,
             baseURL: openrouterBaseUrl,
+            headers: {
+                'HTTP-Referer': 'https://rsquareidea.com',
+                'X-Title': 'RSQUARE IDEA',
+            }
         })
     }
 
@@ -146,6 +181,11 @@ export async function generateWithFallback(options: {
     // If high tier is requested, prepend Pro/Reasoning models
     if (options.tier === 'high') {
         const highTierModels = [
+            // Next-gen high capability models (based on user request)
+            { provider: 'google', id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash' },
+            { provider: 'openrouter', id: 'google/gemini-3.1-pro', name: 'Gemini 3.1 Pro' },
+            { provider: 'openrouter', id: 'anthropic/claude-3.7-sonnet', name: 'Claude 3.7 Sonnet' },
+            // Fallback to known capable models
             { provider: 'google', id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
             { provider: 'openrouter', id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro (OpenRouter)' },
             { provider: 'openrouter', id: 'google/gemini-pro-1.5', name: 'Gemini 1.5 Pro (OpenRouter)' },
@@ -170,7 +210,7 @@ export async function generateWithFallback(options: {
         let modelInstance: LanguageModel
         
         if (modelConfig.provider === 'google') {
-            modelInstance = google(modelConfig.id)
+            modelInstance = googleProvider(modelConfig.id)
         } else if (modelConfig.provider === 'openrouter' && openrouterProvider) {
             modelInstance = openrouterProvider(modelConfig.id)
         } else {
