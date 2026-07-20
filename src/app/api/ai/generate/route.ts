@@ -45,6 +45,25 @@ TUGAS: Kembangkan teks berikut dengan menambahkan detail, contoh, atau penjelasa
         systemInstruction += `
 
 TUGAS: Buat outline artikel yang komprehensif berdasarkan topik. Gunakan format Markdown.`;
+    } else if (command === 'rsquare_format') {
+        systemInstruction += `
+
+TUGAS: Kembangkan draft atau mentahan teks ini menjadi sebuah Proposal Penawaran Aplikasi/Website yang sangat detail, komprehensif, dan siap dikirim ke klien menggunakan standar RSQUARE.
+
+ATURAN PERBAIKAN & PENGEMBANGAN:
+1. JADIKAN LEBIH DETAIL: Jika pengguna hanya memasukkan poin-poin singkat (misal: "fitur login, dashboard, laporan"), kembangkan menjadi deskripsi fitur yang profesional dan menarik bagi klien. Jelaskan *benefit* dari masing-masing fitur tersebut.
+2. STRUKTUR PROPOSAL LENGKAP: Pastikan proposal memiliki struktur yang profesional, seperti: 
+   - Latar Belakang & Tujuan
+   - Ruang Lingkup Pekerjaan (Fitur detail)
+   - Metodologi & Workflow (Tahapan pengerjaan)
+   - Estimasi Waktu (Timeline)
+   - Rincian Investasi & Termin Pembayaran (Buatkan format/tabel placeholder harga)
+   - Support & Maintenance
+   - Penutup
+3. GAYA BAHASA: Gunakan gaya bahasa profesional ala RSQUARE yang meyakinkan, elegan, namun tetap mudah dipahami (tidak terlalu kaku/robotik).
+4. FORMAT HTML: Gunakan format HTML yang rapi (<h2>, <h3>, <p>, <ul>, <li>, <strong>, <table>) untuk menstruktur dokumen. Gunakan tabel untuk timeline atau estimasi harga.
+5. JANGAN hilangkan poin penting dari teks asli, tapi kembangkan dan poles bahasanya hingga sempurna agar meyakinkan klien.
+6. Kembalikan HANYA kode HTML hasil perbaikan tanpa penjelasan apapun.`;
     } else if (command === 'fix_format') {
         systemInstruction += `
 

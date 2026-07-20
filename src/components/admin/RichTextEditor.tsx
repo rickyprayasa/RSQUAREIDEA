@@ -11,6 +11,10 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import { FontFamily } from '@tiptap/extension-font-family'
 import TextAlign from '@tiptap/extension-text-align'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { TableCell } from '@tiptap/extension-table-cell'
 import { useState, useEffect, useRef } from 'react'
 import React from 'react'
 import {
@@ -35,6 +39,7 @@ interface RichTextEditorProps {
         modalTitle?: string
         modalLabel?: string
         modalPlaceholder?: string
+        autoAction?: string
     }
 }
 
@@ -289,6 +294,15 @@ export const RichTextEditor = ({ content, onChange, editable = true, aiConfig }:
             TextAlign.configure({
                 types: ['heading', 'paragraph', 'image'],
             }),
+            Table.configure({
+                resizable: true,
+                HTMLAttributes: {
+                    class: 'min-w-full my-6',
+                },
+            }),
+            TableRow,
+            TableHeader,
+            TableCell,
         ],
         content,
         editable,
@@ -355,9 +369,9 @@ export const RichTextEditor = ({ content, onChange, editable = true, aiConfig }:
             const imgMatch = html.match(/<img[^>]+src="([^">]+)"/)
             const imageUrl = imgMatch ? imgMatch[1] : undefined
 
-            // For fix_format and fix_grammar, send the current content as context
+            // For fix_format, fix_grammar, and rsquare_format, send the current content as context
             let finalCmd = cmd
-            let finalContext = (cmd === 'fix_format' || cmd === 'fix_grammar') ? html : undefined
+            let finalContext = (cmd === 'fix_format' || cmd === 'fix_grammar' || cmd === 'rsquare_format') ? html : undefined
             
             if (cmd === 'generate' && selectedTextContext) {
                 finalCmd = 'edit_selection'
@@ -398,10 +412,14 @@ export const RichTextEditor = ({ content, onChange, editable = true, aiConfig }:
             if (fullText) {
                 console.log("AI content received, length:", fullText.length)
 
-                if (cmd === 'fix_format' || cmd === 'fix_grammar') {
+                if (cmd === 'fix_format' || cmd === 'fix_grammar' || cmd === 'rsquare_format') {
                     // Replace entire content
                     editor.commands.setContent(fullText)
-                    toast.success(cmd === 'fix_format' ? 'Format artikel berhasil dirapikan!' : 'Typo dan ejaan berhasil diperbaiki!')
+                    let toastMsg = 'Konten berhasil diperbarui!'
+                    if (cmd === 'fix_format') toastMsg = 'Format artikel berhasil dirapikan!'
+                    else if (cmd === 'fix_grammar') toastMsg = 'Typo dan ejaan berhasil diperbaiki!'
+                    else if (cmd === 'rsquare_format') toastMsg = 'Proposal berhasil di-enhance dengan format RSQUARE!'
+                    toast.success(toastMsg)
                 } else {
                     editor.chain().focus().insertContent(fullText).run()
                 }
@@ -881,20 +899,25 @@ export const RichTextEditor = ({ content, onChange, editable = true, aiConfig }:
                         <motion.button
                             type="button"
                             onClick={() => {
-                                const { from, to, empty } = editor.state.selection
-                                if (!empty) {
-                                    const selectedText = editor.state.doc.textBetween(from, to, '\n')
-                                    setSelectedTextContext(selectedText)
+                                if (aiConfig?.autoAction) {
+                                    generateContent(aiConfig.autoAction)
                                 } else {
-                                    setSelectedTextContext('')
+                                    const { from, to, empty } = editor.state.selection
+                                    if (!empty) {
+                                        const selectedText = editor.state.doc.textBetween(from, to, '\n')
+                                        setSelectedTextContext(selectedText)
+                                    } else {
+                                        setSelectedTextContext('')
+                                    }
+                                    setShowAIModal(true)
                                 }
-                                setShowAIModal(true)
                             }}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                            disabled={isGenerating}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                         >
-                            <Sparkles className="h-3 w-3" />
+                            {isGenerating && aiConfig?.autoAction ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
                             {aiConfig?.buttonText || 'AI Write'}
                         </motion.button>
                     </div>

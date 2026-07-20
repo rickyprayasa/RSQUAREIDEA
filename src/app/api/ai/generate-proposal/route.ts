@@ -28,9 +28,12 @@ The Proposal must include the following sections:
 1. <h1>Proposal Penawaran: [Nama Project]</h1>
 2. <p><strong>Latar Belakang & Tujuan:</strong> Brief persuasive introduction.</p>
 3. <h2>Ruang Lingkup Pekerjaan (Scope of Work)</h2>: Detailed breakdown of what will be built.
-4. <h2>Tahapan Pengerjaan (Timeline)</h2>: Suggested timeline and milestones.
+4. <h2>Metodologi & Workflow (Tahapan Kerja)</h2>: Explain the development phases (e.g., Requirement, Design, Development, Testing, Deployment).
 5. <h2>Kebutuhan Data & Integrasi</h2>: What needs to be provided by the client.
-6. <h2>Penutup</h2>: A professional closing statement.`
+6. <h2>Estimasi Waktu (Timeline)</h2>: Suggested timeline and milestones.
+7. <h2>Rincian Investasi (Pricing) & Termin Pembayaran</h2>: Create a placeholder table for pricing and list payment terms (e.g., DP 30%, dll).
+8. <h2>Maintenance & Support</h2>: Post-launch support terms.
+9. <h2>Penutup</h2>: A professional closing statement.`
 
         // Extract image URLs if any
         const imageUrls: string[] = []

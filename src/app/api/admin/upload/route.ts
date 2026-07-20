@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -45,8 +45,9 @@ export async function POST(request: NextRequest) {
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`
         const filePath = folder ? `${folder}/${fileName}` : fileName
 
-        // Upload to Supabase Storage
-        const { error: uploadError } = await supabase.storage
+        // Upload to Supabase Storage using Admin Client to bypass RLS
+        const adminSupabase = await createAdminClient()
+        const { error: uploadError } = await adminSupabase.storage
             .from(bucket)
             .upload(filePath, file, {
                 cacheControl: '3600',
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Get public URL
-        const { data: { publicUrl } } = supabase.storage
+        const { data: { publicUrl } } = adminSupabase.storage
             .from(bucket)
             .getPublicUrl(filePath)
 
@@ -94,7 +95,8 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid bucket' }, { status: 400 })
         }
 
-        const { error } = await supabase.storage
+        const adminSupabase = await createAdminClient()
+        const { error } = await adminSupabase.storage
             .from(bucket)
             .remove([path])
 
