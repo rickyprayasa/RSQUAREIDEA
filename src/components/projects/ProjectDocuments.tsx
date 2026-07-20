@@ -426,6 +426,12 @@ Pastikan Anda menggunakan struktur file Google Apps Script yang direkomendasikan
                                     content={content} 
                                     onChange={setContent} 
                                     editable={true} 
+                                    aiConfig={activeDoc.type === 'other' ? {
+                                        buttonText: 'Enhance AI',
+                                        modalTitle: 'AI Context Enhancer',
+                                        modalLabel: 'Instruksi untuk AI (opsional):',
+                                        modalPlaceholder: "Contoh: 'Rapikan catatan ini', 'Buat poin-poin dari teks ini', 'Lengkapi kalimat ini'"
+                                    } : undefined}
                                 />
                             </div>
                         </div>

@@ -30,6 +30,12 @@ interface RichTextEditorProps {
     content: string
     onChange: (content: string) => void
     editable?: boolean
+    aiConfig?: {
+        buttonText?: string
+        modalTitle?: string
+        modalLabel?: string
+        modalPlaceholder?: string
+    }
 }
 
 const ToolbarButton = ({ onClick, isActive, disabled, children, title }: any) => (
@@ -131,7 +137,7 @@ const IllustrationNode = TiptapNode.create({
     },
 })
 
-export function RichTextEditor({ content, onChange, editable = true }: RichTextEditorProps) {
+export const RichTextEditor = ({ content, onChange, editable = true, aiConfig }: RichTextEditorProps) => {
     const [linkUrl, setLinkUrl] = useState('')
     const [showAIModal, setShowAIModal] = useState(false)
     const [showImageModal, setShowImageModal] = useState(false)
@@ -889,7 +895,7 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                             whileTap={{ scale: 0.95 }}
                         >
                             <Sparkles className="h-3 w-3" />
-                            AI Write
+                            {aiConfig?.buttonText || 'AI Write'}
                         </motion.button>
                     </div>
                 </div>
@@ -908,7 +914,7 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                                     <Sparkles className="h-5 w-5 text-purple-500" />
-                                    AI Writing Assistant
+                                    {aiConfig?.modalTitle || 'AI Writing Assistant'}
                                 </h3>
                                 <button onClick={() => setShowAIModal(false)} className="text-gray-400 hover:text-gray-600">
                                     <X className="h-5 w-5" />
@@ -917,7 +923,7 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
 
                             <div className="mb-4">
                                 <label htmlFor="ai-input" className="block text-sm font-medium text-gray-700 mb-2">
-                                    {selectedTextContext ? 'Instruksi untuk teks yang dipilih:' : 'Apa yang ingin Anda tulis?'}
+                                    {selectedTextContext ? 'Instruksi untuk teks yang dipilih:' : (aiConfig?.modalLabel || 'Apa yang ingin Anda tulis?')}
                                 </label>
                                 {selectedTextContext && (
                                     <div className="mb-3 p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg text-xs text-gray-600 italic line-clamp-3">
@@ -928,7 +934,7 @@ export function RichTextEditor({ content, onChange, editable = true }: RichTextE
                                     id="ai-input"
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                                     rows={4}
-                                    placeholder="Contoh: 'Tulis paragraf tentang manfaat meditasi', 'Lanjutkan cerita ini', 'Buat kerangka artikel tentang AI'"
+                                    placeholder={aiConfig?.modalPlaceholder || "Contoh: 'Tulis paragraf tentang manfaat meditasi', 'Lanjutkan cerita ini', 'Buat kerangka artikel tentang AI'"}
                                     value={aiInput}
                                     onChange={(e) => setAiInput(e.target.value)}
                                     disabled={isGenerating}
