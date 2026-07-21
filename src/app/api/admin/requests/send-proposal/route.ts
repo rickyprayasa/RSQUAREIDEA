@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
                 <tr>
                     <!-- Left Logo (White BG) -->
                     <td style="width: 50%; padding: 24px 10px 24px 40px; vertical-align: middle;">
-                        <img src="https://nagujrwbifmpcwhotzut.supabase.co/storage/v1/object/public/Logo%20RSQUARE/RSQUARE.png" alt="RSQUARE" style="height: 48px; width: auto;">
+                        <img src="${process.env.R2_PUBLIC_URL || 'https://pub-yourr2url.r2.dev'}/Logo%20RSQUARE/RSQUARE.png" alt="RSQUARE" style="height: 48px; width: auto;">
                         <div style="color: #6b7280; font-size: 10px; margin-top: 6px; font-weight: 600; letter-spacing: 0.5px;">SOLUSI DIGITAL & OTOMATISASI BISNIS</div>
                     </td>
 

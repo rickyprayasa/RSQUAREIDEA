@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { uploadToR2, deleteFromR2, getR2PublicUrl } from '@/lib/cloudflare/r2'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -43,30 +44,28 @@ export async function POST(request: NextRequest) {
         // Generate unique filename
         const fileExt = file.name.split('.').pop()?.toLowerCase()
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`
-        const filePath = folder ? `${folder}/${fileName}` : fileName
+        const basePath = folder ? `${bucket}/${folder}` : bucket
+        const filePath = `${basePath}/${fileName}`
 
-        // Upload to Supabase Storage using Admin Client to bypass RLS
-        const adminSupabase = await createAdminClient()
-        const { error: uploadError } = await adminSupabase.storage
-            .from(bucket)
-            .upload(filePath, file, {
-                cacheControl: '3600',
-                upsert: false,
-            })
+        // Upload to Cloudflare R2
+        // Determine bucket type: qris is private, others are public
+        const bucketType = bucket === 'qris' ? 'private' : 'public'
+        
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const { success, error, path: r2Path } = await uploadToR2(buffer, filePath, file.type, bucketType)
 
-        if (uploadError) {
-            console.error('Upload error:', uploadError)
-            return NextResponse.json({ error: uploadError.message }, { status: 500 })
+        if (!success) {
+            console.error('R2 Upload error:', error)
+            return NextResponse.json({ error: error || 'Failed to upload to R2' }, { status: 500 })
         }
 
-        // Get public URL
-        const { data: { publicUrl } } = adminSupabase.storage
-            .from(bucket)
-            .getPublicUrl(filePath)
+        // Get public URL (only works correctly if it's a public bucket)
+        // If it's private (qris), it returns the path or a non-working public URL.
+        const r2Url = getR2PublicUrl(r2Path as string)
 
         return NextResponse.json({ 
-            url: publicUrl, 
-            path: filePath,
+            url: r2Url, 
+            path: r2Path,
             bucket 
         })
     } catch (error) {
@@ -95,14 +94,13 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid bucket' }, { status: 400 })
         }
 
-        const adminSupabase = await createAdminClient()
-        const { error } = await adminSupabase.storage
-            .from(bucket)
-            .remove([path])
+        const bucketType = bucket === 'qris' ? 'private' : 'public'
+        
+        const { success, error: deleteError } = await deleteFromR2(path, bucketType)
 
-        if (error) {
-            console.error('Delete error:', error)
-            return NextResponse.json({ error: error.message }, { status: 500 })
+        if (!success) {
+            console.error('R2 Delete error:', deleteError)
+            return NextResponse.json({ error: deleteError || 'Failed to delete from R2' }, { status: 500 })
         }
 
         return NextResponse.json({ success: true })

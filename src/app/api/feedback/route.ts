@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import nodemailer from 'nodemailer'
 import { notifyNewFeedback } from '@/lib/notifications'
+import { uploadToR2, getR2PublicUrl } from '@/lib/cloudflare/r2'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -29,7 +30,7 @@ function getVoucherEmailHtml(name: string, voucherCode: string): string {
     <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; margin-top: 40px; margin-bottom: 40px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
         <!-- Header -->
         <div style="background-color: #ffffff; padding: 30px 40px; text-align: center; border-bottom: 1px solid #f3f4f6;">
-            <img src="https://nagujrwbifmpcwhotzut.supabase.co/storage/v1/object/public/Logo%20RSQUARE/RSQUARE.png" alt="RSQUARE Logo" style="height: 100px; width: auto; display: block; margin: 0 auto;">
+            <img src="${process.env.R2_PUBLIC_URL || 'https://pub-yourr2url.r2.dev'}/Logo%20RSQUARE/RSQUARE.png" alt="RSQUARE Logo" style="height: 100px; width: auto; display: block; margin: 0 auto;">
         </div>
 
         <!-- Content -->
@@ -168,22 +169,12 @@ export async function POST(request: NextRequest) {
                 // Remove data:image/jpeg;base64, from the string
                 const base64Data = data.imageBase64.replace(/^data:image\/\w+;base64,/, "")
                 const buffer = Buffer.from(base64Data, 'base64')
-                const fileName = `feedback-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
+                const fileName = `feedback/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
 
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('feedback_images')
-                    .upload(fileName, buffer, {
-                        contentType: 'image/jpeg',
-                        upsert: false
-                    })
+                const { success, path: r2Path } = await uploadToR2(buffer, fileName, 'image/jpeg', 'public')
 
-                if (uploadError) {
-                    console.error('Error uploading image:', uploadError)
-                } else if (uploadData) {
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('feedback_images')
-                        .getPublicUrl(fileName)
-                    imageUrl = publicUrl
+                if (success && r2Path) {
+                    imageUrl = getR2PublicUrl(r2Path)
                 }
             } catch (err) {
                 console.error('Error processing image:', err)

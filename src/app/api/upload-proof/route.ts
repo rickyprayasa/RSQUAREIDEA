@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { uploadToR2 } from '@/lib/cloudflare/r2'
 
 export async function POST(request: NextRequest) {
     try {
@@ -22,33 +22,26 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'File too large. Maximum size is 5MB.' }, { status: 400 })
         }
 
-        const supabase = await createClient()
-
         // Generate unique filename
         const fileExt = file.name.split('.').pop()?.toLowerCase()
-        const fileName = `proofs/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`
+        const fileName = `qris/proofs/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`
 
-        // Upload to Supabase Storage
-        const { error: uploadError } = await supabase.storage
-            .from('qris')
-            .upload(fileName, file, {
-                cacheControl: '3600',
-                upsert: false,
-            })
+        // Upload to Cloudflare R2
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const { success, error, path: r2Path } = await uploadToR2(buffer, fileName, file.type, 'private')
 
-        if (uploadError) {
-            console.error('Upload error:', uploadError)
-            return NextResponse.json({ error: uploadError.message }, { status: 500 })
+        if (!success) {
+            console.error('R2 Upload error:', error)
+            return NextResponse.json({ error: error || 'Failed to upload proof' }, { status: 500 })
         }
 
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-            .from('qris')
-            .getPublicUrl(fileName)
-
+        // We return the path for private bucket. 
+        // The QRIS confirmation logic in /api/qris-confirmation/route.ts will save this path.
+        // It shouldn't be publicly accessible. Admin view will need a way to get signed URL later,
+        // or just rely on backend proxy. But for now, we just save the path.
         return NextResponse.json({ 
-            url: publicUrl, 
-            path: fileName,
+            url: r2Path, // Use path as URL so frontend logic works (frontend expects url or path)
+            path: r2Path,
         })
     } catch (error) {
         console.error('Upload error:', error)
