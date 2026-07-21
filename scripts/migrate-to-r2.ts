@@ -110,8 +110,8 @@ async function migrateBucket(bucketName: string, bucketType: 'public' | 'private
 
 async function updateDatabaseUrls() {
     console.log('\n🔄 Updating database URLs...')
-    // Pattern to look for: https://nagujrwbifmpcwhotzut.supabase.co/storage/v1/object/public/
     const oldPrefix = `${supabaseUrl}/storage/v1/object/public/`
+    const oldR2Prefix = 'https://pub-8f2c427036524f5f91c24176f710ea27.r2.dev/'
     const newPrefix = publicUrl.endsWith('/') ? publicUrl : publicUrl + '/'
 
     for (const config of dbUpdates) {
@@ -130,10 +130,14 @@ async function updateDatabaseUrls() {
             const updates: any = {}
 
             for (const col of columns) {
-                if (row[col] && typeof row[col] === 'string' && row[col].includes(oldPrefix)) {
-                    // Note: This replaces public URLs. Private buckets (like qris) might need a different path mapping if stored with public URL before.
-                    updates[col] = row[col].replace(oldPrefix, newPrefix)
-                    needsUpdate = true
+                if (row[col] && typeof row[col] === 'string') {
+                    if (row[col].includes(oldPrefix)) {
+                        updates[col] = row[col].replace(oldPrefix, newPrefix)
+                        needsUpdate = true
+                    } else if (row[col].includes(oldR2Prefix)) {
+                        updates[col] = row[col].replace(oldR2Prefix, newPrefix)
+                        needsUpdate = true
+                    }
                 }
             }
 
