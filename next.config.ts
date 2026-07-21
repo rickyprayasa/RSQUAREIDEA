@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'cdn.rsquareidea.my.id',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.r2.dev',
+      },
+      {
+        protocol: 'https',
         hostname: 'img.youtube.com',
       },
       {
@@ -26,7 +34,7 @@ const nextConfig: NextConfig = {
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline' *.supabase.co https://cdn.lordicon.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' data: blob: https://*.supabase.co https://*.ytimg.com https://img.youtube.com https://*.unsplash.com https://*.githubusercontent.com;
+      img-src 'self' data: blob: https://*.supabase.co https://*.ytimg.com https://img.youtube.com https://*.unsplash.com https://*.githubusercontent.com https://cdn.rsquareidea.my.id https://*.r2.dev;
       font-src 'self' https://fonts.gstatic.com;
       connect-src 'self' *.supabase.co *.supabase.in https://cdn.lordicon.com;
       frame-src 'self' *.youtube.com https://www.google.com https://script.google.com https://*.googleusercontent.com;
