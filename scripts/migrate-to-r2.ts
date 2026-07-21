@@ -60,7 +60,7 @@ async function uploadToR2(buffer: Buffer, filePath: string, bucketType: 'public'
 
 // Map database updates
 const dbUpdates = [
-    { table: 'products', columns: ['image', 'thumbnail', 'demo_url', 'download_url'] },
+    { table: 'products', columns: ['image', 'thumbnail', 'images', 'demo_url', 'download_url'] },
     { table: 'qris_confirmations', columns: ['proof_image'] },
     { table: 'feedback', columns: ['image_url'] },
     { table: 'articles', columns: ['thumbnail_url'] },
@@ -130,13 +130,32 @@ async function updateDatabaseUrls() {
             const updates: any = {}
 
             for (const col of columns) {
-                if (row[col] && typeof row[col] === 'string') {
-                    if (row[col].includes(oldPrefix)) {
-                        updates[col] = row[col].replace(oldPrefix, newPrefix)
-                        needsUpdate = true
-                    } else if (row[col].includes(oldR2Prefix)) {
-                        updates[col] = row[col].replace(oldR2Prefix, newPrefix)
-                        needsUpdate = true
+                if (row[col]) {
+                    if (typeof row[col] === 'string') {
+                        if (row[col].includes(oldPrefix)) {
+                            updates[col] = row[col].replace(oldPrefix, newPrefix)
+                            needsUpdate = true
+                        } else if (row[col].includes(oldR2Prefix)) {
+                            updates[col] = row[col].replace(oldR2Prefix, newPrefix)
+                            needsUpdate = true
+                        }
+                    } else if (Array.isArray(row[col])) {
+                        const newArray = row[col].map((item: string) => {
+                            if (typeof item === 'string') {
+                                if (item.includes(oldPrefix)) {
+                                    return item.replace(oldPrefix, newPrefix)
+                                } else if (item.includes(oldR2Prefix)) {
+                                    return item.replace(oldR2Prefix, newPrefix)
+                                }
+                            }
+                            return item
+                        })
+                        
+                        // Check if the array actually changed
+                        if (JSON.stringify(newArray) !== JSON.stringify(row[col])) {
+                            updates[col] = newArray
+                            needsUpdate = true
+                        }
                     }
                 }
             }
