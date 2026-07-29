@@ -532,7 +532,7 @@ export function ChatBotModal({
                     initial={{ y: "100%", opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: "100%", opacity: 0 }}
-                    transition={{ type: 'easeOut', duration: 0.25 }}
+                    transition={{ ease: 'easeOut', duration: 0.25 }}
                     onClick={(e) => e.stopPropagation()}
                     className="w-full max-w-3xl h-[92vh] sm:h-[88vh] max-h-[92vh] sm:max-h-[700px] min-h-[480px] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col border-t sm:border border-gray-200 relative z-[1000000] transform-gpu"
                 >
