@@ -52,10 +52,22 @@ export async function POST(request: NextRequest) {
 
         // Create notification
         const serviceLabels: Record<string, string> = {
+            'sheets_proyek': 'Google Sheets (Model Proyek)',
+            'sheets_tim-embed': 'Google Sheets (Tim Embed)',
+            'sheets_retainer': 'Google Sheets (Retainer SLA)',
+            'webapp_proyek': 'Google Web App (Model Proyek)',
+            'webapp_tim-embed': 'Google Web App (Tim Embed)',
+            'webapp_retainer': 'Google Web App (Retainer SLA)',
+            'fullstack_proyek': 'Full Stack (Model Proyek)',
+            'fullstack_tim-embed': 'Full Stack (Tim Embed)',
+            'fullstack_retainer': 'Full Stack (Retainer SLA)',
             sheets: 'Google Sheets',
             webapp: 'Google Web App',
             fullstack: 'Full Stack Dev',
-            consultation: 'Konsultasi'
+            proyek: 'Proyek (Fixed Scope)',
+            'tim-embed': 'Tim Embed (Dedicated)',
+            retainer: 'Retainer (Enterprise SLA)',
+            consultation: 'Konsultasi Gratis'
         }
         const serviceLabel = serviceLabels[data.serviceType] || 'Custom'
         

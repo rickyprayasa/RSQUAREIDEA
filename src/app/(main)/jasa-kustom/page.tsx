@@ -49,117 +49,297 @@ interface Testimonial {
     likes: string
 }
 
-const services = [
+const serviceCategories = [
     {
         id: 'sheets',
-        icon: FileSpreadsheet,
-        title: 'Google Sheets Templates',
-        shortDesc: 'Spreadsheet pintar dengan automasi',
-        badge: 'Mulai Rp 250K',
+        name: 'Google Sheets Templates',
+        badge: 'Automasi & Spreadsheet',
+        lordicon: 'https://cdn.lordicon.com/wloilxuq.json',
+        lordiconColor: 'primary:#ea580c,secondary:#fbbf24',
         color: 'orange',
-        description: 'Spreadsheet pintar dengan formula canggih dan automasi Google Apps Script untuk efisiensi maksimal.',
-        features: [
-            'Custom formulas & conditional formatting',
-            'Apps Script automation',
-            'Multi-sheet integration',
-            'Data validation & protection',
-            'Email notifications otomatis',
-            'Custom dashboard & charts'
-        ],
-        useCases: [
-            'Inventory management system',
-            'Sales tracking & reporting',
-            'HR attendance & payroll',
-            'Project management tracker',
-            'CRM sederhana',
-            'Financial budgeting tool'
-        ],
-        pricing: 'Rp 250.000 - Rp 3.000.000',
-        timeline: '7-14 hari kerja',
-        support: {
-            free: '1 Tahun',
-            description: 'Free support & bug fixes selama 1 tahun penuh'
-        },
-        showcase: {
-            title: 'Sistem Inventory & POS',
-            description: 'Spreadsheet lengkap untuk tracking stok, penjualan, dan laporan keuangan otomatis',
-            image: '/screenshot/sheets-inventory.png'
-        }
+        desc: 'Spreadsheet pintar dengan automasi formula, Apps Script, & dashboard rekap otomatis',
+        tiers: [
+            {
+                id: 'sheets_proyek',
+                serviceId: 'sheets',
+                modelId: 'proyek',
+                categoryTag: 'SPRINT / FIXED SCOPE',
+                modelTag: 'Model Proyek',
+                title: 'Model Proyek (Fixed Scope)',
+                shortDesc: 'Template Google Sheets kustom, formula kompleks, & automasi Apps Script sekali jalan.',
+                badge: 'Mulai Rp 250K',
+                isPopular: false,
+                color: 'orange',
+                pricing: 'Rp 250rb - 3jt',
+                pricingSubtext: '/ project',
+                timeline: '1-2 minggu',
+                scopeType: 'Fixed Scope',
+                features: [
+                    'Scope & kebutuhan spesifik disepakati di awal',
+                    'Formula kustom, conditional formatting & dashboard rekap',
+                    'Automasi Apps Script (Email otomatis, WA link, cetak PDF)',
+                    'Multi-sheet integration & proteksi data/rekening',
+                    'Garansi bug fix hingga 1 tahun gratis',
+                    'Full source spreadsheet + video tutorial pemakaian'
+                ],
+                support: {
+                    free: '1 Tahun',
+                    description: 'Free support & bug fixes selama 1 tahun penuh'
+                },
+                ctaText: 'PILIH MODEL PROYEK'
+            },
+            {
+                id: 'sheets_tim-embed',
+                serviceId: 'sheets',
+                modelId: 'tim-embed',
+                categoryTag: 'SQUAD / DEDICATED',
+                modelTag: 'Tim Embed',
+                title: 'Tim Embed (Dedicated Squad)',
+                shortDesc: 'Developer Apps Script & Sheets dedicated untuk maintenance & pengembangan spreadsheet bulanan.',
+                badge: 'PALING DIMINTA',
+                isPopular: true,
+                color: 'blue',
+                pricing: 'Rp 1.5jt',
+                pricingSubtext: '/ bulan',
+                timeline: 'Dedicated Squad',
+                scopeType: 'Min. 1 bulan',
+                features: [
+                    'Developer dedicated Apps Script & Google Sheets Specialist',
+                    'Pengembangan & optimasi spreadsheet tanpa batas scope',
+                    'Automasi workflow internal bulanan perusahaan Anda',
+                    'Akses langsung via WhatsApp/Slack & demo berkala',
+                    'Roadmap & prioritas tugas langsung dari Anda',
+                    'Evaluasi & penyesuaian kebutuhan setiap bulan'
+                ],
+                support: {
+                    free: 'Included',
+                    description: 'Dedicated priority support & maintenance'
+                },
+                ctaText: 'PILIH TIM EMBED'
+            },
+            {
+                id: 'sheets_retainer',
+                serviceId: 'sheets',
+                modelId: 'retainer',
+                categoryTag: 'ENTERPRISE / SLA',
+                modelTag: 'Retainer',
+                title: 'Retainer (Enterprise SLA)',
+                shortDesc: 'Support operasional berkelanjutan & SLA formal untuk spreadsheet bisnis kritis.',
+                badge: 'Enterprise SLA',
+                isPopular: false,
+                color: 'purple',
+                pricing: 'Custom SLA',
+                pricingSubtext: '/ bulan',
+                timeline: 'SLA Formal',
+                scopeType: 'Kontrak fleksibel',
+                features: [
+                    'SLA Response Time < 1 jam untuk incident spreadsheet',
+                    'Audit berkala performa formula & batas kuota Apps Script',
+                    'Backup otomatis bulanan & recovery data sheet',
+                    'On-call emergency support jam operasional bisnis',
+                    'Laporan kesehatan spreadsheet & utilisasi bulanan'
+                ],
+                support: {
+                    free: 'SLA 99.9%',
+                    description: 'Penanganan insiden dengan SLA tertulis'
+                },
+                ctaText: 'PILIH RETAINER'
+            }
+        ]
     },
     {
         id: 'webapp',
-        icon: Globe,
-        title: 'Google Web Apps',
-        shortDesc: 'Aplikasi web berbasis Apps Script',
-        badge: 'Mulai Rp 1.5jt',
+        name: 'Google Web Apps',
+        badge: 'Portal & Cloud Workspace',
+        lordicon: 'https://cdn.lordicon.com/gqdnbnwt.json',
+        lordiconColor: 'primary:#2563eb,secondary:#60a5fa',
         color: 'blue',
-        description: 'Aplikasi web interaktif yang terintegrasi penuh dengan Google Workspace Anda.',
-        features: [
-            'Custom UI dengan HTML/CSS/JS',
-            'Google Apps Script backend',
-            'Integration dengan Sheets, Drive, Gmail',
-            'Real-time data synchronization',
-            'User authentication system',
-            'Mobile responsive design'
-        ],
-        useCases: [
-            'Internal dashboard perusahaan',
-            'Form submission system',
-            'Approval workflow app',
-            'Employee portal',
-            'Document management system',
-            'Reporting & analytics platform'
-        ],
-        pricing: 'Rp 1.500.000 - Rp 5.000.000+',
-        timeline: '14-30 hari kerja',
-        support: {
-            free: '6 Bulan',
-            description: 'Free support & bug fixes selama 6 bulan'
-        },
-        showcase: {
-            title: 'Employee Portal System',
-            description: 'Aplikasi portal karyawan dengan absensi, pengajuan cuti, dan dashboard HR terintegrasi Google Workspace',
-            image: '/screenshot/webapp-portal.png'
-        }
+        desc: 'Aplikasi web kustom interaktif terintegrasi Google Workspace tanpa biaya server bulanan',
+        tiers: [
+            {
+                id: 'webapp_proyek',
+                serviceId: 'webapp',
+                modelId: 'proyek',
+                categoryTag: 'SPRINT / FIXED SCOPE',
+                modelTag: 'Model Proyek',
+                title: 'Model Proyek (Fixed Scope)',
+                shortDesc: 'Pembuatan Web App kustom, portal internal, atau form interaktif berbasis Apps Script sekali jalan.',
+                badge: 'Mulai Rp 1.5M',
+                isPopular: false,
+                color: 'orange',
+                pricing: 'Rp 1.5jt - 5jt',
+                pricingSubtext: '/ project',
+                timeline: '2-4 minggu',
+                scopeType: 'Fixed Scope',
+                features: [
+                    'Custom Web Interface (HTML, CSS, Tailwind, JS)',
+                    'Backend Google Apps Script (Gratis tanpa biaya server)',
+                    'Integrasi Google Workspace (Sheets, Drive, Gmail, Docs)',
+                    'Multi-user login & otentikasi role permission',
+                    'Garansi support & bug fix 6 bulan gratis',
+                    'Full source code & dokumentasi operasional'
+                ],
+                support: {
+                    free: '6 Bulan',
+                    description: 'Free support & bug fixes 6 bulan'
+                },
+                ctaText: 'PILIH MODEL PROYEK'
+            },
+            {
+                id: 'webapp_tim-embed',
+                serviceId: 'webapp',
+                modelId: 'tim-embed',
+                categoryTag: 'SQUAD / DEDICATED',
+                modelTag: 'Tim Embed',
+                title: 'Tim Embed (Dedicated Squad)',
+                shortDesc: 'Tim dedicated Web & Apps Script engineer untuk iterasi fitur Web App secara berkelanjutan.',
+                badge: 'PALING DIMINTA',
+                isPopular: true,
+                color: 'blue',
+                pricing: 'Rp 3.5jt',
+                pricingSubtext: '/ bulan',
+                timeline: 'Dedicated Squad',
+                scopeType: 'Min. 1 bulan',
+                features: [
+                    'Tim dedicated 2-3 Engineer (Web App & Apps Script) + PM',
+                    'Iterasi & peluncuran fitur baru Web App tiap minggu',
+                    'Integrasi API 3rd party (Payment, WA Gateway, CRM)',
+                    'Roadmap pengembangan fleksibel sesuai keputusan Anda',
+                    'Demo mingguan & evaluasi kinerja tim',
+                    'Dukungan langsung via grup chat WhatsApp / Slack'
+                ],
+                support: {
+                    free: 'Included',
+                    description: 'Dedicated priority squad support'
+                },
+                ctaText: 'PILIH TIM EMBED'
+            },
+            {
+                id: 'webapp_retainer',
+                serviceId: 'webapp',
+                modelId: 'retainer',
+                categoryTag: 'ENTERPRISE / SLA',
+                modelTag: 'Retainer',
+                title: 'Retainer (Enterprise SLA)',
+                shortDesc: 'SLA formal ketersediaan, monitoring kuota Google Cloud, & incident response cepat.',
+                badge: 'Enterprise SLA',
+                isPopular: false,
+                color: 'purple',
+                pricing: 'Custom SLA',
+                pricingSubtext: '/ bulan',
+                timeline: 'SLA Formal',
+                scopeType: 'Kontrak fleksibel',
+                features: [
+                    'SLA Response Time < 30 menit untuk kendala sistem',
+                    'Monitoring Quota & Execution Time Google Workspace',
+                    'Perbaikan bug & maintenance preventif berkala',
+                    'Dedicated Solutions Architect & Security Audit',
+                    'Laporan utilisasi & performa Web App bulanan'
+                ],
+                support: {
+                    free: 'SLA 99.9%',
+                    description: 'Incident response < 30 menit'
+                },
+                ctaText: 'PILIH RETAINER'
+            }
+        ]
     },
     {
         id: 'fullstack',
-        icon: Rocket,
-        title: 'Full Stack Development',
-        shortDesc: 'Website & aplikasi custom',
-        badge: 'Mulai Rp 5jt',
+        name: 'Full Stack Development',
+        badge: 'Enterprise & Modern Cloud',
+        lordicon: 'https://cdn.lordicon.com/lupuorrc.json',
+        lordiconColor: 'primary:#9333ea,secondary:#c084fc',
         color: 'purple',
-        description: 'Website dan aplikasi custom full-featured dengan teknologi modern seperti Next.js, React, dan Supabase.',
-        features: [
-            'Modern tech stack (Next.js, React)',
-            'Database design (Supabase/PostgreSQL)',
-            'Authentication & authorization',
-            'Admin dashboard lengkap',
-            'Payment integration',
-            'SEO optimized & mobile responsive',
-            'Cloud deployment',
-            'Ongoing maintenance (optional)'
-        ],
-        useCases: [
-            'E-commerce platform',
-            'SaaS application',
-            'Booking & reservation system',
-            'Company profile website',
-            'Learning management system',
-            'Custom business application'
-        ],
-        pricing: 'Rp 5.000.000 - Rp 30.000.000+',
-        timeline: '30-90 hari kerja',
-        support: {
-            free: '1 Bulan',
-            description: 'Free support & bug fixes selama 1 bulan'
-        },
-        showcase: {
-            title: 'Omzetin.web.id',
-            description: 'Platform jajanan online dengan inventory, ordering system, dan payment integration',
-            link: 'https://omzetin.web.id',
-            tech: ['Next.js', 'Supabase', 'Tailwind CSS', 'TypeScript']
-        }
+        desc: 'Website & aplikasi web kustom full-featured ditenagai Next.js, Supabase, & arsitektur cloud modern',
+        tiers: [
+            {
+                id: 'fullstack_proyek',
+                serviceId: 'fullstack',
+                modelId: 'proyek',
+                categoryTag: 'SPRINT / FIXED SCOPE',
+                modelTag: 'Model Proyek',
+                title: 'Model Proyek (Fixed Scope)',
+                shortDesc: 'Pengembangan MVP SaaS, website perusahaan, atau aplikasi kustom berarsitektur modern sekali jalan.',
+                badge: 'Mulai Rp 5M',
+                isPopular: false,
+                color: 'orange',
+                pricing: 'Rp 5jt - 25jt',
+                pricingSubtext: '/ project',
+                timeline: '4-8 minggu',
+                scopeType: 'Fixed Scope',
+                features: [
+                    'Modern Stack (Next.js, React, Supabase, PostgreSQL)',
+                    'Admin Dashboard lengkap, User Auth, & Role Management',
+                    'Integrasi Payment Gateway (Midtrans, QRIS, Xendit)',
+                    'SEO Optimized, Mobile Responsive, & Ultra Fast',
+                    'Deployment Cloud (Vercel, Cloudflare, VPS) + SSL',
+                    'Full source code repository & API documentation'
+                ],
+                support: {
+                    free: '3 Bulan',
+                    description: 'Free support & bug fixes 3 bulan'
+                },
+                ctaText: 'PILIH MODEL PROYEK'
+            },
+            {
+                id: 'fullstack_tim-embed',
+                serviceId: 'fullstack',
+                modelId: 'tim-embed',
+                categoryTag: 'SQUAD / DEDICATED',
+                modelTag: 'Tim Embed',
+                title: 'Tim Embed (Dedicated Squad)',
+                shortDesc: 'Squad pengembang dedicated (Tech Lead, Full Stack Dev, UI/UX) melekat langsung di tim Anda.',
+                badge: 'PALING DIMINTA',
+                isPopular: true,
+                color: 'blue',
+                pricing: 'Rp 7.5jt',
+                pricingSubtext: '/ bulan',
+                timeline: 'Dedicated Squad',
+                scopeType: 'Min. 1 bulan',
+                features: [
+                    'Squad dedicated 3-5 role (Full Stack Dev, UI/UX, QA, PM)',
+                    'Sprint 2-mingguan dengan grooming & standup reguler',
+                    'Arsitektur cloud scalable (CI/CD, Staging, Production)',
+                    'Akses penuh repo Git, Jira/Trello, & kanal komunikasi',
+                    'Standar code review ketat & pengujian otomatis',
+                    'Retrospektif & evaluasi kualitas kerja bulanan'
+                ],
+                support: {
+                    free: 'Included',
+                    description: 'Dedicated priority fullstack squad'
+                },
+                ctaText: 'PILIH TIM EMBED'
+            },
+            {
+                id: 'fullstack_retainer',
+                serviceId: 'fullstack',
+                modelId: 'retainer',
+                categoryTag: 'ENTERPRISE / SLA',
+                modelTag: 'Retainer',
+                title: 'Retainer (Enterprise SLA)',
+                shortDesc: 'Dukungan pemeliharaan sistem 24/7, DevOps, & SLA ketersediaan tinggi untuk aplikasi bisnis kritis.',
+                badge: 'Enterprise SLA',
+                isPopular: false,
+                color: 'purple',
+                pricing: 'Custom SLA',
+                pricingSubtext: '/ bulan',
+                timeline: 'SLA 99.9%+',
+                scopeType: 'Kontrak fleksibel',
+                features: [
+                    'SLA Tertulis dengan jaminan penalti downtime',
+                    'Tim On-Call 24/7 untuk incident response & emergency fix',
+                    'DevOps, database optimization, & patch keamanan berkala',
+                    'Automated backup, failover & disaster recovery plan',
+                    'Dedicated Solutions Architect & Compliance Review'
+                ],
+                support: {
+                    free: '24/7 SLA',
+                    description: 'Zero downtime commitment & 24/7 support'
+                },
+                ctaText: 'PILIH RETAINER'
+            }
+        ]
     }
 ]
 
@@ -172,17 +352,18 @@ const processSteps = [
 ]
 
 const faqs = [
-    { q: 'Apakah bisa revisi setelah project selesai?', a: 'Ya! Kami provide unlimited revision hingga Anda puas. Setelah delivery, minor updates dan bug fixes gratis selamanya.' },
-    { q: 'Berapa lama waktu pengerjaan?', a: 'Sheets templates: 7-14 hari. Web apps: 14-30 hari. Full stack: 30-90 hari. Tergantung kompleksitas project.' },
-    { q: 'Apakah saya mendapat source code?', a: 'Ya! Anda mendapat full ownership source code + dokumentasi lengkap untuk semua project.' },
-    { q: 'Bagaimana sistem pembayarannya?', a: 'DP 50% setelah proposal disetujui, pelunasan 50% setelah project selesai dan Anda approve hasil akhirnya.' },
-    { q: 'Apakah ada maintenance fee?', a: 'Free maintenance & bug fixes selamanya. Untuk penambahan fitur baru, dikenakan biaya terpisah sesuai scope.' },
-    { q: 'Apakah bisa integrasi dengan sistem existing?', a: 'Ya! Kami bisa integrate dengan API, database, atau sistem yang sudah Anda punya.' }
+    { q: 'Apakah bisa revisi setelah project selesai?', a: 'Ya! Kami memberikan garansi revisi & bug fixes. Model Proyek mendapatkan garansi bug fix gratis hingga 1 tahun penuh.' },
+    { q: 'Berapa lama waktu pengerjaan?', a: 'Model Proyek: 1-4 minggu (tergantung scope). Tim Embed: fleksibel bulanan dengan dedicated squad. Retainer: dukungan berkelanjutan dengan SLA formal.' },
+    { q: 'Apakah saya mendapat source code?', a: 'Ya! Anda mendapat full ownership source code, spreadsheet, repository, dan dokumentasi lengkap untuk semua model kerjasama.' },
+    { q: 'Bagaimana sistem pembayarannya?', a: 'Untuk Proyek: DP 50% di awal dan 50% setelah delivery. Untuk Tim Embed & Retainer: billing bulanan transparan di awal periode.' },
+    { q: 'Apakah ada maintenance fee?', a: 'Model Proyek sudah mencakup garansi support gratis 1 tahun. Untuk penanganan sistem kritis & SLA 24/7, Anda dapat memilih paket Retainer.' },
+    { q: 'Apakah bisa integrasi dengan sistem existing?', a: 'Sangat bisa! Tim kami berpengalaman mengintegrasikan Google Workspace, API 3rd party, payment gateway, maupun database internal Anda.' }
 ]
 
 export default function JasaKustomPage() {
-    const [activeService, setActiveService] = useState('sheets')
+    const [activeCategory, setActiveCategory] = useState<'sheets' | 'webapp' | 'fullstack'>('sheets')
     const [serviceType, setServiceType] = useState('sheets')
+    const [selectedModel, setSelectedModel] = useState<'proyek' | 'tim-embed' | 'retainer'>('proyek')
     const [formStatus, setFormStatus] = useState<'idle' | 'sending'>('idle')
     const [portfolio, setPortfolio] = useState<Portfolio[]>([])
     const [testimonials, setTestimonials] = useState<Testimonial[]>([])
@@ -240,6 +421,7 @@ export default function JasaKustomPage() {
         const form = e.currentTarget
 
         try {
+            const payloadService = serviceType === 'consultation' ? 'consultation' : `${serviceType}_${selectedModel}`
             const res = await fetch('/api/template-request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -248,7 +430,7 @@ export default function JasaKustomPage() {
                     email: formData.get('email'),
                     phone: formData.get('phone') || null,
                     company: formData.get('company') || null,
-                    serviceType: serviceType,
+                    serviceType: payloadService,
                     requirements: formData.get('requirements'),
                     budget: formData.get('budget') || null,
                     deadline: formData.get('deadline') || null,
@@ -261,6 +443,7 @@ export default function JasaKustomPage() {
                 setFormStatus('idle')
                 form.reset()
                 setServiceType('sheets')
+                setSelectedModel('proyek')
                 setDialog({
                     isOpen: true,
                     type: 'success',
@@ -398,43 +581,44 @@ export default function JasaKustomPage() {
 
                         {/* Service Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                            {services.map((service, idx) => (
+                            {serviceCategories.map((cat, idx) => (
                                 <motion.div
-                                    key={service.id}
+                                    key={cat.id}
                                     initial={{ opacity: 0, y: 30 }}
                                     animate={heroInView ? { opacity: 1, y: 0 } : {}}
                                     transition={{ duration: 0.5, delay: 0.5 + idx * 0.1 }}
                                     onClick={() => {
-                                        setActiveService(service.id)
-                                        setServiceType(service.id)
+                                        setActiveCategory(cat.id)
+                                        setServiceType(cat.id)
                                         document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
                                     }}
-                                    className={`relative p-6 rounded-2xl cursor-pointer transition-all duration-200 ease-out hover:-translate-y-2 bg-white shadow-md ${
-                                        service.color === 'orange' ? 'border-2 border-orange-200 hover:shadow-xl hover:shadow-orange-200/50 hover:border-orange-300' :
-                                        service.color === 'blue' ? 'border-2 border-blue-200 hover:shadow-xl hover:shadow-blue-200/50 hover:border-blue-300' :
-                                        'border-2 border-purple-200 hover:shadow-xl hover:shadow-purple-200/50 hover:border-purple-300'
+                                    className={`relative p-6 rounded-2xl cursor-pointer transition-all duration-300 ease-out hover:-translate-y-2 bg-white shadow-md ${
+                                        cat.color === 'orange' ? 'border-2 border-orange-200 hover:shadow-xl hover:shadow-orange-200/50 hover:border-orange-400' :
+                                        cat.color === 'blue' ? 'border-2 border-blue-200 hover:shadow-xl hover:shadow-blue-200/50 hover:border-blue-400' :
+                                        'border-2 border-purple-200 hover:shadow-xl hover:shadow-purple-200/50 hover:border-purple-400'
                                     } group`}
                                 >
-                                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 mx-auto transition-transform duration-300 group-hover:scale-110 ${
-                                        service.color === 'orange' ? 'bg-orange-100' :
-                                        service.color === 'blue' ? 'bg-blue-100' :
-                                        'bg-purple-100'
+                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto transition-transform duration-300 group-hover:scale-110 shadow-sm ${
+                                        cat.color === 'orange' ? 'bg-orange-100/80' :
+                                        cat.color === 'blue' ? 'bg-blue-100/80' :
+                                        'bg-purple-100/80'
                                     }`}>
-                                        <service.icon className={`w-7 h-7 ${
-                                            service.color === 'orange' ? 'text-orange-600' :
-                                            service.color === 'blue' ? 'text-blue-600' :
-                                            'text-purple-600'
-                                        }`} />
+                                        <ClientLordIcon
+                                            src={cat.lordicon}
+                                            trigger="hover"
+                                            colors={cat.lordiconColor}
+                                            style={{ width: '36px', height: '36px' }}
+                                        />
                                     </div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">{service.title}</h3>
-                                    <p className="text-sm text-gray-600 mb-4 text-center">{service.shortDesc}</p>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1 text-center">{cat.name}</h3>
+                                    <p className="text-xs text-gray-500 mb-4 text-center">{cat.description}</p>
                                     <div className="text-center">
                                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
-                                            service.color === 'orange' ? 'bg-orange-500 text-white' :
-                                            service.color === 'blue' ? 'bg-blue-500 text-white' :
+                                            cat.color === 'orange' ? 'bg-orange-500 text-white' :
+                                            cat.color === 'blue' ? 'bg-blue-500 text-white' :
                                             'bg-purple-500 text-white'
                                         }`}>
-                                            {service.badge}
+                                            3 Model Kerjasama
                                         </span>
                                     </div>
                                     <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200" />
@@ -445,15 +629,18 @@ export default function JasaKustomPage() {
                 </div>
             </section>
 
-            {/* Services Detail */}
-            <section id="services" ref={servicesRef} className="py-8 md:py-12 relative">
+            {/* Services Detail - Skynet Style Pricing Cards */}
+            <section id="services" ref={servicesRef} className="py-8 md:py-16 relative">
                 <div className="container mx-auto px-6 relative z-10">
                     {/* Section Header */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={servicesInView ? { opacity: 1, y: 0 } : {}}
-                        className="text-center mb-12"
+                        className="text-center mb-16"
                     >
+                        <span className="text-xs font-bold uppercase tracking-widest text-orange-600 bg-orange-100 px-3 py-1 rounded-md inline-block mb-3">
+                            Transparan & Fleksibel
+                        </span>
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">
                             <motion.span
                                 initial={{ opacity: 0, y: 20 }}
@@ -461,7 +648,7 @@ export default function JasaKustomPage() {
                                 transition={{ duration: 0.6, delay: 0.2 }}
                                 className="inline-block text-gray-900"
                             >
-                                Layanan{' '}
+                                Pilihan Paket{' '}
                             </motion.span>
                             <motion.span
                                 initial={{ opacity: 0, scale: 0.8 }}
@@ -469,7 +656,7 @@ export default function JasaKustomPage() {
                                 transition={{ duration: 0.6, delay: 0.3, type: "spring" }}
                                 className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500"
                             >
-                                Kami
+                                Jasa Kustom
                             </motion.span>
                         </h2>
                         <motion.p
@@ -478,151 +665,218 @@ export default function JasaKustomPage() {
                             transition={{ duration: 0.5, delay: 0.4 }}
                             className="text-lg text-gray-600 max-w-2xl mx-auto"
                         >
-                            Dari spreadsheet sederhana hingga aplikasi enterprise, kami siap membantu transformasi digital bisnis Anda
+                            Pilih model pengembangan yang paling pas untuk skala bisnis & kebutuhan digital Anda
                         </motion.p>
                     </motion.div>
 
-                    {/* Service Cards Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {services.map((service, idx) => (
-                            <motion.div
-                                key={service.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={servicesInView ? { opacity: 1, y: 0 } : {}}
-                                transition={{ duration: 0.5, delay: 0.2 + idx * 0.1 }}
-                                className="group"
-                            >
-                                <div className={`relative h-full bg-white rounded-2xl border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 shadow-md ${
-                                    activeService === service.id 
-                                        ? service.color === 'orange' ? 'border-orange-400 shadow-lg shadow-orange-200/60' :
-                                          service.color === 'blue' ? 'border-blue-400 shadow-lg shadow-blue-200/60' :
-                                          'border-purple-400 shadow-lg shadow-purple-200/60'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                }`}>
-                                    {/* Color Accent Top */}
-                                    <div className={`h-1.5 rounded-t-2xl ${
-                                        service.color === 'orange' ? 'bg-gradient-to-r from-orange-500 to-amber-500' :
-                                        service.color === 'blue' ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
-                                        'bg-gradient-to-r from-purple-500 to-pink-500'
-                                    }`} />
-
-                                    <div className="p-6">
-                                        {/* Header */}
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${
-                                                service.color === 'orange' ? 'bg-orange-100' :
-                                                service.color === 'blue' ? 'bg-blue-100' :
-                                                'bg-purple-100'
-                                            }`}>
-                                                <service.icon className={`w-7 h-7 ${
-                                                    service.color === 'orange' ? 'text-orange-600' :
-                                                    service.color === 'blue' ? 'text-blue-600' :
-                                                    'text-purple-600'
-                                                }`} />
-                                            </div>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                service.color === 'orange' ? 'bg-orange-100 text-orange-700' :
-                                                service.color === 'blue' ? 'bg-blue-100 text-blue-700' :
-                                                'bg-purple-100 text-purple-700'
-                                            }`}>
-                                                {service.badge}
-                                            </span>
-                                        </div>
-
-                                        {/* Title & Description */}
-                                        <h3 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
-                                        <p className="text-gray-600 text-sm mb-4">{service.shortDesc}</p>
-
-                                        {/* Features */}
-                                        <div className="space-y-2 mb-4">
-                                            {service.features.slice(0, 4).map((feature, fIdx) => (
-                                                <div key={fIdx} className="flex items-center gap-2 text-sm text-gray-600">
-                                                    <Check className={`w-4 h-4 flex-shrink-0 ${
-                                                        service.color === 'orange' ? 'text-orange-500' :
-                                                        service.color === 'blue' ? 'text-blue-500' :
-                                                        'text-purple-500'
-                                                    }`} />
-                                                    {feature}
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        {/* Support Info */}
-                                        <div className={`flex items-center gap-2 p-3 rounded-lg mb-4 ${
-                                            service.color === 'orange' ? 'bg-orange-50' :
-                                            service.color === 'blue' ? 'bg-blue-50' :
-                                            'bg-purple-50'
-                                        }`}>
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                                service.color === 'orange' ? 'bg-orange-100' :
-                                                service.color === 'blue' ? 'bg-blue-100' :
-                                                'bg-purple-100'
-                                            }`}>
-                                                <ClientLordIcon
-                                                    src="https://cdn.lordicon.com/ssvybplt.json"
-                                                    trigger="hover"
-                                                    colors={
-                                                        service.color === 'orange' ? 'primary:#ea580c,secondary:#fbbf24' :
-                                                        service.color === 'blue' ? 'primary:#2563eb,secondary:#06b6d4' :
-                                                        'primary:#9333ea,secondary:#ec4899'
-                                                    }
-                                                    style={{ width: '18px', height: '18px' }}
-                                                />
-                                            </div>
-                                            <div>
-                                                <p className={`text-xs font-semibold ${
-                                                    service.color === 'orange' ? 'text-orange-700' :
-                                                    service.color === 'blue' ? 'text-blue-700' :
-                                                    'text-purple-700'
-                                                }`}>
-                                                    Free Support {service.support.free}
-                                                </p>
-                                                <p className="text-xs text-gray-500">Lalu maintenance sesuai kompleksitas</p>
-                                            </div>
-                                        </div>
-
-                                        {/* Footer */}
-                                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                                            <div className="flex items-center gap-1 text-gray-500 text-sm">
-                                                <Clock className="w-4 h-4" />
-                                                {service.timeline}
-                                            </div>
-                                            <button
-                                                onClick={() => {
-                                                    setServiceType(service.id)
-                                                    scrollToForm()
-                                                }}
-                                                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-colors ${
-                                                    service.color === 'orange' ? 'bg-orange-500 hover:bg-orange-600' :
-                                                    service.color === 'blue' ? 'bg-blue-500 hover:bg-blue-600' :
-                                                    'bg-purple-500 hover:bg-purple-600'
-                                                }`}
-                                            >
-                                                Request
-                                                <ArrowRight className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
+                    {/* Category Selector Tabs */}
+                    <div className="flex justify-center mb-12">
+                        <div className="inline-flex p-1.5 rounded-2xl bg-gray-100/90 border border-gray-200 gap-2 flex-wrap justify-center shadow-inner">
+                            {serviceCategories.map((cat) => {
+                                const isActive = activeCategory === cat.id
+                                return (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => {
+                                            setActiveCategory(cat.id)
+                                            setServiceType(cat.id)
+                                        }}
+                                        className={`flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+                                            isActive
+                                                ? cat.color === 'orange'
+                                                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25 scale-[1.02]'
+                                                    : cat.color === 'blue'
+                                                    ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
+                                                    : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/25 scale-[1.02]'
+                                                : 'text-gray-600 hover:text-gray-900 hover:bg-white/80'
+                                        }`}
+                                    >
+                                        <ClientLordIcon
+                                            src={cat.lordicon}
+                                            trigger="hover"
+                                            colors={isActive ? 'primary:#ffffff,secondary:#ffffff' : cat.lordiconColor}
+                                            style={{ width: '22px', height: '22px' }}
+                                        />
+                                        <span>{cat.name}</span>
+                                    </button>
+                                )
+                            })}
+                        </div>
                     </div>
 
-                    {/* Bottom CTA */}
+                    {/* Skynet-Inspired Service Cards Grid for Selected Category */}
+                    {(() => {
+                        const currentCategory = serviceCategories.find(c => c.id === activeCategory) || serviceCategories[0]
+                        return (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-7xl mx-auto">
+                                {currentCategory.tiers.map((tier, idx) => (
+                                    <motion.div
+                                        key={tier.id}
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={servicesInView ? { opacity: 1, y: 0 } : {}}
+                                        transition={{ duration: 0.5, delay: 0.2 + idx * 0.1 }}
+                                        className="flex flex-col group"
+                                    >
+                                        <div className={`relative flex flex-col h-full bg-white rounded-3xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 shadow-lg overflow-hidden border-2 ${
+                                            tier.isPopular 
+                                                ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-orange-500/10' 
+                                                : 'border-gray-200 hover:border-gray-300'
+                                        }`}>
+                                            {/* Skynet Popular Banner Header */}
+                                            {tier.isPopular && (
+                                                <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 py-1.5 px-4 text-center text-xs font-black text-white tracking-widest uppercase">
+                                                    ★ {tier.badge} ★
+                                                </div>
+                                            )}
+
+                                            {/* Card Header Top Bar */}
+                                            <div className="p-6 md:p-8 flex-1 flex flex-col">
+                                                {/* Category Tag & Lordicon */}
+                                                <div className="flex items-center justify-between mb-6">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="font-mono text-xs font-bold tracking-widest text-gray-400 uppercase">
+                                                            {tier.categoryTag}
+                                                        </span>
+                                                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase ${
+                                                            tier.color === 'orange' ? 'bg-orange-100 text-orange-700' :
+                                                            tier.color === 'blue' ? 'bg-blue-100 text-blue-700' :
+                                                            'bg-purple-100 text-purple-700'
+                                                        }`}>
+                                                            {tier.modelTag}
+                                                        </span>
+                                                    </div>
+                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-inner ${
+                                                        tier.color === 'orange' ? 'bg-orange-50' :
+                                                        tier.color === 'blue' ? 'bg-blue-50' :
+                                                        'bg-purple-50'
+                                                    }`}>
+                                                        <ClientLordIcon
+                                                            src={currentCategory.lordicon}
+                                                            trigger="hover"
+                                                            colors={currentCategory.lordiconColor}
+                                                            style={{ width: '36px', height: '36px' }}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Title & Short Description */}
+                                                <h3 className="text-2xl font-extrabold text-gray-900 mb-3">{tier.title}</h3>
+                                                <p className="text-gray-600 text-sm leading-relaxed mb-6 min-h-[48px]">
+                                                    {tier.shortDesc}
+                                                </p>
+
+                                                {/* Skynet Style Price Section */}
+                                                <div className="mb-6 p-4 rounded-2xl bg-gray-50/80 border border-gray-100">
+                                                    <div className="flex items-baseline gap-1">
+                                                        <span className="text-xs text-gray-500 font-medium">Estimasi:</span>
+                                                        <span className="text-3xl font-black text-gray-900 tracking-tight">{tier.pricing}</span>
+                                                        <span className="text-xs text-gray-500 font-medium">{tier.pricingSubtext}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-gray-900 text-white">
+                                                            <Clock className="w-3 h-3 text-orange-400" />
+                                                            {tier.timeline}
+                                                        </span>
+                                                        <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-gray-200 text-gray-700">
+                                                            {tier.scopeType}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Skynet Plus (+) Deliverables & Scope Checklist */}
+                                                <div className="space-y-3 mb-8 flex-1">
+                                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Scope & Deliverables</p>
+                                                    {tier.features.map((feature, fIdx) => (
+                                                        <div key={fIdx} className="flex items-start gap-2.5 text-sm text-gray-700 py-1.5 border-b border-gray-100 last:border-0">
+                                                            <span className={`font-mono font-bold text-base leading-none ${
+                                                                tier.color === 'orange' ? 'text-orange-500' :
+                                                                tier.color === 'blue' ? 'text-blue-500' :
+                                                                'text-purple-500'
+                                                            }`}>+</span>
+                                                            <span className="leading-snug">{feature}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Free Support SLA Badge */}
+                                                <div className={`flex items-center gap-3 p-3.5 rounded-xl mb-6 border ${
+                                                    tier.color === 'orange' ? 'bg-orange-50/60 border-orange-200/60 text-orange-950' :
+                                                    tier.color === 'blue' ? 'bg-blue-50/60 border-blue-200/60 text-blue-950' :
+                                                    'bg-purple-50/60 border-purple-200/60 text-purple-950'
+                                                }`}>
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                                        tier.color === 'orange' ? 'bg-orange-100' :
+                                                        tier.color === 'blue' ? 'bg-blue-100' :
+                                                        'bg-purple-100'
+                                                    }`}>
+                                                        <ClientLordIcon
+                                                            src="https://cdn.lordicon.com/ssvybplt.json"
+                                                            trigger="hover"
+                                                            colors={
+                                                                tier.color === 'orange' ? 'primary:#ea580c,secondary:#fbbf24' :
+                                                                tier.color === 'blue' ? 'primary:#2563eb,secondary:#06b6d4' :
+                                                                'primary:#9333ea,secondary:#ec4899'
+                                                            }
+                                                            style={{ width: '20px', height: '20px' }}
+                                                        />
+                                                    </div>
+                                                    <div className="text-xs">
+                                                        <span className="font-bold block">Support: {tier.support.free}</span>
+                                                        <span className="text-gray-500">{tier.support.description}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Action Button - Skynet Style */}
+                                                <button
+                                                    onClick={() => {
+                                                        setServiceType(tier.serviceId)
+                                                        setSelectedModel(tier.modelId)
+                                                        scrollToForm()
+                                                    }}
+                                                    className={`w-full py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md ${
+                                                        tier.isPopular
+                                                            ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]'
+                                                            : 'bg-gray-900 text-white hover:bg-gray-800 hover:shadow-lg hover:scale-[1.01]'
+                                                    }`}
+                                                >
+                                                    <span>{tier.ctaText}</span>
+                                                    <ArrowRight className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )
+                    })()}
+
+                    {/* Bottom Guarantee Banner */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={servicesInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ delay: 0.6 }}
-                        className="mt-10 text-center"
+                        className="mt-14 max-w-4xl mx-auto bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-3xl p-8 text-white shadow-xl text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6 border border-gray-700"
                     >
-                        <p className="text-gray-600 mb-4">
-                            Tidak yakin layanan mana yang cocok? Konsultasi gratis untuk membahas kebutuhan Anda
-                        </p>
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center flex-shrink-0">
+                                <ClientLordIcon
+                                    src="https://cdn.lordicon.com/dxjqnldd.json"
+                                    trigger="loop"
+                                    delay="2000"
+                                    colors="primary:#f97316,secondary:#fbbf24"
+                                    style={{ width: '32px', height: '32px' }}
+                                />
+                            </div>
+                            <div>
+                                <h4 className="text-lg font-bold text-white mb-1">Butuh Kustomisasi Spesifik atau Konsultasi Dulu?</h4>
+                                <p className="text-sm text-gray-300">Tim pengembang RSQUARE siap bantu memetakan kebutuhan & solusi biaya paling efisien.</p>
+                            </div>
+                        </div>
                         <button
                             onClick={scrollToForm}
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-colors"
+                            className="flex-shrink-0 px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-orange-500/30 flex items-center gap-2"
                         >
-                            <MessageCircle className="w-5 h-5" />
+                            <MessageCircle className="w-4 h-4" />
                             Konsultasi Gratis
                         </button>
                     </motion.div>
@@ -1211,38 +1465,76 @@ export default function JasaKustomPage() {
                             transition={{ delay: 0.4 }}
                         >
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                {/* Service Type */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-3">Layanan yang Dibutuhkan</label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {[
-                                            { id: 'sheets', label: 'Google Sheets', lordicon: 'https://cdn.lordicon.com/ghhwiltn.json' },
-                                            { id: 'webapp', label: 'Web App', lordicon: 'https://cdn.lordicon.com/lqxfrxad.json' },
-                                            { id: 'fullstack', label: 'Full Stack', lordicon: 'https://cdn.lordicon.com/nocovwne.json' },
-                                            { id: 'consultation', label: 'Konsultasi', lordicon: 'https://cdn.lordicon.com/fdxqrdfe.json' }
-                                        ].map((opt) => (
-                                            <motion.button
-                                                key={opt.id}
-                                                type="button"
-                                                onClick={() => setServiceType(opt.id)}
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
-                                                className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
-                                                    serviceType === opt.id
-                                                        ? 'border-orange-500 bg-orange-50 text-orange-700'
-                                                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                                                }`}
-                                            >
-                                                <ClientLordIcon
-                                                    src={opt.lordicon}
-                                                    trigger="hover"
-                                                    colors={serviceType === opt.id ? 'primary:#ea580c,secondary:#fbbf24' : 'primary:#6b7280,secondary:#9ca3af'}
-                                                    style={{ width: '24px', height: '24px' }}
-                                                />
-                                                <span className="font-medium">{opt.label}</span>
-                                            </motion.button>
-                                        ))}
+                                {/* Service Selection Step 1: Core Service */}
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            1. Pilih Layanan Utama
+                                        </label>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                                            {[
+                                                { id: 'sheets', label: 'Google Sheets', lordicon: 'https://cdn.lordicon.com/wloilxuq.json' },
+                                                { id: 'webapp', label: 'Web Apps', lordicon: 'https://cdn.lordicon.com/gqdnbnwt.json' },
+                                                { id: 'fullstack', label: 'Full Stack', lordicon: 'https://cdn.lordicon.com/lupuorrc.json' },
+                                                { id: 'consultation', label: 'Konsultasi Gratis', lordicon: 'https://cdn.lordicon.com/fdxqrdfe.json' }
+                                            ].map((opt) => (
+                                                <motion.button
+                                                    key={opt.id}
+                                                    type="button"
+                                                    onClick={() => setServiceType(opt.id)}
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
+                                                        serviceType === opt.id
+                                                            ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
+                                                            : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white'
+                                                    }`}
+                                                >
+                                                    <ClientLordIcon
+                                                        src={opt.lordicon}
+                                                        trigger="hover"
+                                                        colors={serviceType === opt.id ? 'primary:#ea580c,secondary:#fbbf24' : 'primary:#6b7280,secondary:#9ca3af'}
+                                                        style={{ width: '24px', height: '24px' }}
+                                                    />
+                                                    <span className="font-bold text-xs mt-1 text-center">{opt.label}</span>
+                                                </motion.button>
+                                            ))}
+                                        </div>
                                     </div>
+
+                                    {/* Service Selection Step 2: Model Kerjasama */}
+                                    {serviceType !== 'consultation' && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <label className="block text-sm font-semibold text-gray-800 mb-2.5">
+                                                2. Pilih Model Kerjasama
+                                            </label>
+                                            <div className="grid grid-cols-3 gap-2.5">
+                                                {[
+                                                    { id: 'proyek', label: 'Model Proyek', desc: 'Fixed Scope' },
+                                                    { id: 'tim-embed', label: 'Tim Embed', desc: 'Dedicated Squad' },
+                                                    { id: 'retainer', label: 'Retainer', desc: 'Enterprise SLA' }
+                                                ].map((m) => (
+                                                    <button
+                                                        key={m.id}
+                                                        type="button"
+                                                        onClick={() => setSelectedModel(m.id as any)}
+                                                        className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 text-center transition-all ${
+                                                            selectedModel === m.id
+                                                                ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm font-bold'
+                                                                : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white font-medium'
+                                                        }`}
+                                                    >
+                                                        <span className="text-xs md:text-sm">{m.label}</span>
+                                                        <span className="text-[10px] text-gray-500 font-normal">{m.desc}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
                                 </div>
 
                                 {/* Name & Email */}

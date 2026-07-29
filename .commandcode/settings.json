@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(lsof:*)",
+      "Shell(ss:*)",
+      "Shell(netstat:*)",
+      "Shell(kill 12205 2>/dev/null; fuser -k 3000/tcp 2>/dev/null; echo \"Port cleared\")",
+      "Shell(lsof -i :3000 2>/dev/null; echo \"---\"; fuser 3000/tcp 2>&1 || echo \"Port 3000 is free\")",
+      "Shell(fuser:*)",
+      "Shell(kill:*)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
