@@ -2,6 +2,7 @@
 
 import { ClientLordIcon } from '@/components/ui/lordicon'
 import { ChatBotModal } from '@/components/jasa-kustom/ChatBotForm'
+import { PortfolioCardStack } from '@/components/jasa-kustom/PortfolioCardStack'
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
@@ -635,13 +636,13 @@ export default function JasaKustomPage() {
                                         document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
                                     }}
                                     className={`relative p-6 rounded-2xl cursor-pointer transition-all duration-300 ease-out hover:-translate-y-2 bg-white shadow-md ${cat.color === 'orange' ? 'border-2 border-orange-200 hover:shadow-xl hover:shadow-orange-200/50 hover:border-orange-400' :
-                                            cat.color === 'blue' ? 'border-2 border-blue-200 hover:shadow-xl hover:shadow-blue-200/50 hover:border-blue-400' :
-                                                'border-2 border-purple-200 hover:shadow-xl hover:shadow-purple-200/50 hover:border-purple-400'
+                                        cat.color === 'blue' ? 'border-2 border-blue-200 hover:shadow-xl hover:shadow-blue-200/50 hover:border-blue-400' :
+                                            'border-2 border-purple-200 hover:shadow-xl hover:shadow-purple-200/50 hover:border-purple-400'
                                         } group`}
                                 >
                                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto transition-transform duration-300 group-hover:scale-110 shadow-sm ${cat.color === 'orange' ? 'bg-orange-100/80' :
-                                            cat.color === 'blue' ? 'bg-blue-100/80' :
-                                                'bg-purple-100/80'
+                                        cat.color === 'blue' ? 'bg-blue-100/80' :
+                                            'bg-purple-100/80'
                                         }`}>
                                         <ClientLordIcon
                                             src={cat.lordicon}
@@ -654,8 +655,8 @@ export default function JasaKustomPage() {
                                     <p className="text-xs text-gray-500 mb-4 text-center">{cat.desc}</p>
                                     <div className="text-center">
                                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${cat.color === 'orange' ? 'bg-orange-500 text-white' :
-                                                cat.color === 'blue' ? 'bg-blue-500 text-white' :
-                                                    'bg-purple-500 text-white'
+                                            cat.color === 'blue' ? 'bg-blue-500 text-white' :
+                                                'bg-purple-500 text-white'
                                             }`}>
                                             3 Model Kerjasama
                                         </span>
@@ -708,11 +709,22 @@ export default function JasaKustomPage() {
                         </motion.p>
                     </motion.div>
 
-                    {/* Category Selector Tabs */}
-                    <div className="flex justify-center mb-12">
-                        <div className="inline-flex p-1.5 rounded-2xl bg-gray-100/90 border border-gray-200 gap-2 flex-wrap justify-center shadow-inner">
+                    {/* Category Selector Tabs - Clean & Simple Square Cards */}
+                    <div className="max-w-4xl mx-auto mb-6 px-1 sm:px-4">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-3.5 p-1.5 sm:p-2 rounded-2xl md:rounded-3xl bg-slate-100/90 border border-slate-200 shadow-inner backdrop-blur-md">
                             {serviceCategories.map((cat) => {
                                 const isActive = activeCategory === cat.id
+
+                                const activeBorder =
+                                    cat.color === 'orange'
+                                        ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-orange-500/10'
+                                        : cat.color === 'blue'
+                                            ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-blue-500/10'
+                                            : 'border-purple-500 ring-2 ring-purple-500/20 shadow-purple-500/10'
+
+                                const pillBg =
+                                    cat.color === 'orange' ? 'bg-orange-500' : cat.color === 'blue' ? 'bg-blue-500' : 'bg-purple-500'
+
                                 return (
                                     <button
                                         key={cat.id}
@@ -720,163 +732,243 @@ export default function JasaKustomPage() {
                                             setActiveCategory(cat.id)
                                             setServiceType(cat.id)
                                         }}
-                                        className={`flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${isActive
-                                                ? cat.color === 'orange'
-                                                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25 scale-[1.02]'
-                                                    : cat.color === 'blue'
-                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
-                                                        : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/25 scale-[1.02]'
-                                                : 'text-gray-600 hover:text-gray-900 hover:bg-white/80'
+                                        className={`relative group flex flex-col items-center justify-center p-2.5 xs:p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-300 cursor-pointer text-center aspect-[1/0.95] xs:aspect-[1/0.85] sm:aspect-auto sm:min-h-[105px] bg-white ${isActive
+                                            ? `${activeBorder} scale-[1.02] z-10 font-extrabold shadow-md border-2`
+                                            : 'text-slate-600 hover:text-slate-900 border border-slate-200/80 shadow-sm hover:border-slate-300 hover:bg-slate-50/50'
                                             }`}
                                     >
-                                        <ClientLordIcon
-                                            src={cat.lordicon}
-                                            trigger="hover"
-                                            colors={isActive ? 'primary:#ffffff,secondary:#ffffff' : cat.lordiconColor}
-                                            style={{ width: '22px', height: '22px' }}
-                                        />
-                                        <span>{cat.name}</span>
+                                        {/* Active Pill Glow Indicator */}
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="activeCategoryIndicator"
+                                                className={`absolute -top-1 w-6 sm:w-10 h-1 rounded-full ${pillBg} shadow-sm`}
+                                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                            />
+                                        )}
+
+                                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center mb-1.5 transition-transform duration-300 group-hover:scale-110 ${isActive
+                                            ? cat.color === 'orange' ? 'bg-orange-50 border border-orange-200' : cat.color === 'blue' ? 'bg-blue-50 border border-blue-200' : 'bg-purple-50 border border-purple-200'
+                                            : cat.color === 'orange' ? 'bg-orange-50/60' : cat.color === 'blue' ? 'bg-blue-50/60' : 'bg-purple-50/60'
+                                            }`}>
+                                            <ClientLordIcon
+                                                src={cat.lordicon}
+                                                trigger="hover"
+                                                colors={cat.lordiconColor}
+                                                style={{ width: '24px', height: '24px' }}
+                                            />
+                                        </div>
+
+                                        <span className={`block sm:hidden text-[11px] xs:text-xs leading-tight tracking-tight ${isActive ? 'text-slate-900 font-extrabold' : 'text-slate-600 font-bold'}`}>
+                                            {cat.id === 'sheets' ? 'Google Sheets' : cat.id === 'webapp' ? 'Google Web Apps' : 'Full Stack'}
+                                        </span>
+                                        <span className={`hidden sm:block text-sm md:text-base leading-tight tracking-tight ${isActive ? 'text-slate-900 font-extrabold' : 'text-slate-600 font-bold'}`}>
+                                            {cat.name}
+                                        </span>
                                     </button>
                                 )
                             })}
                         </div>
                     </div>
 
-                    {/* Skynet-Inspired Service Cards Grid for Selected Category */}
+                    {/* Model Kerjasama Segmented Control Button (Mobile Only) */}
+                    <div className="max-w-xl mx-auto mb-8 px-2 md:hidden">
+                        <div className="p-1.5 rounded-2xl bg-slate-100/90 border border-slate-200 shadow-inner grid grid-cols-3 gap-1">
+                            {[
+                                { id: 'proyek', label: 'Model Proyek', badge: null },
+                                { id: 'tim-embed', label: 'Tim Embed', badge: 'Populer' },
+                                { id: 'retainer', label: 'Retainer', badge: null },
+                            ].map((model) => {
+                                const isModelActive = selectedModel === model.id
+                                return (
+                                    <button
+                                        key={model.id}
+                                        onClick={() => setSelectedModel(model.id as any)}
+                                        className={`relative py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${isModelActive
+                                            ? 'bg-white text-slate-900 shadow-md border border-slate-200/80 scale-[1.01] z-10'
+                                            : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
+                                            }`}
+                                    >
+                                        {isModelActive && (
+                                            <motion.div
+                                                layoutId="activeModelSegment"
+                                                className="absolute inset-0 rounded-xl bg-white shadow-md border border-slate-200/80 -z-10"
+                                                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                                            />
+                                        )}
+                                        <span className="leading-tight">{model.label}</span>
+                                        {model.badge && (
+                                            <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-black uppercase tracking-tight ${isModelActive ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-600'
+                                                }`}>
+                                                {model.badge}
+                                            </span>
+                                        )}
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Skynet-Inspired Service Cards Grid / Mobile Single Card View */}
                     {(() => {
                         const currentCategory = serviceCategories.find(c => c.id === activeCategory) || serviceCategories[0]
-                        return (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-7xl mx-auto">
-                                {currentCategory.tiers.map((tier, idx) => (
-                                    <motion.div
-                                        key={tier.id}
-                                        initial={{ opacity: 0, y: 30 }}
-                                        animate={servicesInView ? { opacity: 1, y: 0 } : {}}
-                                        transition={{ duration: 0.5, delay: 0.2 + idx * 0.1 }}
-                                        className="flex flex-col group"
-                                    >
-                                        <div className={`relative flex flex-col h-full bg-white rounded-3xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 shadow-lg overflow-hidden border-2 ${tier.isPopular
-                                                ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-orange-500/10'
-                                                : 'border-gray-200 hover:border-gray-300'
-                                            }`}>
-                                            {/* Skynet Popular Banner Header */}
-                                            {tier.isPopular && (
-                                                <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 py-1.5 px-4 text-center text-xs font-black text-white tracking-widest uppercase">
-                                                    ★ {tier.badge} ★
-                                                </div>
-                                            )}
+                        const activeTiers = currentCategory.tiers.filter(t => t.modelId === selectedModel)
+                        const mobileTier = activeTiers.length > 0 ? activeTiers[0] : currentCategory.tiers[0]
 
-                                            {/* Card Header Top Bar */}
-                                            <div className="p-6 md:p-8 flex-1 flex flex-col">
-                                                {/* Category Tag & Lordicon */}
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className="font-mono text-xs font-bold tracking-widest text-gray-400 uppercase">
-                                                            {tier.categoryTag}
-                                                        </span>
-                                                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase ${tier.color === 'orange' ? 'bg-orange-100 text-orange-700' :
-                                                                tier.color === 'blue' ? 'bg-blue-100 text-blue-700' :
-                                                                    'bg-purple-100 text-purple-700'
-                                                            }`}>
-                                                            {tier.modelTag}
-                                                        </span>
-                                                    </div>
-                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-inner ${tier.color === 'orange' ? 'bg-orange-50' :
-                                                            tier.color === 'blue' ? 'bg-blue-50' :
-                                                                'bg-purple-50'
-                                                        }`}>
-                                                        <ClientLordIcon
-                                                            src={currentCategory.lordicon}
-                                                            trigger="hover"
-                                                            colors={currentCategory.lordiconColor}
-                                                            style={{ width: '36px', height: '36px' }}
-                                                        />
-                                                    </div>
-                                                </div>
+                        const renderTierCard = (tier: typeof currentCategory.tiers[0], isSelectedTier: boolean) => (
+                            <div className={`relative flex flex-col h-full bg-white rounded-3xl transition-all duration-300 hover:shadow-2xl overflow-hidden border-2 ${isSelectedTier
+                                ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-xl shadow-orange-500/10'
+                                : 'border-gray-200 hover:border-gray-300 shadow-lg'
+                                }`}>
+                                {/* Popular Banner Header */}
+                                {tier.isPopular && (
+                                    <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 py-1.5 px-4 text-center text-xs font-black text-white tracking-widest uppercase">
+                                        ★ {tier.badge} ★
+                                    </div>
+                                )}
 
-                                                {/* Title & Short Description */}
-                                                <h3 className="text-2xl font-extrabold text-gray-900 mb-3">{tier.title}</h3>
-                                                <p className="text-gray-600 text-sm leading-relaxed mb-6 min-h-[48px]">
-                                                    {tier.shortDesc}
-                                                </p>
-
-                                                {/* Skynet Style Price Section */}
-                                                <div className="mb-6 p-4 rounded-2xl bg-gray-50/80 border border-gray-100">
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span className="text-xs text-gray-500 font-medium">Estimasi:</span>
-                                                        <span className="text-3xl font-black text-gray-900 tracking-tight">{tier.pricing}</span>
-                                                        <span className="text-xs text-gray-500 font-medium">{tier.pricingSubtext}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-gray-900 text-white">
-                                                            <Clock className="w-3 h-3 text-orange-400" />
-                                                            {tier.timeline}
-                                                        </span>
-                                                        <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-gray-200 text-gray-700">
-                                                            {tier.scopeType}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Skynet Plus (+) Deliverables & Scope Checklist */}
-                                                <div className="space-y-3 mb-8 flex-1">
-                                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Scope & Deliverables</p>
-                                                    {tier.features.map((feature, fIdx) => (
-                                                        <div key={fIdx} className="flex items-start gap-2.5 text-sm text-gray-700 py-1.5 border-b border-gray-100 last:border-0">
-                                                            <span className={`font-mono font-bold text-base leading-none ${tier.color === 'orange' ? 'text-orange-500' :
-                                                                    tier.color === 'blue' ? 'text-blue-500' :
-                                                                        'text-purple-500'
-                                                                }`}>+</span>
-                                                            <span className="leading-snug">{feature}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                {/* Free Support SLA Badge */}
-                                                <div className={`flex items-center gap-3 p-3.5 rounded-xl mb-6 border ${tier.color === 'orange' ? 'bg-orange-50/60 border-orange-200/60 text-orange-950' :
-                                                        tier.color === 'blue' ? 'bg-blue-50/60 border-blue-200/60 text-blue-950' :
-                                                            'bg-purple-50/60 border-purple-200/60 text-purple-950'
-                                                    }`}>
-                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${tier.color === 'orange' ? 'bg-orange-100' :
-                                                            tier.color === 'blue' ? 'bg-blue-100' :
-                                                                'bg-purple-100'
-                                                        }`}>
-                                                        <ClientLordIcon
-                                                            src="https://cdn.lordicon.com/ssvybplt.json"
-                                                            trigger="hover"
-                                                            colors={
-                                                                tier.color === 'orange' ? 'primary:#ea580c,secondary:#fbbf24' :
-                                                                    tier.color === 'blue' ? 'primary:#2563eb,secondary:#06b6d4' :
-                                                                        'primary:#9333ea,secondary:#ec4899'
-                                                            }
-                                                            style={{ width: '20px', height: '20px' }}
-                                                        />
-                                                    </div>
-                                                    <div className="text-xs">
-                                                        <span className="font-bold block">Support: {tier.support.free}</span>
-                                                        <span className="text-gray-500">{tier.support.description}</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Action Button - Skynet Style */}
-                                                <button
-                                                    onClick={() => {
-                                                        setServiceType(tier.serviceId)
-                                                        setSelectedModel(tier.modelId)
-                                                        setIsChatModalOpen(true)
-                                                    }}
-                                                    className={`w-full py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md ${tier.isPopular
-                                                            ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]'
-                                                            : 'bg-gray-900 text-white hover:bg-gray-800 hover:shadow-lg hover:scale-[1.01]'
-                                                        }`}
-                                                >
-                                                    <span>{tier.ctaText}</span>
-                                                    <ArrowRight className="w-4 h-4" />
-                                                </button>
-                                            </div>
+                                {/* Card Header Top Bar */}
+                                <div className="p-6 md:p-8 flex-1 flex flex-col">
+                                    {/* Category Tag & Lordicon */}
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="font-mono text-xs font-bold tracking-widest text-gray-400 uppercase">
+                                                {tier.categoryTag}
+                                            </span>
+                                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase ${tier.color === 'orange' ? 'bg-orange-100 text-orange-700' :
+                                                tier.color === 'blue' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-purple-100 text-purple-700'
+                                                }`}>
+                                                {tier.modelTag}
+                                            </span>
                                         </div>
+                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-inner ${tier.color === 'orange' ? 'bg-orange-50' :
+                                            tier.color === 'blue' ? 'bg-blue-50' :
+                                                'bg-purple-50'
+                                            }`}>
+                                            <ClientLordIcon
+                                                src={currentCategory.lordicon}
+                                                trigger="hover"
+                                                colors={currentCategory.lordiconColor}
+                                                style={{ width: '36px', height: '36px' }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Title & Short Description */}
+                                    <h3 className="text-2xl font-extrabold text-gray-900 mb-3">{tier.title}</h3>
+                                    <p className="text-gray-600 text-sm leading-relaxed mb-6 min-h-[48px]">
+                                        {tier.shortDesc}
+                                    </p>
+
+                                    {/* Price Section */}
+                                    <div className="mb-6 p-4 rounded-2xl bg-gray-50/80 border border-gray-100">
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-xs text-gray-500 font-medium">Estimasi:</span>
+                                            <span className="text-3xl font-black text-gray-900 tracking-tight">{tier.pricing}</span>
+                                            <span className="text-xs text-gray-500 font-medium">{tier.pricingSubtext}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-gray-900 text-white">
+                                                <Clock className="w-3 h-3 text-orange-400" />
+                                                {tier.timeline}
+                                            </span>
+                                            <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-gray-200 text-gray-700">
+                                                {tier.scopeType}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Scope & Deliverables Checklist */}
+                                    <div className="space-y-3 mb-8 flex-1">
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Scope & Deliverables</p>
+                                        {tier.features.map((feature, fIdx) => (
+                                            <div key={fIdx} className="flex items-start gap-2.5 text-sm text-gray-700 py-1.5 border-b border-gray-100 last:border-0">
+                                                <span className={`font-mono font-bold text-base leading-none ${tier.color === 'orange' ? 'text-orange-500' :
+                                                    tier.color === 'blue' ? 'text-blue-500' :
+                                                        'text-purple-500'
+                                                    }`}>+</span>
+                                                <span className="leading-snug">{feature}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Free Support SLA Badge */}
+                                    <div className={`flex items-center gap-3 p-3.5 rounded-xl mb-6 border ${tier.color === 'orange' ? 'bg-orange-50/60 border-orange-200/60 text-orange-950' :
+                                        tier.color === 'blue' ? 'bg-blue-50/60 border-blue-200/60 text-blue-950' :
+                                            'bg-purple-50/60 border-purple-200/60 text-purple-950'
+                                        }`}>
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${tier.color === 'orange' ? 'bg-orange-100' :
+                                            tier.color === 'blue' ? 'bg-blue-100' :
+                                                'bg-purple-100'
+                                            }`}>
+                                            <ClientLordIcon
+                                                src="https://cdn.lordicon.com/ssvybplt.json"
+                                                trigger="hover"
+                                                colors={
+                                                    tier.color === 'orange' ? 'primary:#ea580c,secondary:#fbbf24' :
+                                                        tier.color === 'blue' ? 'primary:#2563eb,secondary:#06b6d4' :
+                                                            'primary:#9333ea,secondary:#ec4899'
+                                                }
+                                                style={{ width: '20px', height: '20px' }}
+                                            />
+                                        </div>
+                                        <div className="text-xs">
+                                            <span className="font-bold block">Support: {tier.support.free}</span>
+                                            <span className="text-gray-500">{tier.support.description}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Action Button */}
+                                    <button
+                                        onClick={() => {
+                                            setServiceType(tier.serviceId)
+                                            setSelectedModel(tier.modelId)
+                                            setIsChatModalOpen(true)
+                                        }}
+                                        className={`w-full py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md ${tier.isPopular
+                                            ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]'
+                                            : 'bg-gray-900 text-white hover:bg-gray-800 hover:shadow-lg hover:scale-[1.01]'
+                                            }`}
+                                    >
+                                        <span>{tier.ctaText}</span>
+                                        <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        )
+
+                        return (
+                            <div className="max-w-7xl mx-auto">
+                                {/* Mobile View: Single Compact Card for Selected Model */}
+                                <div className="block md:hidden max-w-md mx-auto">
+                                    <motion.div
+                                        key={`${activeCategory}-${mobileTier.id}`}
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        {renderTierCard(mobileTier, true)}
                                     </motion.div>
-                                ))}
+                                </div>
+
+                                {/* Desktop View: 3 Columns Grid with Selected Model Highlighted */}
+                                <div className="hidden md:grid md:grid-cols-3 gap-8 items-stretch">
+                                    {currentCategory.tiers.map((tier, idx) => {
+                                        const isSelectedTier = tier.modelId === selectedModel
+                                        return (
+                                            <motion.div
+                                                key={tier.id}
+                                                initial={{ opacity: 0, y: 30 }}
+                                                animate={servicesInView ? { opacity: 1, y: 0 } : {}}
+                                                transition={{ duration: 0.5, delay: 0.1 * idx }}
+                                                onClick={() => setSelectedModel(tier.modelId)}
+                                                className={`flex flex-col group cursor-pointer transition-all duration-300 ${isSelectedTier ? 'scale-[1.02] z-10' : 'opacity-90 hover:opacity-100'}`}
+                                            >
+                                                {renderTierCard(tier, isSelectedTier)}
+                                            </motion.div>
+                                        )
+                                    })}
+                                </div>
                             </div>
                         )
                     })()}
@@ -955,63 +1047,7 @@ export default function JasaKustomPage() {
                             </motion.p>
                         </motion.div>
 
-                        <div className="grid md:grid-cols-3 gap-6">
-                            {portfolio.slice(0, 6).map((project, idx) => (
-                                <motion.div
-                                    key={project.id}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: 0.2 + idx * 0.1 }}
-                                >
-                                    <Link href={`/templates/${project.slug}`}>
-                                        <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group border-2 border-gray-200 hover:border-orange-300">
-                                            <div className="aspect-video bg-gray-100 relative overflow-hidden">
-                                                {project.image ? (
-                                                    <Image
-                                                        src={project.image}
-                                                        alt={project.title}
-                                                        fill
-                                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-amber-100">
-                                                        <ClientLordIcon
-                                                            src="https://cdn.lordicon.com/ghhwiltn.json"
-                                                            trigger="loop"
-                                                            delay="2000"
-                                                            colors="primary:#fdba74,secondary:#fed7aa"
-                                                            style={{ width: '48px', height: '48px' }}
-                                                        />
-                                                    </div>
-                                                )}
-                                                <div className="absolute top-3 left-3">
-                                                    <span className="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded-full flex items-center gap-1">
-                                                        <Sparkles className="w-3 h-3" />
-                                                        Custom
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="p-5">
-                                                <h3 className="font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">{project.title}</h3>
-                                                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{project.description}</p>
-                                                {project.clientName && (
-                                                    <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-md border border-purple-100 mt-2">
-                                                        <ClientLordIcon
-                                                            src="https://cdn.lordicon.com/fdxqrdfe.json"
-                                                            trigger="hover"
-                                                            colors="primary:#9333ea"
-                                                            style={{ width: '14px', height: '14px' }}
-                                                        />
-                                                        Requested by {project.clientName}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </div>
+                        <PortfolioCardStack projects={portfolio} />
 
                         {portfolio.length > 6 && (
                             <motion.div
@@ -1119,10 +1155,10 @@ export default function JasaKustomPage() {
                                         >
                                             <motion.div
                                                 className={`w-20 h-20 rounded-2xl bg-white shadow-xl border-2 flex items-center justify-center mx-auto relative overflow-hidden ${idx === 0 ? 'border-orange-300' :
-                                                        idx === 1 ? 'border-amber-300' :
-                                                            idx === 2 ? 'border-pink-300' :
-                                                                idx === 3 ? 'border-purple-300' :
-                                                                    'border-green-300'
+                                                    idx === 1 ? 'border-amber-300' :
+                                                        idx === 2 ? 'border-pink-300' :
+                                                            idx === 3 ? 'border-purple-300' :
+                                                                'border-green-300'
                                                     }`}
                                                 initial={{ rotate: -180, scale: 0 }}
                                                 animate={processInView ? { rotate: 0, scale: 1 } : {}}
@@ -1130,10 +1166,10 @@ export default function JasaKustomPage() {
                                             >
                                                 <motion.div
                                                     className={`absolute inset-0 opacity-20 ${idx === 0 ? 'bg-orange-400' :
-                                                            idx === 1 ? 'bg-amber-400' :
-                                                                idx === 2 ? 'bg-pink-400' :
-                                                                    idx === 3 ? 'bg-purple-400' :
-                                                                        'bg-green-400'
+                                                        idx === 1 ? 'bg-amber-400' :
+                                                            idx === 2 ? 'bg-pink-400' :
+                                                                idx === 3 ? 'bg-purple-400' :
+                                                                    'bg-green-400'
                                                         }`}
                                                     animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.1, 0.2] }}
                                                     transition={{ duration: 3, repeat: Infinity, delay: idx * 0.2 }}
@@ -1156,10 +1192,10 @@ export default function JasaKustomPage() {
                                             {/* Step Number Badge */}
                                             <motion.div
                                                 className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg ${idx === 0 ? 'bg-orange-500' :
-                                                        idx === 1 ? 'bg-amber-500' :
-                                                            idx === 2 ? 'bg-pink-500' :
-                                                                idx === 3 ? 'bg-purple-500' :
-                                                                    'bg-green-500'
+                                                    idx === 1 ? 'bg-amber-500' :
+                                                        idx === 2 ? 'bg-pink-500' :
+                                                            idx === 3 ? 'bg-purple-500' :
+                                                                'bg-green-500'
                                                     }`}
                                                 initial={{ scale: 0 }}
                                                 animate={processInView ? { scale: 1 } : {}}
@@ -1179,10 +1215,10 @@ export default function JasaKustomPage() {
                                             <p className="text-sm text-gray-600 mb-2">{step.desc}</p>
                                             <motion.span
                                                 className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${idx === 0 ? 'bg-orange-100 text-orange-600' :
-                                                        idx === 1 ? 'bg-amber-100 text-amber-600' :
-                                                            idx === 2 ? 'bg-pink-100 text-pink-600' :
-                                                                idx === 3 ? 'bg-purple-100 text-purple-600' :
-                                                                    'bg-green-100 text-green-600'
+                                                    idx === 1 ? 'bg-amber-100 text-amber-600' :
+                                                        idx === 2 ? 'bg-pink-100 text-pink-600' :
+                                                            idx === 3 ? 'bg-purple-100 text-purple-600' :
+                                                                'bg-green-100 text-green-600'
                                                     }`}
                                                 whileHover={{ scale: 1.05 }}
                                             >
@@ -1206,10 +1242,10 @@ export default function JasaKustomPage() {
                                 >
                                     <motion.div
                                         className={`w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg ${idx === 0 ? 'bg-orange-100' :
-                                                idx === 1 ? 'bg-amber-100' :
-                                                    idx === 2 ? 'bg-pink-100' :
-                                                        idx === 3 ? 'bg-purple-100' :
-                                                            'bg-green-100'
+                                            idx === 1 ? 'bg-amber-100' :
+                                                idx === 2 ? 'bg-pink-100' :
+                                                    idx === 3 ? 'bg-purple-100' :
+                                                        'bg-green-100'
                                             }`}
                                         whileHover={{ scale: 1.1, rotate: 5 }}
                                     >
@@ -1230,19 +1266,19 @@ export default function JasaKustomPage() {
                                     <div className="flex-1 pb-6 border-b-2 border-gray-200">
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${idx === 0 ? 'bg-orange-500' :
-                                                    idx === 1 ? 'bg-amber-500' :
-                                                        idx === 2 ? 'bg-pink-500' :
-                                                            idx === 3 ? 'bg-purple-500' :
-                                                                'bg-green-500'
+                                                idx === 1 ? 'bg-amber-500' :
+                                                    idx === 2 ? 'bg-pink-500' :
+                                                        idx === 3 ? 'bg-purple-500' :
+                                                            'bg-green-500'
                                                 }`}>{step.number}</span>
                                             <h4 className="font-bold text-gray-900">{step.title}</h4>
                                         </div>
                                         <p className="text-sm text-gray-600 mb-2">{step.desc}</p>
                                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${idx === 0 ? 'bg-orange-100 text-orange-600' :
-                                                idx === 1 ? 'bg-amber-100 text-amber-600' :
-                                                    idx === 2 ? 'bg-pink-100 text-pink-600' :
-                                                        idx === 3 ? 'bg-purple-100 text-purple-600' :
-                                                            'bg-green-100 text-green-600'
+                                            idx === 1 ? 'bg-amber-100 text-amber-600' :
+                                                idx === 2 ? 'bg-pink-100 text-pink-600' :
+                                                    idx === 3 ? 'bg-purple-100 text-purple-600' :
+                                                        'bg-green-100 text-green-600'
                                             }`}>{step.duration}</span>
                                     </div>
                                 </motion.div>
@@ -1531,7 +1567,7 @@ export default function JasaKustomPage() {
                                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
                                                 {[
                                                     { id: 'sheets', label: 'Google Sheets', lordicon: 'https://cdn.lordicon.com/wloilxuq.json' },
-                                                    { id: 'webapp', label: 'Web Apps', lordicon: 'https://cdn.lordicon.com/gqdnbnwt.json' },
+                                                    { id: 'webapp', label: 'Google Web Apps', lordicon: 'https://cdn.lordicon.com/gqdnbnwt.json' },
                                                     { id: 'fullstack', label: 'Full Stack', lordicon: 'https://cdn.lordicon.com/lupuorrc.json' },
                                                     { id: 'consultation', label: 'Konsultasi Gratis', lordicon: 'https://cdn.lordicon.com/fdxqrdfe.json' }
                                                 ].map((opt) => (
@@ -1542,8 +1578,8 @@ export default function JasaKustomPage() {
                                                         whileHover={{ scale: 1.02 }}
                                                         whileTap={{ scale: 0.98 }}
                                                         className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${serviceType === opt.id
-                                                                ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
-                                                                : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white'
+                                                            ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
+                                                            : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white'
                                                             }`}
                                                     >
                                                         <ClientLordIcon
@@ -1579,8 +1615,8 @@ export default function JasaKustomPage() {
                                                             type="button"
                                                             onClick={() => setSelectedModel(m.id as any)}
                                                             className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 text-center transition-all ${selectedModel === m.id
-                                                                    ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm font-bold'
-                                                                    : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white font-medium'
+                                                                ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm font-bold'
+                                                                : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white font-medium'
                                                                 }`}
                                                         >
                                                             <span className="text-xs md:text-sm">{m.label}</span>

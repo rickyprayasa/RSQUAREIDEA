@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ClientLordIcon } from '@/components/ui/lordicon'
 import {
     Send,
     RotateCcw,
@@ -11,7 +10,15 @@ import {
     X,
     Bot,
     MessageSquare,
-    CheckCircle2
+    CheckCircle2,
+    FileSpreadsheet,
+    Globe,
+    Rocket,
+    Layers,
+    Users,
+    ShieldCheck,
+    Calendar,
+    CircleDollarSign
 } from 'lucide-react'
 
 export interface ChatFormData {
@@ -26,12 +33,19 @@ export interface ChatFormData {
     deadline: string
 }
 
+interface MessageOption {
+    id: string
+    label: string
+    subtext?: string
+    iconType?: 'sheets' | 'webapp' | 'fullstack' | 'consultation' | 'proyek' | 'tim-embed' | 'retainer' | 'budget' | 'deadline'
+}
+
 interface Message {
     id: string
     sender: 'bot' | 'user'
     text: string
     timestamp: string
-    options?: { id: string; label: string; subtext?: string; icon?: string }[]
+    options?: MessageOption[]
     inputType?: 'text' | 'email' | 'tel' | 'textarea' | 'date' | 'options'
     isSummary?: boolean
 }
@@ -86,13 +100,19 @@ export function ChatBotModal({
         }
     }, [isOpen])
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const scrollToBottom = (instant = false) => {
+        if (!messagesEndRef.current) return
+        const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768
+        if (instant || isMobileDevice) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'auto' })
+        } else {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+        }
     }
 
     useEffect(() => {
         if (isOpen) {
-            scrollToBottom()
+            scrollToBottom(false)
         }
     }, [messages, isTyping, isOpen])
 
@@ -134,14 +154,14 @@ export function ChatBotModal({
                     text: 'Halo! 👋 Selamat datang di RSQUARE.\nSaya RSQUARE Assistant Bot yang akan memandu Anda merancang kebutuhan solusi digital terbaik.\n\nUntuk memulai, **Layanan Utama** mana yang Anda butuhkan?',
                     timestamp: getTimestamp(),
                     options: [
-                        { id: 'sheets', label: 'Google Sheets', subtext: 'Automasi & Formula', icon: 'https://cdn.lordicon.com/wloilxuq.json' },
-                        { id: 'webapp', label: 'Web Apps', subtext: 'Apps Script & Workspace', icon: 'https://cdn.lordicon.com/gqdnbnwt.json' },
-                        { id: 'fullstack', label: 'Full Stack', subtext: 'Next.js, Supabase, Cloud', icon: 'https://cdn.lordicon.com/lupuorrc.json' },
-                        { id: 'consultation', label: 'Konsultasi Gratis', subtext: 'Diskusi & Pemetaan Scope', icon: 'https://cdn.lordicon.com/fdxqrdfe.json' }
+                        { id: 'sheets', label: 'Google Sheets', subtext: 'Automasi & Formula', iconType: 'sheets' },
+                        { id: 'webapp', label: 'Web Apps', subtext: 'Apps Script & Workspace', iconType: 'webapp' },
+                        { id: 'fullstack', label: 'Full Stack', subtext: 'Next.js, Supabase, Cloud', iconType: 'fullstack' },
+                        { id: 'consultation', label: 'Konsultasi Gratis', subtext: 'Diskusi & Pemetaan Scope', iconType: 'consultation' }
                     ]
                 }
             ])
-        }, 400)
+        }, 200)
     }
 
     // Process Bot Responses based on Step
@@ -174,9 +194,9 @@ export function ChatBotModal({
                             text: `Pilihan tepat! Untuk layanan **${serviceLabel}**, **Model Kerjasama** mana yang paling sesuai dengan kebutuhan Anda?`,
                             timestamp: getTimestamp(),
                             options: [
-                                { id: 'proyek', label: 'Model Proyek', subtext: 'Fixed Scope & Garansi Support' },
-                                { id: 'tim-embed', label: 'Tim Embed', subtext: 'Dedicated Squad Bulanan' },
-                                { id: 'retainer', label: 'Retainer', subtext: 'Enterprise SLA & On-Call' }
+                                { id: 'proyek', label: 'Model Proyek', subtext: 'Fixed Scope & Garansi Support', iconType: 'proyek' },
+                                { id: 'tim-embed', label: 'Tim Embed', subtext: 'Dedicated Squad Bulanan', iconType: 'tim-embed' },
+                                { id: 'retainer', label: 'Retainer', subtext: 'Enterprise SLA & On-Call', iconType: 'retainer' }
                             ]
                         }
                     ])
@@ -251,13 +271,13 @@ export function ChatBotModal({
                         text: 'Berapa perkiraan **Budget Range** yang Anda sediakan untuk project ini?',
                         timestamp: getTimestamp(),
                         options: [
-                            { id: 'Belum tahu budget', label: 'Belum tahu budget' },
-                            { id: '< 500k', label: '< Rp 500.000' },
-                            { id: '500k - 1jt', label: 'Rp 500rb - 1jt' },
-                            { id: '1jt - 3jt', label: 'Rp 1jt - 3jt' },
-                            { id: '3jt - 5jt', label: 'Rp 3jt - 5jt' },
-                            { id: '5jt - 10jt', label: 'Rp 5jt - 10jt' },
-                            { id: '> 10jt', label: '> Rp 10jt' }
+                            { id: 'Belum tahu budget', label: 'Belum tahu budget', iconType: 'budget' },
+                            { id: '< 500k', label: '< Rp 500.000', iconType: 'budget' },
+                            { id: '500k - 1jt', label: 'Rp 500rb - 1jt', iconType: 'budget' },
+                            { id: '1jt - 3jt', label: 'Rp 1jt - 3jt', iconType: 'budget' },
+                            { id: '3jt - 5jt', label: 'Rp 3jt - 5jt', iconType: 'budget' },
+                            { id: '5jt - 10jt', label: 'Rp 5jt - 10jt', iconType: 'budget' },
+                            { id: '> 10jt', label: '> Rp 10jt', iconType: 'budget' }
                         ]
                     }
                 ])
@@ -271,10 +291,10 @@ export function ChatBotModal({
                         text: 'Terakhir, kapan **Target Deadline** pengerjaan project ini?',
                         timestamp: getTimestamp(),
                         options: [
-                            { id: 'ASAP (Secepatnya)', label: '⚡ ASAP (Secepatnya)' },
-                            { id: '1-2 Minggu', label: '📅 1-2 Minggu' },
-                            { id: '1 Bulan', label: '🗓️ 1 Bulan' },
-                            { id: 'Fleksibel', label: '⏳ Fleksibel' }
+                            { id: 'ASAP (Secepatnya)', label: '⚡ ASAP (Secepatnya)', iconType: 'deadline' },
+                            { id: '1-2 Minggu', label: '📅 1-2 Minggu', iconType: 'deadline' },
+                            { id: '1 Bulan', label: '🗓️ 1 Bulan', iconType: 'deadline' },
+                            { id: 'Fleksibel', label: '⏳ Fleksibel', iconType: 'deadline' }
                         ]
                     }
                 ])
@@ -291,7 +311,7 @@ export function ChatBotModal({
                     }
                 ])
             }
-        }, 400)
+        }, 200)
     }
 
     // Option Pill Click Handler
@@ -364,7 +384,7 @@ export function ChatBotModal({
                             inputType: 'email'
                         }
                     ])
-                }, 200)
+                }, 150)
                 return
             }
             updated.email = text
@@ -471,6 +491,31 @@ export function ChatBotModal({
         })
     }
 
+    const renderOptionIcon = (iconType?: string) => {
+        switch (iconType) {
+            case 'sheets':
+                return <FileSpreadsheet className="w-5 h-5 text-orange-600 flex-shrink-0" />
+            case 'webapp':
+                return <Globe className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            case 'fullstack':
+                return <Rocket className="w-5 h-5 text-purple-600 flex-shrink-0" />
+            case 'consultation':
+                return <MessageSquare className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            case 'proyek':
+                return <Layers className="w-5 h-5 text-orange-600 flex-shrink-0" />
+            case 'tim-embed':
+                return <Users className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            case 'retainer':
+                return <ShieldCheck className="w-5 h-5 text-purple-600 flex-shrink-0" />
+            case 'budget':
+                return <CircleDollarSign className="w-4 h-4 text-orange-500 flex-shrink-0" />
+            case 'deadline':
+                return <Calendar className="w-4 h-4 text-amber-500 flex-shrink-0" />
+            default:
+                return null
+        }
+    }
+
     if (!isOpen) return null
 
     return (
@@ -479,21 +524,22 @@ export function ChatBotModal({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[999999] bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-hidden"
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-[999999] bg-slate-950/80 sm:backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-hidden"
                 onClick={onClose}
             >
                 <motion.div
                     initial={{ y: "100%", opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: "100%", opacity: 0 }}
-                    transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                    transition={{ type: 'easeOut', duration: 0.25 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-3xl h-[92vh] sm:h-[88vh] max-h-[92vh] sm:max-h-[700px] min-h-[480px] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col border-t sm:border border-gray-200 relative z-[1000000]"
+                    className="w-full max-w-3xl h-[92vh] sm:h-[88vh] max-h-[92vh] sm:max-h-[700px] min-h-[480px] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col border-t sm:border border-gray-200 relative z-[1000000] transform-gpu"
                 >
                     {/* Mobile Sheet Drag Handle Indicator */}
                     <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto my-2 sm:hidden flex-shrink-0" />
 
-                    {/* Modal Header - Clean & Simple Light Theme */}
+                    {/* Modal Header */}
                     <div className="px-5 sm:px-6 py-3.5 sm:py-4 bg-white border-b border-gray-100 text-gray-900 flex items-center justify-between z-20 flex-shrink-0">
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 border border-orange-100 flex items-center justify-center shadow-2xs">
@@ -517,7 +563,7 @@ export function ChatBotModal({
                             <button
                                 onClick={initChat}
                                 title="Reset Percakapan"
-                                className="px-3 py-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 text-xs font-semibold transition-all flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 text-xs font-semibold transition-all flex items-center gap-1.5 active:scale-95"
                             >
                                 <RotateCcw className="w-3.5 h-3.5" />
                                 <span className="hidden sm:inline">Reset</span>
@@ -525,7 +571,7 @@ export function ChatBotModal({
                             <button
                                 onClick={onClose}
                                 title="Tutup Modal"
-                                className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-gray-800 border border-gray-200 text-xs font-bold transition-all flex items-center gap-1.5"
+                                className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-gray-800 border border-gray-200 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95"
                             >
                                 <X className="w-4 h-4" />
                                 <span className="hidden sm:inline">Tutup</span>
@@ -533,8 +579,8 @@ export function ChatBotModal({
                         </div>
                     </div>
 
-                    {/* Chat Messages Body - Clean Soft Background */}
-                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/60 custom-scrollbar">
+                    {/* Chat Messages Body */}
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/60 custom-scrollbar transform-gpu">
                         <div className="text-center py-1">
                             <span className="text-[11px] font-medium text-gray-500 bg-white border border-gray-200/80 px-3.5 py-1 rounded-full shadow-2xs">
                                 💬 Sesi Diskusi Interactive • RSQUARE Assistant
@@ -542,11 +588,8 @@ export function ChatBotModal({
                         </div>
 
                         {messages.map((msg) => (
-                            <motion.div
+                            <div
                                 key={msg.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.2 }}
                                 className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                             >
                                 <div className={`flex items-end gap-2.5 max-w-[92%] sm:max-w-[82%] ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -564,7 +607,7 @@ export function ChatBotModal({
                                     >
                                         <div className="whitespace-pre-line">{renderFormattedText(msg.text)}</div>
 
-                                        {/* Option Pills */}
+                                        {/* Option Pills - Fast SVG Lucide Icons */}
                                         {msg.options && !isCompleted && (
                                             <div className="mt-3.5 pt-3 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 {msg.options.map((opt) => (
@@ -574,14 +617,7 @@ export function ChatBotModal({
                                                         disabled={isTyping}
                                                         className="flex items-center gap-3 p-3 rounded-xl bg-white hover:bg-orange-50/60 border border-gray-200 hover:border-orange-400 text-left transition-all duration-200 group active:scale-[0.98] shadow-2xs"
                                                     >
-                                                        {opt.icon && (
-                                                            <ClientLordIcon
-                                                                src={opt.icon}
-                                                                trigger="hover"
-                                                                colors="primary:#ea580c,secondary:#f59e0b"
-                                                                style={{ width: '22px', height: '22px' }}
-                                                            />
-                                                        )}
+                                                        {renderOptionIcon(opt.iconType)}
                                                         <div>
                                                             <span className="font-bold text-xs text-gray-900 group-hover:text-orange-600 transition-colors block">
                                                                 {opt.label}
@@ -664,16 +700,12 @@ export function ChatBotModal({
                                 <span className="text-[10px] text-gray-400 mt-1 px-1 font-mono">
                                     {msg.timestamp}
                                 </span>
-                            </motion.div>
+                            </div>
                         ))}
 
                         {/* Typing Indicator */}
                         {isTyping && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 8 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="flex items-center gap-2 max-w-[80%]"
-                            >
+                            <div className="flex items-center gap-2 max-w-[80%]">
                                 <div className="w-8 h-8 rounded-xl bg-orange-100 border border-orange-200 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-2xs">
                                     <Sparkles className="w-4 h-4 text-orange-500 animate-pulse" />
                                 </div>
@@ -682,12 +714,12 @@ export function ChatBotModal({
                                     <span className="w-2 h-2 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '150ms' }} />
                                     <span className="w-2 h-2 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '300ms' }} />
                                 </div>
-                            </motion.div>
+                            </div>
                         )}
                         <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Footer Text Input Bar - Clean & Modern */}
+                    {/* Footer Text Input Bar */}
                     {!isCompleted && [3, 4, 5, 6, 7].includes(currentStep) && (
                         <div className="p-3.5 sm:p-4 bg-white border-t border-gray-100 z-20 flex-shrink-0">
                             <form onSubmit={handleTextSubmit} className="flex items-center gap-2">
@@ -727,7 +759,7 @@ export function ChatBotModal({
                                     <button
                                         type="button"
                                         onClick={() => handleTextSubmit()}
-                                        className="px-3.5 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold border border-gray-200 transition-all"
+                                        className="px-3.5 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold border border-gray-200 transition-all active:scale-95"
                                     >
                                         Lewati
                                     </button>
