@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { Sparkles, ArrowRight } from 'lucide-react'
 import { CardStack } from '@/components/home/CardStack'
 import { ClientLordIcon } from '@/components/ui/lordicon'
 
@@ -97,14 +98,25 @@ export function TemplateSection({
                         <p className="text-gray-600 max-w-md mx-auto mb-6">
                             {emptyDescription}
                         </p>
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full text-orange-600 text-sm font-medium">
-                            <ClientLordIcon
-                                src="https://cdn.lordicon.com/hvueufdo.json"
-                                trigger="loop"
-                                colors="primary:#ea580c"
-                                style={{ width: '18px', height: '18px' }}
-                            />
-                            Coming Soon
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-50 rounded-full text-orange-600 text-xs font-semibold">
+                                <ClientLordIcon
+                                    src="https://cdn.lordicon.com/hvueufdo.json"
+                                    trigger="loop"
+                                    colors="primary:#ea580c"
+                                    style={{ width: '16px', height: '16px' }}
+                                />
+                                Coming Soon
+                            </div>
+
+                            <Link
+                                href="/jasa-kustom"
+                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 group transform active:scale-95 border border-orange-400/30"
+                            >
+                                <Sparkles className="w-4 h-4 text-yellow-200 group-hover:rotate-12 transition-transform" />
+                                <span>Request Template Custom</span>
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </Link>
                         </div>
                     </motion.div>
                 ) : (

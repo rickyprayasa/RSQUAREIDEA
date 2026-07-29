@@ -7,7 +7,10 @@
       "Shell(kill 12205 2>/dev/null; fuser -k 3000/tcp 2>/dev/null; echo \"Port cleared\")",
       "Shell(lsof -i :3000 2>/dev/null; echo \"---\"; fuser 3000/tcp 2>&1 || echo \"Port 3000 is free\")",
       "Shell(fuser:*)",
-      "Shell(kill:*)"
+      "Shell(kill:*)",
+      "Shell(whoami; id; ps -p $(fuser 3000/tcp 2>/dev/null) -o user=,pid=,args= 2>&1)",
+      "Shell(kill 56005 2>&1; sleep 1; fuser 3000/tcp 2>&1 || echo \"Port 3000 sudah kosong\")",
+      "Shell(kill -9 56005 2>&1; sleep 1; fuser 3000/tcp 2>&1 || echo \"Port 3000 sudah kosong\")"
     ],
     "deny": [],
     "defaultMode": "default"

@@ -63,7 +63,7 @@ export function PortfolioCardStack({ projects }: PortfolioCardStackProps) {
                     return newOrder
                 })
                 setIsAnimating(false)
-            }, 250)
+            }, 180)
             return
         }
 
@@ -82,7 +82,7 @@ export function PortfolioCardStack({ projects }: PortfolioCardStackProps) {
                 return newOrder
             })
             setIsAnimating(false)
-        }, 250)
+        }, 180)
     }
 
     if (!projects || projects.length === 0) return null
@@ -102,25 +102,23 @@ export function PortfolioCardStack({ projects }: PortfolioCardStackProps) {
                             <motion.div
                                 key={project.id}
                                 onClick={() => handleCardClick(project.slug)}
-                                className="relative cursor-pointer select-none flex-shrink-0 group"
-                                initial={{ opacity: 0, y: 40, rotate: rotation + 5 }}
+                                className="relative cursor-pointer select-none flex-shrink-0 group transform-gpu"
+                                initial={{ opacity: 0, y: 30, rotate: rotation }}
                                 animate={{
                                     opacity: isInView ? 1 : 0,
-                                    y: isInView ? 0 : 40,
-                                    rotate: isInView ? rotation : rotation + 5,
+                                    y: isInView ? 0 : 30,
+                                    rotate: isInView ? rotation : rotation,
                                 }}
                                 whileHover={{
-                                    y: -16,
-                                    scale: 1.04,
+                                    y: -12,
+                                    scale: 1.03,
                                     rotate: 0,
                                     zIndex: 50,
-                                    transition: { type: "spring", stiffness: 350, damping: 22 }
                                 }}
                                 transition={{
-                                    type: "spring",
-                                    stiffness: 220,
-                                    damping: 24,
-                                    delay: isInView ? index * 0.08 : 0,
+                                    duration: 0.2,
+                                    ease: "easeOut",
+                                    delay: isInView ? index * 0.05 : 0,
                                 }}
                                 style={{ width: '280px', zIndex: index + 1 }}
                             >
@@ -184,7 +182,7 @@ export function PortfolioCardStack({ projects }: PortfolioCardStackProps) {
         <div className="w-full" ref={containerRef}>
             <div className="flex flex-col items-center justify-center py-4">
                 <div
-                    className="relative transform-gpu"
+                    className="relative transform-gpu will-change-transform"
                     style={{
                         width: '310px',
                         height: `${CARD_HEIGHT + (STACK_OFFSET * (visibleCards.length - 1))}px`,
@@ -207,7 +205,7 @@ export function PortfolioCardStack({ projects }: PortfolioCardStackProps) {
                         )
                     })}
 
-                    <AnimatePresence mode="popLayout">
+                    <AnimatePresence>
                         {visibleCards.map((projectIndex, stackIndex) => {
                             const project = projects[projectIndex]
                             const isFront = stackIndex === 0
@@ -216,16 +214,16 @@ export function PortfolioCardStack({ projects }: PortfolioCardStackProps) {
                             return (
                                 <motion.div
                                     key={project.id}
-                                    className={`absolute left-0 right-0 transform-gpu ${isFront ? 'cursor-pointer' : ''}`}
+                                    className={`absolute left-0 right-0 transform-gpu will-change-transform ${isFront ? 'cursor-pointer' : ''}`}
                                     style={{ bottom: 0, zIndex: visibleCards.length - stackIndex }}
-                                    initial={{ y: 80, opacity: 0 }}
+                                    initial={{ y: 50, opacity: 0 }}
                                     animate={{
                                         y: -bottomOffset,
                                         opacity: 1,
                                         scale: isFront ? 1 : 0.96 - (stackIndex * 0.02)
                                     }}
-                                    exit={{ y: 250, opacity: 0, transition: { duration: 0.25, ease: "easeOut" } }}
-                                    transition={{ type: "spring", stiffness: 350, damping: 28, delay: isInView ? stackIndex * 0.06 : 0 }}
+                                    exit={{ y: 150, opacity: 0 }}
+                                    transition={{ duration: 0.22, ease: "easeOut" }}
                                     onClick={isFront ? () => handleMobileCardClick(stackIndex) : undefined}
                                 >
                                     <div

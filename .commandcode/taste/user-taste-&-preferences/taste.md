@@ -7,3 +7,4 @@
 - Likes automated checking (AI-powered) combined with manual selection/approval for applying updates. Confidence: 0.9
 - Provides screenshots when reporting bugs/issues. Confidence: 0.8
 - Values confirmation before proceeding with impactful changes (asks "Apakah perlu...?"). Confidence: 0.7
+- Prefers to be taught the underlying commands/tools so they can resolve recurring issues independently, not just have the assistant fix things for them. Confidence: 0.8

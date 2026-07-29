@@ -732,7 +732,7 @@ export default function JasaKustomPage() {
                                             setActiveCategory(cat.id)
                                             setServiceType(cat.id)
                                         }}
-                                        className={`relative group flex flex-col items-center justify-center p-2.5 xs:p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-300 cursor-pointer text-center aspect-[1/0.95] xs:aspect-[1/0.85] sm:aspect-auto sm:min-h-[105px] bg-white ${isActive
+                                        className={`relative group flex flex-col items-center justify-center p-2.5 xs:p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-200 ease-out cursor-pointer text-center aspect-[1/0.95] xs:aspect-[1/0.85] sm:aspect-auto sm:min-h-[105px] bg-white transform-gpu active:scale-95 ${isActive
                                             ? `${activeBorder} scale-[1.02] z-10 font-extrabold shadow-md border-2`
                                             : 'text-slate-600 hover:text-slate-900 border border-slate-200/80 shadow-sm hover:border-slate-300 hover:bg-slate-50/50'
                                             }`}
@@ -740,13 +740,14 @@ export default function JasaKustomPage() {
                                         {/* Active Pill Glow Indicator */}
                                         {isActive && (
                                             <motion.div
-                                                layoutId="activeCategoryIndicator"
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
                                                 className={`absolute -top-1 w-6 sm:w-10 h-1 rounded-full ${pillBg} shadow-sm`}
-                                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                                transition={{ duration: 0.15, ease: "easeOut" }}
                                             />
                                         )}
 
-                                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center mb-1.5 transition-transform duration-300 group-hover:scale-110 ${isActive
+                                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center mb-1.5 transition-transform duration-200 group-hover:scale-105 ${isActive
                                             ? cat.color === 'orange' ? 'bg-orange-50 border border-orange-200' : cat.color === 'blue' ? 'bg-blue-50 border border-blue-200' : 'bg-purple-50 border border-purple-200'
                                             : cat.color === 'orange' ? 'bg-orange-50/60' : cat.color === 'blue' ? 'bg-blue-50/60' : 'bg-purple-50/60'
                                             }`}>
@@ -783,18 +784,11 @@ export default function JasaKustomPage() {
                                     <button
                                         key={model.id}
                                         onClick={() => setSelectedModel(model.id as any)}
-                                        className={`relative py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${isModelActive
+                                        className={`relative py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ease-out flex items-center justify-center gap-1.5 transform-gpu active:scale-95 ${isModelActive
                                             ? 'bg-white text-slate-900 shadow-md border border-slate-200/80 scale-[1.01] z-10'
                                             : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
                                             }`}
                                     >
-                                        {isModelActive && (
-                                            <motion.div
-                                                layoutId="activeModelSegment"
-                                                className="absolute inset-0 rounded-xl bg-white shadow-md border border-slate-200/80 -z-10"
-                                                transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                                            />
-                                        )}
                                         <span className="leading-tight">{model.label}</span>
                                         {model.badge && (
                                             <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-black uppercase tracking-tight ${isModelActive ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-600'

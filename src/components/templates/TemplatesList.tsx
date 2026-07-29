@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+import { Sparkles, ArrowRight } from 'lucide-react'
 import { ClientLordIcon } from '@/components/ui/lordicon'
 
 import { useState } from 'react'
@@ -230,14 +232,25 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                             <p className={`text-gray-500 text-center mt-1 ${viewMode === 'compact' ? 'text-xs' : 'text-sm'}`}>
                                 Template baru sedang disiapkan
                             </p>
-                            <motion.div 
-                                className={`flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-orange-100 rounded-full ${viewMode === 'compact' ? 'text-xs' : 'text-sm'}`}
-                                animate={{ scale: [1, 1.05, 1] }}
-                                transition={{ duration: 1.5, repeat: Infinity }}
-                            >
-                                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-                                <span className="text-orange-600 font-medium">Coming Soon</span>
-                            </motion.div>
+                            <div className="flex flex-col items-center gap-2.5 mt-3">
+                                <motion.div 
+                                    className={`flex items-center gap-1.5 px-3 py-1 bg-orange-100/80 rounded-full ${viewMode === 'compact' ? 'text-[11px]' : 'text-xs'}`}
+                                    animate={{ scale: [1, 1.04, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                >
+                                    <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+                                    <span className="text-orange-700 font-semibold">Coming Soon</span>
+                                </motion.div>
+
+                                <Link
+                                    href="/jasa-kustom"
+                                    className="mt-1 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 group transform active:scale-95 border border-orange-400/30"
+                                >
+                                    <Sparkles className="w-3.5 h-3.5 text-yellow-200 group-hover:rotate-12 transition-transform" />
+                                    <span>Request Template</span>
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                            </div>
                         </div>
                     </motion.div>
                 </motion.div>
