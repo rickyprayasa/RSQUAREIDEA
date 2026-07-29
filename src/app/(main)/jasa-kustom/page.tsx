@@ -49,7 +49,44 @@ interface Testimonial {
     likes: string
 }
 
-const serviceCategories = [
+type CategoryId = 'sheets' | 'webapp' | 'fullstack'
+type ModelId = 'proyek' | 'tim-embed' | 'retainer'
+
+interface ServiceTier {
+    id: string
+    serviceId: CategoryId
+    modelId: ModelId
+    categoryTag: string
+    modelTag: string
+    title: string
+    shortDesc: string
+    badge: string
+    isPopular: boolean
+    color: string
+    pricing: string
+    pricingSubtext: string
+    timeline: string
+    scopeType: string
+    features: string[]
+    support: {
+        free: string
+        description: string
+    }
+    ctaText: string
+}
+
+interface ServiceCategory {
+    id: CategoryId
+    name: string
+    badge: string
+    lordicon: string
+    lordiconColor: string
+    color: string
+    desc: string
+    tiers: ServiceTier[]
+}
+
+const serviceCategories: ServiceCategory[] = [
     {
         id: 'sheets',
         name: 'Google Sheets Templates',
@@ -609,7 +646,7 @@ export default function JasaKustomPage() {
                                         />
                                     </div>
                                     <h3 className="text-lg font-bold text-gray-900 mb-1 text-center">{cat.name}</h3>
-                                    <p className="text-xs text-gray-500 mb-4 text-center">{cat.description}</p>
+                                    <p className="text-xs text-gray-500 mb-4 text-center">{cat.desc}</p>
                                     <div className="text-center">
                                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${cat.color === 'orange' ? 'bg-orange-500 text-white' :
                                                 cat.color === 'blue' ? 'bg-blue-500 text-white' :
