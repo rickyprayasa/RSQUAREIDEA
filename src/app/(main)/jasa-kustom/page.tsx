@@ -886,7 +886,7 @@ export default function JasaKustomPage() {
                         <div className="flex items-center gap-4">
                             <div className="w-14 h-14 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center flex-shrink-0">
                                 <ClientLordIcon
-                                    src="https://cdn.lordicon.com/dxjqnldd.json"
+                                    src="https://cdn.lordicon.com/fdxqrdfe.json"
                                     trigger="loop"
                                     delay="2000"
                                     colors="primary:#f97316,secondary:#fbbf24"
@@ -993,7 +993,7 @@ export default function JasaKustomPage() {
                                                 {project.clientName && (
                                                     <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-md border border-purple-100 mt-2">
                                                         <ClientLordIcon
-                                                            src="https://cdn.lordicon.com/dxjqnldd.json"
+                                                            src="https://cdn.lordicon.com/fdxqrdfe.json"
                                                             trigger="hover"
                                                             colors="primary:#9333ea"
                                                             style={{ width: '14px', height: '14px' }}
