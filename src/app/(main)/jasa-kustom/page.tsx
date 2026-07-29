@@ -6,11 +6,11 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
-import { 
-    FileSpreadsheet, 
-    Globe, 
-    Rocket, 
-    Check, 
+import {
+    FileSpreadsheet,
+    Globe,
+    Rocket,
+    Check,
     Star,
     MessageCircle,
     Clock,
@@ -99,7 +99,7 @@ const serviceCategories = [
                 badge: 'PALING DIMINTA',
                 isPopular: true,
                 color: 'blue',
-                pricing: 'Rp 1.5jt',
+                pricing: 'Rp 3.5jt',
                 pricingSubtext: '/ bulan',
                 timeline: 'Dedicated Squad',
                 scopeType: 'Min. 1 bulan',
@@ -196,7 +196,7 @@ const serviceCategories = [
                 badge: 'PALING DIMINTA',
                 isPopular: true,
                 color: 'blue',
-                pricing: 'Rp 3.5jt',
+                pricing: 'Rp 7.5jt',
                 pricingSubtext: '/ bulan',
                 timeline: 'Dedicated Squad',
                 scopeType: 'Min. 1 bulan',
@@ -293,7 +293,7 @@ const serviceCategories = [
                 badge: 'PALING DIMINTA',
                 isPopular: true,
                 color: 'blue',
-                pricing: 'Rp 7.5jt',
+                pricing: 'Rp 17.5jt',
                 pricingSubtext: '/ bulan',
                 timeline: 'Dedicated Squad',
                 scopeType: 'Min. 1 bulan',
@@ -542,7 +542,7 @@ export default function JasaKustomPage() {
                                 />
                                 Custom Development Services
                             </span>
-                            
+
                             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                                 <motion.span
                                     initial={{ opacity: 0, y: 20 }}
@@ -555,8 +555,8 @@ export default function JasaKustomPage() {
                                 <motion.span
                                     initial={{ opacity: 0, y: 30, scale: 0.95 }}
                                     animate={heroInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                                    transition={{ 
-                                        duration: 0.8, 
+                                    transition={{
+                                        duration: 0.8,
                                         delay: 0.3,
                                         type: "spring",
                                         stiffness: 120,
@@ -568,7 +568,7 @@ export default function JasaKustomPage() {
                                     Solusi Digital
                                 </motion.span>
                             </h1>
-                            
+
                             <motion.p
                                 initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                                 animate={heroInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
@@ -592,17 +592,15 @@ export default function JasaKustomPage() {
                                         setServiceType(cat.id)
                                         document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
                                     }}
-                                    className={`relative p-6 rounded-2xl cursor-pointer transition-all duration-300 ease-out hover:-translate-y-2 bg-white shadow-md ${
-                                        cat.color === 'orange' ? 'border-2 border-orange-200 hover:shadow-xl hover:shadow-orange-200/50 hover:border-orange-400' :
-                                        cat.color === 'blue' ? 'border-2 border-blue-200 hover:shadow-xl hover:shadow-blue-200/50 hover:border-blue-400' :
-                                        'border-2 border-purple-200 hover:shadow-xl hover:shadow-purple-200/50 hover:border-purple-400'
-                                    } group`}
+                                    className={`relative p-6 rounded-2xl cursor-pointer transition-all duration-300 ease-out hover:-translate-y-2 bg-white shadow-md ${cat.color === 'orange' ? 'border-2 border-orange-200 hover:shadow-xl hover:shadow-orange-200/50 hover:border-orange-400' :
+                                            cat.color === 'blue' ? 'border-2 border-blue-200 hover:shadow-xl hover:shadow-blue-200/50 hover:border-blue-400' :
+                                                'border-2 border-purple-200 hover:shadow-xl hover:shadow-purple-200/50 hover:border-purple-400'
+                                        } group`}
                                 >
-                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto transition-transform duration-300 group-hover:scale-110 shadow-sm ${
-                                        cat.color === 'orange' ? 'bg-orange-100/80' :
-                                        cat.color === 'blue' ? 'bg-blue-100/80' :
-                                        'bg-purple-100/80'
-                                    }`}>
+                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto transition-transform duration-300 group-hover:scale-110 shadow-sm ${cat.color === 'orange' ? 'bg-orange-100/80' :
+                                            cat.color === 'blue' ? 'bg-blue-100/80' :
+                                                'bg-purple-100/80'
+                                        }`}>
                                         <ClientLordIcon
                                             src={cat.lordicon}
                                             trigger="hover"
@@ -613,11 +611,10 @@ export default function JasaKustomPage() {
                                     <h3 className="text-lg font-bold text-gray-900 mb-1 text-center">{cat.name}</h3>
                                     <p className="text-xs text-gray-500 mb-4 text-center">{cat.description}</p>
                                     <div className="text-center">
-                                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
-                                            cat.color === 'orange' ? 'bg-orange-500 text-white' :
-                                            cat.color === 'blue' ? 'bg-blue-500 text-white' :
-                                            'bg-purple-500 text-white'
-                                        }`}>
+                                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${cat.color === 'orange' ? 'bg-orange-500 text-white' :
+                                                cat.color === 'blue' ? 'bg-blue-500 text-white' :
+                                                    'bg-purple-500 text-white'
+                                            }`}>
                                             3 Model Kerjasama
                                         </span>
                                     </div>
@@ -681,15 +678,14 @@ export default function JasaKustomPage() {
                                             setActiveCategory(cat.id)
                                             setServiceType(cat.id)
                                         }}
-                                        className={`flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
-                                            isActive
+                                        className={`flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${isActive
                                                 ? cat.color === 'orange'
                                                     ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25 scale-[1.02]'
                                                     : cat.color === 'blue'
-                                                    ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
-                                                    : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/25 scale-[1.02]'
+                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
+                                                        : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-500/25 scale-[1.02]'
                                                 : 'text-gray-600 hover:text-gray-900 hover:bg-white/80'
-                                        }`}
+                                            }`}
                                     >
                                         <ClientLordIcon
                                             src={cat.lordicon}
@@ -717,11 +713,10 @@ export default function JasaKustomPage() {
                                         transition={{ duration: 0.5, delay: 0.2 + idx * 0.1 }}
                                         className="flex flex-col group"
                                     >
-                                        <div className={`relative flex flex-col h-full bg-white rounded-3xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 shadow-lg overflow-hidden border-2 ${
-                                            tier.isPopular 
-                                                ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-orange-500/10' 
+                                        <div className={`relative flex flex-col h-full bg-white rounded-3xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 shadow-lg overflow-hidden border-2 ${tier.isPopular
+                                                ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-orange-500/10'
                                                 : 'border-gray-200 hover:border-gray-300'
-                                        }`}>
+                                            }`}>
                                             {/* Skynet Popular Banner Header */}
                                             {tier.isPopular && (
                                                 <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 py-1.5 px-4 text-center text-xs font-black text-white tracking-widest uppercase">
@@ -737,19 +732,17 @@ export default function JasaKustomPage() {
                                                         <span className="font-mono text-xs font-bold tracking-widest text-gray-400 uppercase">
                                                             {tier.categoryTag}
                                                         </span>
-                                                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase ${
-                                                            tier.color === 'orange' ? 'bg-orange-100 text-orange-700' :
-                                                            tier.color === 'blue' ? 'bg-blue-100 text-blue-700' :
-                                                            'bg-purple-100 text-purple-700'
-                                                        }`}>
+                                                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase ${tier.color === 'orange' ? 'bg-orange-100 text-orange-700' :
+                                                                tier.color === 'blue' ? 'bg-blue-100 text-blue-700' :
+                                                                    'bg-purple-100 text-purple-700'
+                                                            }`}>
                                                             {tier.modelTag}
                                                         </span>
                                                     </div>
-                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-inner ${
-                                                        tier.color === 'orange' ? 'bg-orange-50' :
-                                                        tier.color === 'blue' ? 'bg-blue-50' :
-                                                        'bg-purple-50'
-                                                    }`}>
+                                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-inner ${tier.color === 'orange' ? 'bg-orange-50' :
+                                                            tier.color === 'blue' ? 'bg-blue-50' :
+                                                                'bg-purple-50'
+                                                        }`}>
                                                         <ClientLordIcon
                                                             src={currentCategory.lordicon}
                                                             trigger="hover"
@@ -788,34 +781,31 @@ export default function JasaKustomPage() {
                                                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Scope & Deliverables</p>
                                                     {tier.features.map((feature, fIdx) => (
                                                         <div key={fIdx} className="flex items-start gap-2.5 text-sm text-gray-700 py-1.5 border-b border-gray-100 last:border-0">
-                                                            <span className={`font-mono font-bold text-base leading-none ${
-                                                                tier.color === 'orange' ? 'text-orange-500' :
-                                                                tier.color === 'blue' ? 'text-blue-500' :
-                                                                'text-purple-500'
-                                                            }`}>+</span>
+                                                            <span className={`font-mono font-bold text-base leading-none ${tier.color === 'orange' ? 'text-orange-500' :
+                                                                    tier.color === 'blue' ? 'text-blue-500' :
+                                                                        'text-purple-500'
+                                                                }`}>+</span>
                                                             <span className="leading-snug">{feature}</span>
                                                         </div>
                                                     ))}
                                                 </div>
 
                                                 {/* Free Support SLA Badge */}
-                                                <div className={`flex items-center gap-3 p-3.5 rounded-xl mb-6 border ${
-                                                    tier.color === 'orange' ? 'bg-orange-50/60 border-orange-200/60 text-orange-950' :
-                                                    tier.color === 'blue' ? 'bg-blue-50/60 border-blue-200/60 text-blue-950' :
-                                                    'bg-purple-50/60 border-purple-200/60 text-purple-950'
-                                                }`}>
-                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                                        tier.color === 'orange' ? 'bg-orange-100' :
-                                                        tier.color === 'blue' ? 'bg-blue-100' :
-                                                        'bg-purple-100'
+                                                <div className={`flex items-center gap-3 p-3.5 rounded-xl mb-6 border ${tier.color === 'orange' ? 'bg-orange-50/60 border-orange-200/60 text-orange-950' :
+                                                        tier.color === 'blue' ? 'bg-blue-50/60 border-blue-200/60 text-blue-950' :
+                                                            'bg-purple-50/60 border-purple-200/60 text-purple-950'
                                                     }`}>
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${tier.color === 'orange' ? 'bg-orange-100' :
+                                                            tier.color === 'blue' ? 'bg-blue-100' :
+                                                                'bg-purple-100'
+                                                        }`}>
                                                         <ClientLordIcon
                                                             src="https://cdn.lordicon.com/ssvybplt.json"
                                                             trigger="hover"
                                                             colors={
                                                                 tier.color === 'orange' ? 'primary:#ea580c,secondary:#fbbf24' :
-                                                                tier.color === 'blue' ? 'primary:#2563eb,secondary:#06b6d4' :
-                                                                'primary:#9333ea,secondary:#ec4899'
+                                                                    tier.color === 'blue' ? 'primary:#2563eb,secondary:#06b6d4' :
+                                                                        'primary:#9333ea,secondary:#ec4899'
                                                             }
                                                             style={{ width: '20px', height: '20px' }}
                                                         />
@@ -833,11 +823,10 @@ export default function JasaKustomPage() {
                                                         setSelectedModel(tier.modelId)
                                                         scrollToForm()
                                                     }}
-                                                    className={`w-full py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md ${
-                                                        tier.isPopular
+                                                    className={`w-full py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md ${tier.isPopular
                                                             ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]'
                                                             : 'bg-gray-900 text-white hover:bg-gray-800 hover:shadow-lg hover:scale-[1.01]'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <span>{tier.ctaText}</span>
                                                     <ArrowRight className="w-4 h-4" />
@@ -937,8 +926,8 @@ export default function JasaKustomPage() {
                                         <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group border-2 border-gray-200 hover:border-orange-300">
                                             <div className="aspect-video bg-gray-100 relative overflow-hidden">
                                                 {project.image ? (
-                                                    <Image 
-                                                        src={project.image} 
+                                                    <Image
+                                                        src={project.image}
                                                         alt={project.title}
                                                         fill
                                                         className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -983,7 +972,7 @@ export default function JasaKustomPage() {
                         </div>
 
                         {portfolio.length > 6 && (
-                            <motion.div 
+                            <motion.div
                                 className="text-center mt-10"
                                 initial={{ opacity: 0 }}
                                 whileInView={{ opacity: 1 }}
@@ -991,7 +980,7 @@ export default function JasaKustomPage() {
                                 transition={{ delay: 0.8 }}
                             >
                                 <Link href="/templates?filter=custom">
-                                    <motion.button 
+                                    <motion.button
                                         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-medium hover:border-orange-300 hover:text-orange-600 transition-all"
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
@@ -1059,7 +1048,7 @@ export default function JasaKustomPage() {
                         {/* Desktop Timeline */}
                         <div className="hidden md:block relative">
                             {/* Animated Line */}
-                            <motion.div 
+                            <motion.div
                                 className="absolute top-24 left-0 right-0 h-1.5 bg-gray-100 rounded-full overflow-hidden"
                                 initial={{ opacity: 0 }}
                                 animate={processInView ? { opacity: 1 } : {}}
@@ -1087,25 +1076,23 @@ export default function JasaKustomPage() {
                                             whileHover={{ scale: 1.1 }}
                                         >
                                             <motion.div
-                                                className={`w-20 h-20 rounded-2xl bg-white shadow-xl border-2 flex items-center justify-center mx-auto relative overflow-hidden ${
-                                                    idx === 0 ? 'border-orange-300' :
-                                                    idx === 1 ? 'border-amber-300' :
-                                                    idx === 2 ? 'border-pink-300' :
-                                                    idx === 3 ? 'border-purple-300' :
-                                                    'border-green-300'
-                                                }`}
+                                                className={`w-20 h-20 rounded-2xl bg-white shadow-xl border-2 flex items-center justify-center mx-auto relative overflow-hidden ${idx === 0 ? 'border-orange-300' :
+                                                        idx === 1 ? 'border-amber-300' :
+                                                            idx === 2 ? 'border-pink-300' :
+                                                                idx === 3 ? 'border-purple-300' :
+                                                                    'border-green-300'
+                                                    }`}
                                                 initial={{ rotate: -180, scale: 0 }}
                                                 animate={processInView ? { rotate: 0, scale: 1 } : {}}
                                                 transition={{ duration: 0.6, delay: 0.5 + idx * 0.15, type: "spring" }}
                                             >
                                                 <motion.div
-                                                    className={`absolute inset-0 opacity-20 ${
-                                                        idx === 0 ? 'bg-orange-400' :
-                                                        idx === 1 ? 'bg-amber-400' :
-                                                        idx === 2 ? 'bg-pink-400' :
-                                                        idx === 3 ? 'bg-purple-400' :
-                                                        'bg-green-400'
-                                                    }`}
+                                                    className={`absolute inset-0 opacity-20 ${idx === 0 ? 'bg-orange-400' :
+                                                            idx === 1 ? 'bg-amber-400' :
+                                                                idx === 2 ? 'bg-pink-400' :
+                                                                    idx === 3 ? 'bg-purple-400' :
+                                                                        'bg-green-400'
+                                                        }`}
                                                     animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.1, 0.2] }}
                                                     transition={{ duration: 3, repeat: Infinity, delay: idx * 0.2 }}
                                                 />
@@ -1115,24 +1102,23 @@ export default function JasaKustomPage() {
                                                     delay="2000"
                                                     colors={
                                                         idx === 0 ? 'primary:#ea580c,secondary:#fbbf24' :
-                                                        idx === 1 ? 'primary:#f59e0b,secondary:#fcd34d' :
-                                                        idx === 2 ? 'primary:#ec4899,secondary:#f9a8d4' :
-                                                        idx === 3 ? 'primary:#9333ea,secondary:#c084fc' :
-                                                        'primary:#22c55e,secondary:#86efac'
+                                                            idx === 1 ? 'primary:#f59e0b,secondary:#fcd34d' :
+                                                                idx === 2 ? 'primary:#ec4899,secondary:#f9a8d4' :
+                                                                    idx === 3 ? 'primary:#9333ea,secondary:#c084fc' :
+                                                                        'primary:#22c55e,secondary:#86efac'
                                                     }
                                                     style={{ width: '40px', height: '40px' }}
                                                 />
                                             </motion.div>
-                                            
+
                                             {/* Step Number Badge */}
                                             <motion.div
-                                                className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg ${
-                                                    idx === 0 ? 'bg-orange-500' :
-                                                    idx === 1 ? 'bg-amber-500' :
-                                                    idx === 2 ? 'bg-pink-500' :
-                                                    idx === 3 ? 'bg-purple-500' :
-                                                    'bg-green-500'
-                                                }`}
+                                                className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg ${idx === 0 ? 'bg-orange-500' :
+                                                        idx === 1 ? 'bg-amber-500' :
+                                                            idx === 2 ? 'bg-pink-500' :
+                                                                idx === 3 ? 'bg-purple-500' :
+                                                                    'bg-green-500'
+                                                    }`}
                                                 initial={{ scale: 0 }}
                                                 animate={processInView ? { scale: 1 } : {}}
                                                 transition={{ delay: 0.8 + idx * 0.15, type: "spring" }}
@@ -1149,14 +1135,13 @@ export default function JasaKustomPage() {
                                         >
                                             <h4 className="font-bold text-gray-900 mb-1">{step.title}</h4>
                                             <p className="text-sm text-gray-600 mb-2">{step.desc}</p>
-                                            <motion.span 
-                                                className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${
-                                                    idx === 0 ? 'bg-orange-100 text-orange-600' :
-                                                    idx === 1 ? 'bg-amber-100 text-amber-600' :
-                                                    idx === 2 ? 'bg-pink-100 text-pink-600' :
-                                                    idx === 3 ? 'bg-purple-100 text-purple-600' :
-                                                    'bg-green-100 text-green-600'
-                                                }`}
+                                            <motion.span
+                                                className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${idx === 0 ? 'bg-orange-100 text-orange-600' :
+                                                        idx === 1 ? 'bg-amber-100 text-amber-600' :
+                                                            idx === 2 ? 'bg-pink-100 text-pink-600' :
+                                                                idx === 3 ? 'bg-purple-100 text-purple-600' :
+                                                                    'bg-green-100 text-green-600'
+                                                    }`}
                                                 whileHover={{ scale: 1.05 }}
                                             >
                                                 {step.duration}
@@ -1178,13 +1163,12 @@ export default function JasaKustomPage() {
                                     className="flex items-start gap-4"
                                 >
                                     <motion.div
-                                        className={`w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg ${
-                                            idx === 0 ? 'bg-orange-100' :
-                                            idx === 1 ? 'bg-amber-100' :
-                                            idx === 2 ? 'bg-pink-100' :
-                                            idx === 3 ? 'bg-purple-100' :
-                                            'bg-green-100'
-                                        }`}
+                                        className={`w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg ${idx === 0 ? 'bg-orange-100' :
+                                                idx === 1 ? 'bg-amber-100' :
+                                                    idx === 2 ? 'bg-pink-100' :
+                                                        idx === 3 ? 'bg-purple-100' :
+                                                            'bg-green-100'
+                                            }`}
                                         whileHover={{ scale: 1.1, rotate: 5 }}
                                     >
                                         <ClientLordIcon
@@ -1193,33 +1177,31 @@ export default function JasaKustomPage() {
                                             delay="2000"
                                             colors={
                                                 idx === 0 ? 'primary:#ea580c,secondary:#fbbf24' :
-                                                idx === 1 ? 'primary:#f59e0b,secondary:#fcd34d' :
-                                                idx === 2 ? 'primary:#ec4899,secondary:#f9a8d4' :
-                                                idx === 3 ? 'primary:#9333ea,secondary:#c084fc' :
-                                                'primary:#22c55e,secondary:#86efac'
+                                                    idx === 1 ? 'primary:#f59e0b,secondary:#fcd34d' :
+                                                        idx === 2 ? 'primary:#ec4899,secondary:#f9a8d4' :
+                                                            idx === 3 ? 'primary:#9333ea,secondary:#c084fc' :
+                                                                'primary:#22c55e,secondary:#86efac'
                                             }
                                             style={{ width: '28px', height: '28px' }}
                                         />
                                     </motion.div>
                                     <div className="flex-1 pb-6 border-b-2 border-gray-200">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${
-                                                idx === 0 ? 'bg-orange-500' :
-                                                idx === 1 ? 'bg-amber-500' :
-                                                idx === 2 ? 'bg-pink-500' :
-                                                idx === 3 ? 'bg-purple-500' :
-                                                'bg-green-500'
-                                            }`}>{step.number}</span>
+                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${idx === 0 ? 'bg-orange-500' :
+                                                    idx === 1 ? 'bg-amber-500' :
+                                                        idx === 2 ? 'bg-pink-500' :
+                                                            idx === 3 ? 'bg-purple-500' :
+                                                                'bg-green-500'
+                                                }`}>{step.number}</span>
                                             <h4 className="font-bold text-gray-900">{step.title}</h4>
                                         </div>
                                         <p className="text-sm text-gray-600 mb-2">{step.desc}</p>
-                                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                                            idx === 0 ? 'bg-orange-100 text-orange-600' :
-                                            idx === 1 ? 'bg-amber-100 text-amber-600' :
-                                            idx === 2 ? 'bg-pink-100 text-pink-600' :
-                                            idx === 3 ? 'bg-purple-100 text-purple-600' :
-                                            'bg-green-100 text-green-600'
-                                        }`}>{step.duration}</span>
+                                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${idx === 0 ? 'bg-orange-100 text-orange-600' :
+                                                idx === 1 ? 'bg-amber-100 text-amber-600' :
+                                                    idx === 2 ? 'bg-pink-100 text-pink-600' :
+                                                        idx === 3 ? 'bg-purple-100 text-purple-600' :
+                                                            'bg-green-100 text-green-600'
+                                            }`}>{step.duration}</span>
                                     </div>
                                 </motion.div>
                             ))}
@@ -1298,8 +1280,8 @@ export default function JasaKustomPage() {
                                                     viewport={{ once: true }}
                                                     transition={{ delay: 0.5 + idx * 0.1 + i * 0.05 }}
                                                 >
-                                                    <Star 
-                                                        className={`w-4 h-4 ${i < testimonial.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200'}`} 
+                                                    <Star
+                                                        className={`w-4 h-4 ${i < testimonial.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200'}`}
                                                     />
                                                 </motion.div>
                                             ))}
@@ -1309,7 +1291,7 @@ export default function JasaKustomPage() {
                                             <div>
                                                 <p className="font-bold text-gray-900">{testimonial.name}</p>
                                                 {testimonial.templateSlug ? (
-                                                    <Link 
+                                                    <Link
                                                         href={`/templates/${testimonial.templateSlug}`}
                                                         className="text-sm text-orange-600 hover:text-orange-700"
                                                     >
@@ -1414,7 +1396,7 @@ export default function JasaKustomPage() {
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ duration: 10, repeat: Infinity }}
                 />
-                
+
                 <div className="container mx-auto px-6 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -1458,7 +1440,7 @@ export default function JasaKustomPage() {
                             </motion.p>
                         </div>
 
-                        <motion.div 
+                        <motion.div
                             className="bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-8 md:p-10"
                             initial={{ opacity: 0, y: 30 }}
                             animate={formInView ? { opacity: 1, y: 0 } : {}}
@@ -1484,11 +1466,10 @@ export default function JasaKustomPage() {
                                                     onClick={() => setServiceType(opt.id)}
                                                     whileHover={{ scale: 1.02 }}
                                                     whileTap={{ scale: 0.98 }}
-                                                    className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
-                                                        serviceType === opt.id
+                                                    className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${serviceType === opt.id
                                                             ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
                                                             : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <ClientLordIcon
                                                         src={opt.lordicon}
@@ -1522,11 +1503,10 @@ export default function JasaKustomPage() {
                                                         key={m.id}
                                                         type="button"
                                                         onClick={() => setSelectedModel(m.id as any)}
-                                                        className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 text-center transition-all ${
-                                                            selectedModel === m.id
+                                                        className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 text-center transition-all ${selectedModel === m.id
                                                                 ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm font-bold'
                                                                 : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white font-medium'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         <span className="text-xs md:text-sm">{m.label}</span>
                                                         <span className="text-[10px] text-gray-500 font-normal">{m.desc}</span>
@@ -1678,11 +1658,10 @@ export default function JasaKustomPage() {
                             onClick={(e) => e.stopPropagation()}
                             className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border-2 border-gray-200"
                         >
-                            <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${
-                                dialog.type === 'success' ? 'bg-green-100' : 'bg-red-100'
-                            }`}>
+                            <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${dialog.type === 'success' ? 'bg-green-100' : 'bg-red-100'
+                                }`}>
                                 <ClientLordIcon
-                                    src={dialog.type === 'success' 
+                                    src={dialog.type === 'success'
                                         ? 'https://cdn.lordicon.com/lupuorrc.json'
                                         : 'https://cdn.lordicon.com/usownftb.json'
                                     }
