@@ -1,6 +1,7 @@
 'use client'
 
 import { ClientLordIcon } from '@/components/ui/lordicon'
+import { ChatBotModal } from '@/components/jasa-kustom/ChatBotForm'
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
@@ -17,7 +18,9 @@ import {
     ChevronDown,
     ChevronRight,
     Sparkles,
-    ArrowRight
+    ArrowRight,
+    Bot,
+    FileText
 } from 'lucide-react'
 
 interface DialogState {
@@ -401,6 +404,8 @@ export default function JasaKustomPage() {
     const [activeCategory, setActiveCategory] = useState<'sheets' | 'webapp' | 'fullstack'>('sheets')
     const [serviceType, setServiceType] = useState('sheets')
     const [selectedModel, setSelectedModel] = useState<'proyek' | 'tim-embed' | 'retainer'>('proyek')
+    const [formMode, setFormMode] = useState<'bot' | 'classic'>('bot')
+    const [isChatModalOpen, setIsChatModalOpen] = useState(false)
     const [formStatus, setFormStatus] = useState<'idle' | 'sending'>('idle')
     const [portfolio, setPortfolio] = useState<Portfolio[]>([])
     const [testimonials, setTestimonials] = useState<Testimonial[]>([])
@@ -858,7 +863,7 @@ export default function JasaKustomPage() {
                                                     onClick={() => {
                                                         setServiceType(tier.serviceId)
                                                         setSelectedModel(tier.modelId)
-                                                        scrollToForm()
+                                                        setIsChatModalOpen(true)
                                                     }}
                                                     className={`w-full py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md ${tier.isPopular
                                                             ? 'bg-gradient-to-r from-orange-600 to-amber-500 text-white hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]'
@@ -1440,243 +1445,297 @@ export default function JasaKustomPage() {
                         animate={formInView ? { opacity: 1, y: 0 } : {}}
                         className="max-w-2xl mx-auto"
                     >
-                        <div className="text-center mb-10">
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                        <div className="text-center mb-6">
+                            <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-2 flex-wrap">
                                 <motion.span
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={formInView ? { opacity: 1, y: 0 } : {}}
                                     transition={{ duration: 0.6, delay: 0.2 }}
-                                    className="inline-block text-gray-900"
+                                    className="text-gray-900"
                                 >
-                                    Siap Mulai{' '}
+                                    Siap Mulai
                                 </motion.span>
                                 <motion.span
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={formInView ? { opacity: 1, scale: 1 } : {}}
                                     transition={{ duration: 0.6, delay: 0.3, type: "spring" }}
-                                    className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500"
+                                    className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500"
                                 >
-                                    Project Anda
-                                </motion.span>
-                                <motion.span
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={formInView ? { opacity: 1, x: 0 } : {}}
-                                    transition={{ duration: 0.6, delay: 0.4 }}
-                                    className="inline-block text-gray-900"
-                                >
-                                    ?
+                                    Project Anda?
                                 </motion.span>
                             </h2>
                             <motion.p
                                 initial={{ opacity: 0, filter: "blur(5px)" }}
                                 animate={formInView ? { opacity: 1, filter: "blur(0px)" } : {}}
                                 transition={{ duration: 0.5, delay: 0.5 }}
-                                className="text-lg text-gray-600"
+                                className="text-base md:text-lg text-gray-600"
                             >
-                                Isi form di bawah, kami akan hubungi dalam 1x24 jam
+                                Konsultasikan kebutuhan Anda secara interaktif atau gunakan form standar
                             </motion.p>
                         </div>
 
-                        <motion.div
-                            className="bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-8 md:p-10"
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={formInView ? { opacity: 1, y: 0 } : {}}
-                            transition={{ delay: 0.4 }}
-                        >
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                {/* Service Selection Step 1: Core Service */}
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-800 mb-2.5">
-                                            1. Pilih Layanan Utama
-                                        </label>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-                                            {[
-                                                { id: 'sheets', label: 'Google Sheets', lordicon: 'https://cdn.lordicon.com/wloilxuq.json' },
-                                                { id: 'webapp', label: 'Web Apps', lordicon: 'https://cdn.lordicon.com/gqdnbnwt.json' },
-                                                { id: 'fullstack', label: 'Full Stack', lordicon: 'https://cdn.lordicon.com/lupuorrc.json' },
-                                                { id: 'consultation', label: 'Konsultasi Gratis', lordicon: 'https://cdn.lordicon.com/fdxqrdfe.json' }
-                                            ].map((opt) => (
-                                                <motion.button
-                                                    key={opt.id}
-                                                    type="button"
-                                                    onClick={() => setServiceType(opt.id)}
-                                                    whileHover={{ scale: 1.02 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${serviceType === opt.id
-                                                            ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
-                                                            : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white'
-                                                        }`}
-                                                >
-                                                    <ClientLordIcon
-                                                        src={opt.lordicon}
-                                                        trigger="hover"
-                                                        colors={serviceType === opt.id ? 'primary:#ea580c,secondary:#fbbf24' : 'primary:#6b7280,secondary:#9ca3af'}
-                                                        style={{ width: '24px', height: '24px' }}
-                                                    />
-                                                    <span className="font-bold text-xs mt-1 text-center">{opt.label}</span>
-                                                </motion.button>
-                                            ))}
+                        {/* Primary Interactive Chat Bot Form Trigger - Clean & Simple */}
+                        {formMode === 'bot' ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={formInView ? { opacity: 1, y: 0 } : {}}
+                                transition={{ delay: 0.3 }}
+                                className="bg-white rounded-3xl p-8 md:p-10 border border-gray-200/90 shadow-xl shadow-gray-200/50 text-center max-w-xl mx-auto relative overflow-hidden group hover:border-orange-300 transition-all duration-300"
+                            >
+                                {/* Subtle background glow */}
+                                <div className="absolute top-0 right-0 w-48 h-48 bg-orange-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                                <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-100/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+                                <div className="relative z-10 space-y-5">
+                                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 border border-orange-200/80 text-orange-600 text-xs font-extrabold uppercase tracking-wide">
+                                        <Sparkles className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
+                                        <span>Interactive Assistant</span>
+                                    </div>
+
+                                    <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
+                                        Diskusi & Konsultasi Project
+                                    </h3>
+
+                                    <p className="text-gray-600 text-sm md:text-base leading-relaxed max-w-md mx-auto">
+                                        Mulai sesi percakapan interaktif dengan RSQUARE Assistant Bot untuk pemetaan fitur, estimasi budget, dan jadwal pengerjaan.
+                                    </p>
+
+                                    <div className="pt-2">
+                                        <motion.button
+                                            onClick={() => setIsChatModalOpen(true)}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-700 hover:to-amber-600 text-white font-bold text-base rounded-2xl shadow-lg shadow-orange-500/25 flex items-center justify-center gap-3 transition-all mx-auto group active:scale-[0.98]"
+                                        >
+                                            <Bot className="w-5 h-5 text-white group-hover:rotate-12 transition-transform" />
+                                            <span>Mulai Chat Diskusi (Interactive)</span>
+                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                        </motion.button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                className="bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-8 md:p-10"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={formInView ? { opacity: 1, y: 0 } : {}}
+                                transition={{ delay: 0.4 }}
+                            >
+                                <form onSubmit={handleSubmit} className="space-y-6">
+                                    {/* Service Selection Step 1: Core Service */}
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-800 mb-2.5">
+                                                1. Pilih Layanan Utama
+                                            </label>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                                                {[
+                                                    { id: 'sheets', label: 'Google Sheets', lordicon: 'https://cdn.lordicon.com/wloilxuq.json' },
+                                                    { id: 'webapp', label: 'Web Apps', lordicon: 'https://cdn.lordicon.com/gqdnbnwt.json' },
+                                                    { id: 'fullstack', label: 'Full Stack', lordicon: 'https://cdn.lordicon.com/lupuorrc.json' },
+                                                    { id: 'consultation', label: 'Konsultasi Gratis', lordicon: 'https://cdn.lordicon.com/fdxqrdfe.json' }
+                                                ].map((opt) => (
+                                                    <motion.button
+                                                        key={opt.id}
+                                                        type="button"
+                                                        onClick={() => setServiceType(opt.id)}
+                                                        whileHover={{ scale: 1.02 }}
+                                                        whileTap={{ scale: 0.98 }}
+                                                        className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${serviceType === opt.id
+                                                                ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
+                                                                : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white'
+                                                            }`}
+                                                    >
+                                                        <ClientLordIcon
+                                                            src={opt.lordicon}
+                                                            trigger="hover"
+                                                            colors={serviceType === opt.id ? 'primary:#ea580c,secondary:#fbbf24' : 'primary:#6b7280,secondary:#9ca3af'}
+                                                            style={{ width: '24px', height: '24px' }}
+                                                        />
+                                                        <span className="font-bold text-xs mt-1 text-center">{opt.label}</span>
+                                                    </motion.button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Service Selection Step 2: Model Kerjasama */}
+                                        {serviceType !== 'consultation' && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                <label className="block text-sm font-semibold text-gray-800 mb-2.5">
+                                                    2. Pilih Model Kerjasama
+                                                </label>
+                                                <div className="grid grid-cols-3 gap-2.5">
+                                                    {[
+                                                        { id: 'proyek', label: 'Model Proyek', desc: 'Fixed Scope' },
+                                                        { id: 'tim-embed', label: 'Tim Embed', desc: 'Dedicated Squad' },
+                                                        { id: 'retainer', label: 'Retainer', desc: 'Enterprise SLA' }
+                                                    ].map((m) => (
+                                                        <button
+                                                            key={m.id}
+                                                            type="button"
+                                                            onClick={() => setSelectedModel(m.id as any)}
+                                                            className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 text-center transition-all ${selectedModel === m.id
+                                                                    ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm font-bold'
+                                                                    : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white font-medium'
+                                                                }`}
+                                                        >
+                                                            <span className="text-xs md:text-sm">{m.label}</span>
+                                                            <span className="text-[10px] text-gray-500 font-normal">{m.desc}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </div>
+
+                                    {/* Name & Email */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                required
+                                                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
+                                                placeholder="Nama Anda"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                required
+                                                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
+                                                placeholder="email@example.com"
+                                            />
                                         </div>
                                     </div>
 
-                                    {/* Service Selection Step 2: Model Kerjasama */}
-                                    {serviceType !== 'consultation' && (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <label className="block text-sm font-semibold text-gray-800 mb-2.5">
-                                                2. Pilih Model Kerjasama
+                                    {/* Phone & Company */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                No. WhatsApp <span className="text-gray-400">(Opsional)</span>
                                             </label>
-                                            <div className="grid grid-cols-3 gap-2.5">
-                                                {[
-                                                    { id: 'proyek', label: 'Model Proyek', desc: 'Fixed Scope' },
-                                                    { id: 'tim-embed', label: 'Tim Embed', desc: 'Dedicated Squad' },
-                                                    { id: 'retainer', label: 'Retainer', desc: 'Enterprise SLA' }
-                                                ].map((m) => (
-                                                    <button
-                                                        key={m.id}
-                                                        type="button"
-                                                        onClick={() => setSelectedModel(m.id as any)}
-                                                        className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 text-center transition-all ${selectedModel === m.id
-                                                                ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm font-bold'
-                                                                : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-white font-medium'
-                                                            }`}
-                                                    >
-                                                        <span className="text-xs md:text-sm">{m.label}</span>
-                                                        <span className="text-[10px] text-gray-500 font-normal">{m.desc}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </div>
-
-                                {/* Name & Email */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            required
-                                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
-                                            placeholder="Nama Anda"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            required
-                                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
-                                            placeholder="email@example.com"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Phone & Company */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            No. WhatsApp <span className="text-gray-400">(Opsional)</span>
-                                        </label>
-                                        <input
-                                            type="tel"
-                                            name="phone"
-                                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
-                                            placeholder="08xxxxxxxxxx"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Perusahaan/Organisasi <span className="text-gray-400">(Opsional)</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="company"
-                                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
-                                            placeholder="Nama perusahaan"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Requirements */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Ceritakan Kebutuhan Anda</label>
-                                    <textarea
-                                        name="requirements"
-                                        required
-                                        rows={5}
-                                        className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all resize-none"
-                                        placeholder="Jelaskan kebutuhan, fitur yang diinginkan, referensi (jika ada), dll."
-                                    />
-                                </div>
-
-                                {/* Budget & Deadline */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Budget Range <span className="text-gray-400">(Opsional)</span>
-                                        </label>
-                                        <select
-                                            name="budget"
-                                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
-                                        >
-                                            <option value="">Belum tahu budget</option>
-                                            <option value="< 500k">&lt; Rp 500.000</option>
-                                            <option value="500k - 1jt">Rp 500.000 - Rp 1.000.000</option>
-                                            <option value="1jt - 3jt">Rp 1.000.000 - Rp 3.000.000</option>
-                                            <option value="3jt - 5jt">Rp 3.000.000 - Rp 5.000.000</option>
-                                            <option value="5jt - 10jt">Rp 5.000.000 - Rp 10.000.000</option>
-                                            <option value="> 10jt">&gt; Rp 10.000.000</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Target Deadline <span className="text-gray-400">(Opsional)</span>
-                                        </label>
-                                        <input
-                                            type="date"
-                                            name="deadline"
-                                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Submit */}
-                                <motion.button
-                                    type="submit"
-                                    disabled={formStatus === 'sending'}
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:shadow-orange-200/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                >
-                                    {formStatus === 'sending' ? (
-                                        <>
-                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Mengirim...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <ClientLordIcon
-                                                src="https://cdn.lordicon.com/aklfruoc.json"
-                                                trigger="hover"
-                                                colors="primary:#ffffff,secondary:#ffffff"
-                                                style={{ width: '24px', height: '24px' }}
+                                            <input
+                                                type="tel"
+                                                name="phone"
+                                                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
+                                                placeholder="08xxxxxxxxxx"
                                             />
-                                            Kirim Request
-                                        </>
-                                    )}
-                                </motion.button>
-                            </form>
-                        </motion.div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Perusahaan/Organisasi <span className="text-gray-400">(Opsional)</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="company"
+                                                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
+                                                placeholder="Nama perusahaan"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Requirements */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Ceritakan Kebutuhan Anda</label>
+                                        <textarea
+                                            name="requirements"
+                                            required
+                                            rows={5}
+                                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all resize-none"
+                                            placeholder="Jelaskan kebutuhan, fitur yang diinginkan, referensi (jika ada), dll."
+                                        />
+                                    </div>
+
+                                    {/* Budget & Deadline */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Budget Range <span className="text-gray-400">(Opsional)</span>
+                                            </label>
+                                            <select
+                                                name="budget"
+                                                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
+                                            >
+                                                <option value="">Belum tahu budget</option>
+                                                <option value="< 500k">&lt; Rp 500.000</option>
+                                                <option value="500k - 1jt">Rp 500.000 - Rp 1.000.000</option>
+                                                <option value="1jt - 3jt">Rp 1.000.000 - Rp 3.000.000</option>
+                                                <option value="3jt - 5jt">Rp 3.000.000 - Rp 5.000.000</option>
+                                                <option value="5jt - 10jt">Rp 5.000.000 - Rp 10.000.000</option>
+                                                <option value="> 10jt">&gt; Rp 10.000.000</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Target Deadline <span className="text-gray-400">(Opsional)</span>
+                                            </label>
+                                            <input
+                                                type="date"
+                                                name="deadline"
+                                                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Submit */}
+                                    <motion.button
+                                        type="submit"
+                                        disabled={formStatus === 'sending'}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:shadow-orange-200/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {formStatus === 'sending' ? (
+                                            <>
+                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                Mengirim...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ClientLordIcon
+                                                    src="https://cdn.lordicon.com/aklfruoc.json"
+                                                    trigger="hover"
+                                                    colors="primary:#ffffff,secondary:#ffffff"
+                                                    style={{ width: '24px', height: '24px' }}
+                                                />
+                                                Kirim Request
+                                            </>
+                                        )}
+                                    </motion.button>
+                                </form>
+                            </motion.div>
+                        )}
+
+                        {/* Option to switch to classic form */}
+                        <div className="mt-6 text-center">
+                            <button
+                                type="button"
+                                onClick={() => setFormMode(formMode === 'bot' ? 'classic' : 'bot')}
+                                className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 hover:text-orange-600 underline transition-colors"
+                            >
+                                <FileText className="w-3.5 h-3.5" />
+                                <span>{formMode === 'bot' ? 'Lebih suka form biasa? Klik di sini untuk tampilan form standar' : 'Kembali ke Mode Interactive Chat Bot'}</span>
+                            </button>
+                        </div>
                     </motion.div>
                 </div>
             </section>
+
+            {/* Chat Bot Modal */}
+            <ChatBotModal
+                isOpen={isChatModalOpen}
+                onClose={() => setIsChatModalOpen(false)}
+                initialServiceType={serviceType}
+                initialModel={selectedModel}
+            />
 
             {/* Dialog */}
             <AnimatePresence>
