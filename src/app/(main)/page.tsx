@@ -10,72 +10,57 @@ import { RequestTemplate } from '@/components/home/RequestTemplate'
 import { AboutUs } from '@/components/home/AboutUs'
 import { GlobalBackground } from '@/components/home/GlobalBackground'
 
-async function getSettings() {
+async function getHomepageData() {
     const supabase = await createClient()
-    const { data } = await supabase
-        .from('site_settings')
-        .select('key, value')
-        .in('key', ['homepage_free_limit', 'homepage_featured_limit'])
     
-    const settings: Record<string, string> = {}
-    data?.forEach(s => { settings[s.key] = s.value || '4' })
+    const [settingsRes, freeTemplatesRes, featuredTemplatesRes] = await Promise.all([
+        supabase
+            .from('site_settings')
+            .select('key, value')
+            .in('key', ['homepage_free_limit', 'homepage_featured_limit']),
+        supabase
+            .from('products')
+            .select('id, title, slug, price, discount_price, image, category, is_featured, download_url, demo_url')
+            .eq('is_active', true)
+            .eq('is_free', true)
+            .order('created_at', { ascending: false })
+            .limit(6),
+        supabase
+            .from('products')
+            .select('id, title, slug, price, discount_price, image, category, is_featured, download_url, demo_url')
+            .eq('is_active', true)
+            .eq('is_featured', true)
+            .order('created_at', { ascending: false })
+            .limit(6)
+    ])
+    
+    const settingsMap: Record<string, string> = {}
+    settingsRes.data?.forEach(s => { settingsMap[s.key] = s.value || '4' })
+    
+    const freeLimit = parseInt(settingsMap.homepage_free_limit || '4')
+    const featuredLimit = parseInt(settingsMap.homepage_featured_limit || '4')
+    
+    const mapTemplate = (t: any) => ({
+        _id: t.id.toString(),
+        title: t.title,
+        slug: t.slug,
+        price: t.price,
+        discountPrice: t.discount_price,
+        image: t.image || '',
+        category: t.category,
+        isFeatured: t.is_featured,
+        downloadUrl: t.download_url,
+        demoUrl: t.demo_url,
+    })
     
     return {
-        freeLimit: parseInt(settings.homepage_free_limit || '4'),
-        featuredLimit: parseInt(settings.homepage_featured_limit || '4'),
-    }
-}
-
-async function getTemplates() {
-    const supabase = await createClient()
-    const { freeLimit, featuredLimit } = await getSettings()
-    
-    const { data: freeTemplates } = await supabase
-        .from('products')
-        .select('id, title, slug, price, discount_price, image, category, is_featured, download_url, demo_url')
-        .eq('is_active', true)
-        .eq('is_free', true)
-        .order('created_at', { ascending: false })
-        .limit(freeLimit)
-    
-    const { data: featuredTemplates } = await supabase
-        .from('products')
-        .select('id, title, slug, price, discount_price, image, category, is_featured, download_url, demo_url')
-        .eq('is_active', true)
-        .eq('is_featured', true)
-        .order('created_at', { ascending: false })
-        .limit(featuredLimit)
-    
-    return {
-        freeTemplates: freeTemplates?.map(t => ({
-            _id: t.id.toString(),
-            title: t.title,
-            slug: t.slug,
-            price: t.price,
-            discountPrice: t.discount_price,
-            image: t.image || '',
-            category: t.category,
-            isFeatured: t.is_featured,
-            downloadUrl: t.download_url,
-            demoUrl: t.demo_url,
-        })) || [],
-        featuredTemplates: featuredTemplates?.map(t => ({
-            _id: t.id.toString(),
-            title: t.title,
-            slug: t.slug,
-            price: t.price,
-            discountPrice: t.discount_price,
-            image: t.image || '',
-            category: t.category,
-            isFeatured: t.is_featured,
-            downloadUrl: t.download_url,
-            demoUrl: t.demo_url,
-        })) || [],
+        freeTemplates: (freeTemplatesRes.data || []).slice(0, freeLimit).map(mapTemplate),
+        featuredTemplates: (featuredTemplatesRes.data || []).slice(0, featuredLimit).map(mapTemplate),
     }
 }
 
 export default async function Home() {
-    const { freeTemplates, featuredTemplates } = await getTemplates()
+    const { freeTemplates, featuredTemplates } = await getHomepageData()
 
     return (
         <main className="overflow-hidden relative">

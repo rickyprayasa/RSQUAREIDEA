@@ -85,6 +85,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://connect.facebook.net" />
+        <link rel="preconnect" href="https://cdn.lordicon.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.lordicon.com" />
         {/* Lordicon script for animated icons */}
         <script src="https://cdn.lordicon.com/lordicon.js" async />
         {/* Tracking pixels - load early for proper detection */}
