@@ -6,6 +6,8 @@ import { motion, useAnimationControls } from 'framer-motion'
 import { FlipWords } from '@/components/ui/flip-words'
 import { useCallback, useEffect } from 'react'
 
+import Image from 'next/image'
+
 const features = [
   {
     title: 'Desain Intuitif & Estetis',
@@ -122,11 +124,13 @@ export function Features() {
                   "absolute inset-0 rounded-full blur-3xl opacity-20 transform scale-75",
                   feature.color.replace('100', '300')
                 )} />
-                <img
+                <Image
                   src={feature.image}
                   alt={feature.title}
+                  width={500}
+                  height={500}
                   className="relative z-10 w-full max-w-md mx-auto drop-shadow-xl"
-                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, 500px"
                 />
               </motion.div>
 

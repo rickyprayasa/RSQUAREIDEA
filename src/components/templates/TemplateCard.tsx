@@ -60,8 +60,8 @@ export function TemplateCard({
                                 src={image}
                                 alt={title}
                                 fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 className="object-contain"
-                                unoptimized
                             />
                         ) : (
                             <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs">
@@ -106,8 +106,8 @@ export function TemplateCard({
                             src={image}
                             alt={title}
                             fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             className="object-contain group-hover:scale-105 transition-transform duration-500"
-                            unoptimized
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm font-medium">

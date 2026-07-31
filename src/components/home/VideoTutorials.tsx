@@ -5,6 +5,7 @@ import { ClientLordIcon } from '@/components/ui/lordicon'
 /* eslint-disable @next/next/no-img-element */
 import { useRef, useState, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
+import Image from 'next/image'
 
 interface VideoTutorial {
     id: number
@@ -183,10 +184,12 @@ export function VideoTutorials() {
                                                         const videoId = getYouTubeId(currentVideo.youtubeUrl)
                                                         const thumbnailUrl = currentVideo.thumbnailUrl || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null)
                                                         return thumbnailUrl && (
-                                                            <img
+                                                            <Image
                                                                 src={thumbnailUrl}
                                                                 alt={currentVideo.title}
-                                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                                fill
+                                                                sizes="(max-width: 768px) 100vw, 800px"
+                                                                className="object-cover transition-transform duration-500 group-hover:scale-105"
                                                                 onError={(e) => {
                                                                     const target = e.target as HTMLImageElement
                                                                     if (videoId && target.src.includes('maxresdefault')) {

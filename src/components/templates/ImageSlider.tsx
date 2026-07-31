@@ -205,7 +205,6 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                                 width={1200}
                                 height={900}
                                 className="max-w-full max-h-[70vh] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
-                                unoptimized
                             />
                         ) : (
                             <div className="flex flex-col items-center justify-center text-gray-400 py-20">
@@ -289,7 +288,6 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                                         alt={`Thumbnail ${index + 1}`}
                                         fill
                                         className="object-cover"
-                                        unoptimized
                                     />
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex flex-col items-center justify-center text-gray-400">
@@ -476,7 +474,6 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                                         className="object-contain select-none"
                                         style={{ maxWidth: '90vw', maxHeight: '80vh', width: 'auto', height: 'auto' }}
                                         draggable={false}
-                                        unoptimized
                                         priority
                                     />
                                 </div>
@@ -522,7 +519,6 @@ export function ImageSlider({ images, title }: ImageSliderProps) {
                                                 alt={`Thumb ${idx + 1}`}
                                                 fill
                                                 className="object-cover"
-                                                unoptimized
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-white/20 flex items-center justify-center text-white/60 text-xs">
