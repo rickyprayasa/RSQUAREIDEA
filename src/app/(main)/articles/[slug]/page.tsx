@@ -1,4 +1,5 @@
-import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
+export const revalidate = 3600 // 1 hour
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
@@ -13,27 +14,31 @@ import { ArticleComments } from '@/components/articles/ArticleComments'
 // import { getArticleRating } from '@/app/actions/article-rating'
 // import { ArticleRating } from '@/components/articles/ArticleRating'
 
+export async function generateStaticParams() {
+    const supabase = createStaticClient()
+    const { data: articles } = await supabase
+        .from('articles')
+        .select('slug')
+        .eq('published', true)
+
+    return (articles || []).map((article) => ({
+        slug: article.slug,
+    }))
+}
+
 type Props = {
     params: Promise<{ slug: string }>
 }
 
 async function getArticle(slug: string) {
-    const supabase = await createAdminClient()
-    const authClient = await createClient()
+    const supabase = createStaticClient()
 
-    const { data: { user } } = await authClient.auth.getUser()
-
-    let query = supabase
+    const { data: article, error } = await supabase
         .from('articles')
         .select('*')
         .eq('slug', slug)
-
-    // Only filter by published if NOT logged in
-    if (!user) {
-        query = query.eq('published', true)
-    }
-
-    const { data: article, error } = await query.single()
+        .eq('published', true)
+        .single()
 
     if (error) {
         console.error('Error fetching article:', error)
@@ -134,16 +139,7 @@ export default async function ArticlePage({ params }: Props) {
             {/* Hero / Header */}
             <div className="relative pt-32 pb-16">
                 <div className="container mx-auto px-4 max-w-4xl relative z-10">
-                    {/* Draft Preview Indicator */}
-                    {!article.published && (
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-yellow-100 px-4 py-1.5 text-sm font-medium text-yellow-800 border border-yellow-200 shadow-sm">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-                            </span>
-                            Mode Preview (Draft)
-                        </div>
-                    )}
+                    {/* Draft Preview Indicator - Removed for ISR compatibility */}
 
                     <Link
                         href="/articles"

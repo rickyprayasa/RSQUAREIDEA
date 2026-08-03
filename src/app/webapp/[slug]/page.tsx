@@ -1,9 +1,23 @@
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 import { WebAppFrame } from './WebAppFrame'
 import type { Metadata } from 'next'
 
-export const revalidate = 60
+export const revalidate = 3600
+
+export async function generateStaticParams() {
+    const supabase = createStaticClient()
+    const { data: webapps } = await supabase
+        .from('products')
+        .select('slug')
+        .eq('product_type', 'webapp')
+        .eq('is_active', true)
+
+    return (webapps || []).map((webapp) => ({
+        slug: webapp.slug,
+    }))
+}
 
 interface WebAppPageProps {
     params: Promise<{
@@ -12,7 +26,7 @@ interface WebAppPageProps {
 }
 
 async function getWebApp(slug: string) {
-    const supabase = await createClient()
+    const supabase = createStaticClient()
 
     const { data, error } = await supabase
         .from('products')
@@ -64,5 +78,14 @@ export default async function WebAppPage({ params }: WebAppPageProps) {
         notFound()
     }
 
-    return <WebAppFrame webapp={webapp} />
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+                <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-gray-500 font-medium">Memuat aplikasi web...</p>
+            </div>
+        }>
+            <WebAppFrame webapp={webapp} />
+        </Suspense>
+    )
 }

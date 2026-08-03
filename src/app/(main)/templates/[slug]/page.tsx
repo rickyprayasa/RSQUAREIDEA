@@ -1,8 +1,20 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 import { ProductDetail } from '@/components/templates/ProductDetail'
 
-export const revalidate = 60
+export const revalidate = 3600
+
+export async function generateStaticParams() {
+    const supabase = createStaticClient()
+    const { data: templates } = await supabase
+        .from('products')
+        .select('slug')
+        .eq('is_active', true)
+
+    return (templates || []).map((template) => ({
+        slug: template.slug,
+    }))
+}
 
 interface TemplateDetailProps {
     params: Promise<{
@@ -11,7 +23,7 @@ interface TemplateDetailProps {
 }
 
 async function getTemplate(slug: string) {
-    const supabase = await createClient()
+    const supabase = createStaticClient()
 
     const { data, error } = await supabase
         .from('products')

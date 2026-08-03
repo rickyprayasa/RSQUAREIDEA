@@ -1,5 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
 import ClientTemplatesPage from './ClientTemplatesPage'
+export const revalidate = 3600 // 1 hour
 
 export const metadata = {
     title: 'Templates - RSQUARE IDEA',
@@ -7,7 +8,7 @@ export const metadata = {
 }
 
 async function getTemplatesAndCategories() {
-    const supabase = await createClient()
+    const supabase = createStaticClient()
 
     // 1. Fetch products
     const { data: products } = await supabase

@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
+export const revalidate = 3600 // 1 hour
 import { Hero } from '@/components/home/Hero'
 import { Marquee } from '@/components/home/Marquee'
 import { Features } from '@/components/home/Features'
@@ -11,7 +12,7 @@ import { AboutUs } from '@/components/home/AboutUs'
 import { GlobalBackground } from '@/components/home/GlobalBackground'
 
 async function getHomepageData() {
-    const supabase = await createClient()
+    const supabase = createStaticClient()
     
     const [settingsRes, freeTemplatesRes, featuredTemplatesRes] = await Promise.all([
         supabase

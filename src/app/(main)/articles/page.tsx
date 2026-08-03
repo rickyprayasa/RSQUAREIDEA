@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { createStaticClient } from '@/lib/supabase/static'
+export const revalidate = 3600 // 1 hour
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 async function getArticles() {
-    const supabase = await createClient()
+    const supabase = createStaticClient()
     const { data: articles } = await supabase
         .from('articles')
         .select('*')
