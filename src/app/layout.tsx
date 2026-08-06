@@ -7,6 +7,7 @@ import { CartProvider } from '@/contexts/CartContext'
 import { TrackingScripts } from '@/components/TrackingScripts'
 import { AnalyticsProvider } from '@/components/AnalyticsProvider'
 import { Toaster } from 'sonner'
+import { Analytics } from "@vercel/analytics/next"
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -100,6 +101,7 @@ export default function RootLayout({
           </AnalyticsProvider>
         </CartProvider>
         <Toaster position="top-center" richColors closeButton />
+        <Analytics />
       </body>
     </html>
   )
