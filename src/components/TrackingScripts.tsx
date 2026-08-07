@@ -30,7 +30,15 @@ export function TrackingScripts() {
 
     useEffect(() => {
         fetch('/api/settings')
-            .then(res => res.json())
+            .then(async (res) => {
+                if (!res.ok) throw new Error('Failed to fetch settings')
+                const text = await res.text()
+                try {
+                    return JSON.parse(text)
+                } catch (e) {
+                    throw new Error('Invalid JSON from settings API')
+                }
+            })
             .then(data => {
                 if (data.settings) {
                     setSettings(data.settings)

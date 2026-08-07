@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Sparkles, ArrowRight } from 'lucide-react'
+import { Sparkles, ArrowRight, LayoutGrid, List } from 'lucide-react'
 import { ClientLordIcon } from '@/components/ui/lordicon'
 
 import { useState } from 'react'
@@ -131,23 +131,13 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                             onClick={() => setViewMode('grid')}
                             className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-100'}`}
                         >
-                            <ClientLordIcon
-                                src="https://cdn.lordicon.com/jeuxydnh.json"
-                                trigger="hover"
-                                colors={viewMode === 'grid' ? "primary:#ea580c" : "primary:#9ca3af"}
-                                style={{ width: '22px', height: '22px' }}
-                            />
+                            <LayoutGrid className="w-[22px] h-[22px]" />
                         </button>
                         <button
                             onClick={() => setViewMode('compact')}
                             className={`p-2 rounded-lg transition-colors ${viewMode === 'compact' ? 'bg-orange-100 text-orange-600' : 'text-gray-400 hover:bg-gray-100'}`}
                         >
-                            <ClientLordIcon
-                                src="https://cdn.lordicon.com/qqkwcnqq.json"
-                                trigger="hover"
-                                colors={viewMode === 'compact' ? "primary:#ea580c" : "primary:#9ca3af"}
-                                style={{ width: '22px', height: '22px' }}
-                            />
+                            <List className="w-[22px] h-[22px]" />
                         </button>
                     </div>
                 </div>
@@ -180,7 +170,7 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                                 slug={template.slug}
                                 price={template.price}
                                 discountPrice={template.discountPrice}
-                                image={template.image || '/placeholder.jpg'}
+                                image={template.image || '/placeholder-image.svg'}
                                 category={template.category}
                                 isFeatured={template.isFeatured}
                                 compact={viewMode === 'compact'}
@@ -211,15 +201,8 @@ export function TemplatesList({ initialTemplates, categories: propCategories }: 
                                 }}
                                 className={`${viewMode === 'compact' ? 'mb-2' : 'mb-4'}`}
                             >
-                                <ClientLordIcon
-                                    src="https://cdn.lordicon.com/fqhwldvk.json"
-                                    trigger="loop"
-                                    delay="1000"
-                                    colors="primary:#f97316,secondary:#fbbf24"
-                                    style={{ 
-                                        width: viewMode === 'compact' ? '48px' : '72px', 
-                                        height: viewMode === 'compact' ? '48px' : '72px' 
-                                    }}
+                                <Sparkles 
+                                    className={`text-orange-500 animate-pulse ${viewMode === 'compact' ? 'w-12 h-12' : 'w-16 h-16'}`} 
                                 />
                             </motion.div>
                             <motion.h3 
