@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -42,8 +43,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
         if (error) {
             console.error('Error updating article:', error)
-            return NextResponse.json({ error: 'Failed to update article' }, { status: 500 })
+            return NextResponse.json({ error: error.message }, { status: 500 })
         }
+
+        // Revalidate relevant pages
+        revalidatePath('/articles')
+        revalidatePath('/')
 
         return NextResponse.json({ article })
     } catch (error) {
@@ -64,8 +69,12 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
         if (error) {
             console.error('Error deleting article:', error)
-            return NextResponse.json({ error: 'Failed to delete article' }, { status: 500 })
+            return NextResponse.json({ error: error.message }, { status: 500 })
         }
+
+        // Revalidate relevant pages
+        revalidatePath('/articles')
+        revalidatePath('/')
 
         return NextResponse.json({ success: true })
     } catch (error) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -77,6 +78,10 @@ export async function POST(request: NextRequest) {
             console.error('Error creating product:', error)
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
+
+        // Revalidate relevant pages
+        revalidatePath('/templates')
+        revalidatePath('/')
 
         return NextResponse.json({ product })
     } catch (error) {

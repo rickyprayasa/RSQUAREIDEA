@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 import slugify from 'slugify'
 
@@ -87,8 +88,12 @@ export async function POST(request: Request) {
 
         if (error) {
             console.error('Error creating article:', error)
-            return NextResponse.json({ error: 'Failed to create article' }, { status: 500 })
+            return NextResponse.json({ error: error.message }, { status: 500 })
         }
+
+        // Revalidate relevant pages
+        revalidatePath('/articles')
+        revalidatePath('/')
 
         return NextResponse.json({ article })
 

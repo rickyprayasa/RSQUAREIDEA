@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -85,6 +86,10 @@ export async function PUT(
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
 
+        // Revalidate relevant pages
+        revalidatePath('/templates')
+        revalidatePath('/')
+
         return NextResponse.json({ product })
     } catch (error) {
         console.error('Error updating product:', error)
@@ -115,6 +120,10 @@ export async function DELETE(
             console.error('Error deleting product:', error)
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
+
+        // Revalidate relevant pages
+        revalidatePath('/templates')
+        revalidatePath('/')
 
         return NextResponse.json({ success: true })
     } catch (error) {
